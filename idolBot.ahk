@@ -4,17 +4,18 @@ SendMode Input  ; Recommended for new scripts due to its superior speed and reli
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent phaseing directory.
 
 ; Include the GUI
-#include idolBotGUI.ahk
+#include botui.ahk
 
 CoordMode, Pixel, Client
 CoordMode, Mouse, Client
 
-SetTimer, GUIPos, 100 ; Every 100ms we position the GUI below the game
+SetTimer, GuiPos, 100 ; Every 100ms we position the GUI below the game
 
 phase = -1 ; -1 = bot not launched, 0 = bot in campaign selection screen, 1 = initial stuff like looking for overlays, waiting for the game to fully load, 2 = maxing the levels/ main dps and upgrades, 3 = reset phase
 
 launchTime = % UnixTime(A_Now)
 now = 0
+relaunching = false
 
 upgAllUntil = 5 ; Triggers the buy all upgrades after upgAllUntil max all levels
 maxAllCount = 0
@@ -32,6 +33,7 @@ Bot:
 	IfWinExist, Crusaders of The Lost Idols
 	{
 		WinActivate, Crusaders of The Lost Idols
+		WinMove, 0, 0
 		; Self-explanatory
 		if (phase = -1) {
 			Loop {
@@ -66,6 +68,7 @@ Bot:
 					}
 				}
 				if (phase = 1) {
+					relaunching = false
 					Log("Waiting for the campaign to load.")
 					; We look at the left arrow in the crusaders bar, if it's there it means the screen is fully loaded
 					PixelGetColor, Output, 15, 585, RGB
@@ -179,7 +182,7 @@ Bot:
 					; Auto move the mouse to get the gold and quest items for 30 seconds.
 					Log("Get the gold and quest items for 30 seconds.")
 					now = % UnixTime(A_Now)
-					while (UnixTime(A_Now) - now < 20) {
+					while (UnixTime(A_Now) - now < 30) {
 						MouseMove, 840, 240
 						Sleep, 40
 						MouseMove, 840, 355
@@ -302,9 +305,6 @@ Bot:
 								Sleep, 100
 								phase = 1
 								Break
-							} else {
-								Log("Reset warning window not showing.")
-								phase = 2
 							}
 						}
 					}
@@ -319,7 +319,7 @@ Bot:
 	Return
 
 ; Set the GUI below the game
-GUIPos:
+GuiPos:
 	IfWinExist, Crusaders of The Lost Idols
 	{
 		WinGetPos, X, Y, W, H, Crusaders of The Lost Idols
@@ -330,9 +330,11 @@ GUIPos:
 	}
 	IfWinNotExist, Crusaders of The Lost Idols
 	{
-		Pause,, 1
-		GuiControl, idolBotGUI:, BotStatus, images/paused.png
-		Log("CoTLI not found.")
+		if (relaunching = false) {
+			Pause,, 1
+			GuiControl, BotGui:, BotStatus, images/paused.png
+			Log("[GUI] Game not found.")
+		}
 	}
 	Return
 
@@ -372,7 +374,8 @@ BotStatus:
 
 ; Relaunch the game, pretty much self-explanatory
 Relaunch:
-	Log("Closing CoTLI.")
+	Log("Closing the game.")
+	relaunching = true;
 	WinClose, Crusaders of The Lost Idols
 	Log("Waiting on the game to close.")
 	WinWaitClose, Crusaders of The Lost Idols,,180
@@ -389,6 +392,7 @@ Relaunch:
 	Run, steam://Rungameid/402840,,UseErrorLevel
 	Log("Waiting on the game to launch.")
 	WinWait, Crusaders of The Lost Idols,,300
+	relaunching = false
 	WinActivate, Crusaders of The Lost Idols
 	WinMove, Crusaders of The Lost Idols,,15,15
 	seen = 0
