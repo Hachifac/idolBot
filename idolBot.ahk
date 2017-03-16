@@ -4,12 +4,12 @@ SendMode Input  ; Recommended for new scripts due to its superior speed and reli
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent phaseing directory.
 
 ; Include the GUI
-#include botui.ahk
+#include idolBotGUI.ahk
 
 CoordMode, Pixel, Client
 CoordMode, Mouse, Client
 
-SetTimer, GuiPos, 100 ; Every 100ms we position the GUI below the game
+SetTimer, GUIPos, 100 ; Every 100ms we position the GUI below the game
 
 phase = -1 ; -1 = bot not launched, 0 = bot in campaign selection screen, 1 = initial stuff like looking for overlays, waiting for the game to fully load, 2 = maxing the levels/ main dps and upgrades, 3 = reset phase
 
@@ -319,7 +319,7 @@ Bot:
 	Return
 
 ; Set the GUI below the game
-GuiPos:
+GUIPos:
 	IfWinExist, Crusaders of The Lost Idols
 	{
 		WinGetPos, X, Y, W, H, Crusaders of The Lost Idols
@@ -331,7 +331,7 @@ GuiPos:
 	IfWinNotExist, Crusaders of The Lost Idols
 	{
 		Pause,, 1
-		GuiControl, BotGui:, BotStatus, images/paused.png
+		GuiControl, idolBotGUI:, BotStatus, images/paused.png
 		Log("CoTLI not found.")
 	}
 	Return

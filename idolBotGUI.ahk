@@ -5,7 +5,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 v := "0.81"
 
-Gui, BotGui: New, -Caption, CotLI Bot
+Gui, idolBotGUI: New, -Caption, idolBot
 Gui, Color, 5C1F07
 Gui, Font, s8 italic cAAAAAA, Candara
 Gui, Add, Text, x5 y+60, v%v% by Hachifac
