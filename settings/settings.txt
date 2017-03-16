@@ -1,0 +1,5 @@
+[Settings]
+campaign=7
+objective=1
+formation=1
+maindps=frosty
