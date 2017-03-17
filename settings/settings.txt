@@ -1,5 +1,10 @@
 [Settings]
-campaign=2
+campaign=7
 objective=1
 formation=1
 maindps=frosty
+upgalluntil=5
+autoprogresscheckdelay=120
+maindpsdelay=60
+resetcrusader=nate
+chatroom=1

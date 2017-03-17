@@ -4,7 +4,7 @@ SendMode Input  ; Recommended for new scripts due to its superior speed and reli
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent phaseing directory.
 
 ; Include the GUI
-#include botui.ahk
+#include idolBotGUI.ahk
 
 CoordMode, Pixel, Client
 CoordMode, Mouse, Client
@@ -658,6 +658,22 @@ RewriteSettings:
 	FileAppend, objective=%objective%`n, settings/settings.txt
 	FileAppend, formation=%formation%`n, settings/settings.txt
 	FileAppend, maindps=%mainDPS%`n, settings/settings.txt
+	GuiControlGet, SUpgAllUntil
+	upgalluntil := SUpgAllUntil
+	GuiControlGet, SAutoProgressCheckDelay
+	autoprogresscheckdelay := SAutoProgressCheckDelay
+	GuiControlGet, SMainDPSDelay
+	maindpsdelay := SMainDPSDelay
+	GuiControlGet, SResetCrusader
+	resetcrusader := SResetCrusader
+	GuiControlGet, SChatRoom
+	chatroom := SChatRoom
+	StringLower, SResetCrusader, SResetCrusader
+	FileAppend, upgalluntil=%SUpgAllUntil%`n, settings/settings.txt
+	FileAppend, autoprogresscheckdelay=%SAutoProgressCheckDelay%`n, settings/settings.txt
+	FileAppend, maindpsdelay=%SMainDPSDelay%`n, settings/settings.txt
+	FileAppend, resetcrusader=%SResetCrusader%`n, settings/settings.txt
+	FileAppend, chatroom=%SChatRoom%`n, settings/settings.txt
 	Return
 
 ;				;
