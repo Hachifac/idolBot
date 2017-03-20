@@ -4,7 +4,8 @@ SendMode Input  ; Recommended for new scripts due to its superior speed and reli
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent phaseing directory.
 
 ; Include the GUI
-#include idolBotGUI.ahk
+#include gui/main.ahk
+#include lists/crusaders.ahk
 
 CoordMode, Pixel, Client
 CoordMode, Mouse, Client
@@ -17,23 +18,24 @@ launchTime = % UnixTime(A_Now)
 now = 0
 relaunching = false
 
-upgAllUntil = 5 ; Triggers the buy all upgrades after upgAllUntil max all levels
 maxAllCount = 0
 
 lastProgressCheck = 0
-autoProgressCheckDelay = 119 ; Time, in seconds, between each auto progress checks
 runTime = 0
-chatRoom = 1
-mainDPSDelay = 60 ; Time, in minutes, before the bot starts to only level up the main dps
-resetCrusader := "nate"
+lastChatRoom := chatRoom
 
+global currentCIndex := [1, 1]
+global currentCCoords := [36, 506]
+global crusaderPixels := Object()
+global crusaderPixelsTemp := Object()
+	
 ; Bot loop
 Bot:
 	Log("------------- CoTLI Bot by Hachifac -------------")
 	IfWinExist, Crusaders of The Lost Idols
 	{
 		WinActivate, Crusaders of The Lost Idols
-		WinMove, 0, 0
+		; WinMove, 0, 0
 		; Self-explanatory
 		if (phase = -1) {
 			Loop {
@@ -79,15 +81,7 @@ Bot:
 						; If the left arrow is gold, it means we're not at the beginning of the characters bar, we're moving back until we detect the gold color
 						if (Output != 0xA07107) {
 							Log("Moving the characters bar to the beginning.")
-							MouseMove, 15, 585
-							Loop {
-								Click
-								Sleep, 100
-								PixelGetColor, Output, 15, 585, RGB
-								if (Output = 0xA07107) {
-									Break
-								}
-							}
+							MoveToFirstPage()
 						}
 						Loop, 100 {
 							; We look at Jim's buy button to know if we can select the formation
@@ -124,12 +118,7 @@ Bot:
 						}
 						; Set Chat Room to chatRoom
 						Log("Setting chat room to " . chatRoom . ".")
-						MouseMove, 1135, 10
-						Sleep, 100
-						Click
-						MouseMove, 1135, 40
-						Sleep, 100
-						Click
+						Gosub, SetChatRoom
 					} else {
 						Sleep, 1000
 					}
@@ -142,59 +131,81 @@ Bot:
 				}
 				; Upgrade all/max all/max main dps. Final phase until reset phase.
 				if (phase = 2) {
+					if (lastChatRoom != chatRoom) {
+						Gosub, SetChatRoom
+					}
 					; If mainDPSDelay elapsed between the launchTime and current time, we only max mainDPS until reset phase
-					if (UnixTime(A_Now) - launchTime > (mainDPSDelay * 60)) {
+					if (1=1) {
 						Log("Moving to mainDPS.")
-						cCoords := MoveToCrusader(mainDPS, 1)
-						if (cCoords = 0) {
-							Log("mainDPS not found. Maxing all levels instead.")
-							MouseMove, 985, 630
-							Click
-							Sleep, 3000
+						if (crusaderPixels.length() = 0) {
+							MoveToCrusader(mainDPS)
+							Sleep, 1000
+							SetCrusadersPixels()
 						} else {
-							Log("Maxing mainDPS.")
-							MouseMove, cCoords[1] + 206, cCoords[2] + 25
-							send, {ctrl down}
-							sleep, 100
-							click
-							send, {ctrl up}
-							sleep, 100
+							if (CompareCrusadersPixels() = false) {
+								Log("We might have moved from the mainDPS, let's go back.")
+								MoveToFirstPage()
+								Sleep, 500
+								MoveToCrusader(mainDPS)
+								Sleep, 1000
+								SetCrusadersPixels()
+							}
 						}
+						Log("Maxing mainDPS.")
+						MouseMove, currentCCoords[1] + 252, currentCCoords[2] + 18
+						send, {ctrl down}
+						sleep, 100
+						click
+						send, {ctrl up}
+						sleep, 100
 					} else {
 						; If mainDPSDelay hasn't elapsed yet, we max all levels, 
-						Log("Max all levels.")
-						; Max levels
-						MouseMove, 985, 630
-						Click
-						maxAllCount++
-						Sleep, 3000
-						send, {%formationKey%}
-						if (maxAllCount >= upgAllUntil) {
-							; If the bot did upgAllUntil max all levels, do one buy all upgrades
-							Log("Buy all upgrades.")
-							Sleep, 3000
-							MouseMove, 985, 540
-							Click
-							maxAllCount = 0
-						}
-						
+						maxLevels(false)
 					}
 					; Auto move the mouse to get the gold and quest items for 30 seconds.
 					Log("Get the gold and quest items for 30 seconds.")
 					now = % UnixTime(A_Now)
-					while (UnixTime(A_Now) - now < 30) {
+					if (clicking = true) {
+						delay := clickDelay / 2
+					} else {
+						delay = 40
+					}
+					while (UnixTime(A_Now) - now <= 1) {
 						MouseMove, 840, 240
-						Sleep, 40
+						if (clicking = true) {
+							click
+						}
+						Sleep, %delay%
 						MouseMove, 840, 355
-						Sleep, 40
+						Sleep, %delay%
 					}
 					; If the last time we did an auto progress check is >= than autoProgressCheckDelay, we initiate an auto progress check
 					if (UnixTime(A_Now) - lastProgressCheck >= autoProgressCheckDelay) {
 						lastProgressCheck = % UnixTime(A_Now)
 						; Every 2 minutes we take a look if Auto Progress is still activated, if it's not it means we died so achieved the highest zone we could, we have to reset
-						if (CheckAutoProgress() = false) {
+						; We also look for the level cap if the levelCapReset is on
+						if (levelCapReset = true) {
+							Log("Level cap reset check.")
+							maxLevels(true)
+							levelsCapped := true
+							Loop {
+								PixelGetColor, Output, 985, 585, RGB
+								if (Output != 0x503803) {
+									Break
+								}
+								ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/computinglevels.png
+								if (ErrorLevel = 0) {
+									levelsCapped := false
+								}
+							}
+							if (levelsCapped = true) {
+								phase = 3
+							}
+						}
+						if (CheckAutoProgress() = false and levelsCapped = false) {
 							if (UnixTime(A_Now) - launchTime < 60) {
 								; Stuck at beginning, might be the formation not active
+								Log("Might be stuck at the beginning.")
 								send, {%formationKey%}
 								Sleep, 100
 								Send, {g}
@@ -203,25 +214,9 @@ Bot:
 							}
 						}
 						Log("Using all skills.")
-						Send, 1
-						Sleep, 25
-						Send, 2
-						Sleep, 25
-						Send, 3
-						Sleep, 25
-						Send, 4
-						Sleep, 25
-						Send, 5
-						Sleep, 25
-						Send, 6
-						Sleep, 25
-						Send, 7
-						Sleep, 25
-						Send, 8
+						useSkill(0)
 					}
 				}
-				; Roborudolph 447, 652
-				; Kizlblyp same as nate
 				; If runTime time elapsed or phase is set at 3, we reset
 				if ((runTime > 0 and UnixTime(A_Now) - launchTime > runTime) or phase = 3) {
 					Log("Cannot progress further, time to reset.")
@@ -230,82 +225,64 @@ Bot:
 					Click
 					Sleep, 500
 					; Move to reset crusader
-					Log("Searching for the reset crusader.")
-					rC := resetCrusader
-					Loop, 5 {
-						cCoords := MoveToCrusader(rC, 5)
-						if (cCoords = 0) {
-							if (rC == "nate") {
-								rC := "rudolph"
-							} else if (rC == "rudolph") {
-								rC := "kizlblyp"
-							} else if (rC == "kizlblyp") {
-								rC == "nate"
-							}
-						} else {
-							Break
-						}
+					Log("Moving to reset crusader.")
+					MoveToCrusader(resetCrusader)
+					Sleep, 1000
+					; Get pixel color on resetCrusader skills to know where the reset button is
+					Log("Searching for that reset skill.")
+					cY := currentCCoords[2] + 60
+					if (resetCrusader == "nate" or resetCrusader == "kizlblyp") {
+						cX := currentCCoords[1] + 154
 					}
-					if (cCoords = 0) {
-						Log("Reset crusader not found...")
+					if (resetCrusader == "rudolph") {
+						cX := currentCCoords[1] + 96
+					}
+					PixelGetColor, Output, cX, cY, RGB
+					if (Output = 0x853213) {
+						MouseMove, currentCCoords[1] + 9, cY
+						Sleep, 500
 					} else {
-						Log("Reset crusader found.")
-						; Get pixel color on resetCrusader skills to know where the reset button is
-						Log("Searching for that reset skill.")
-						cY := cCoords[2] + 67
-						if (rC == "nate" or rC == "kizlblyp") {
-							cX := cCoords[1] + 109
-						}
-						if (rC == "rudolph") {
-							cX := cCoords[1] + 50
-						}
-						PixelGetColor, Output, cX, cY, RGB
-						if (Output = 0x853213) {
-							MouseMove, cCoords[1] - 36, cY
-							Sleep, 500
-						} else {
-							MouseMove, cX, cY
-							Sleep, 500
-						}
-						Log("Found. Reset inbound.")
-						Loop {
-							Click
-							Sleep, 1000
-							Log("Reset warning window.")
-							ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/resetwarning.png
-							if (ErrorLevel = 0) {
-								Loop {
-									; Reset button
-									MouseMove, 407, 516
+						MouseMove, cX, cY
+						Sleep, 500
+					}
+					Log("Found. Reset inbound.")
+					Loop {
+						Click
+						Sleep, 1000
+						Log("Reset warning window.")
+						ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/resetwarning.png
+						if (ErrorLevel = 0) {
+							Loop {
+								; Reset button
+								MouseMove, 407, 516
+								Sleep, 500
+								Click
+								Sleep, 2000
+								; Big red button
+								Log("Clicking the red button.")
+								ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/redbutton.png
+								if (ErrorLevel = 0) {
+									MouseMove, 509, 546
+									Sleep, 500
+									Click
+									Sleep, 5000
+								}
+								; Idols screen
+								Log("Idols continue screen.")
+								ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/idolscontinue.png
+								if (ErrorLevel = 0) {
+									MouseMove, 507, 550
 									Sleep, 500
 									Click
 									Sleep, 2000
-									; Big red button
-									Log("Clicking the red button.")
-									ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/redbutton.png
-									if (ErrorLevel = 0) {
-										MouseMove, 509, 546
-										Sleep, 500
-										Click
-										Sleep, 5000
-									}
-									; Idols screen
-									Log("Idols continue screen.")
-									ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/idolscontinue.png
-									if (ErrorLevel = 0) {
-										MouseMove, 507, 550
-										Sleep, 500
-										Click
-										Sleep, 2000
-										Break
-									}
+									Break
 								}
-								Log("Start a new campaign.")
-								Gosub, CampaignStart
-								Sleep, 100
-								phase = 1
-								Break
 							}
+							Log("Start a new campaign.")
+							Gosub, CampaignStart
+							Sleep, 100
+							phase = 1
+							Break
 						}
 					}
 				}
@@ -323,16 +300,16 @@ GuiPos:
 	IfWinExist, Crusaders of The Lost Idols
 	{
 		WinGetPos, X, Y, W, H, Crusaders of The Lost Idols
-		nY := A_ScreenHeight - (A_ScreenHeight - Y) + H - 3
+		nY := A_ScreenHeight - (A_ScreenHeight - Y) + H - 2
 		nW := W
-		nX := X + W / 2 - 749 / 2 + 2
-		Gui, BotGui: Show, x%nX% y%nY% w749 h77 NoActivate, BotGui
+		nX := X + W / 2 - 661 / 2 + 2
+		Gui, BotGUI: Show, x%nX% y%nY% w661 h116 NoActivate, BotGUI
 	}
 	IfWinNotExist, Crusaders of The Lost Idols
 	{
 		if (relaunching = false) {
 			Pause,, 1
-			GuiControl, BotGui:, BotStatus, images/paused.png
+			GuiControl, BotGUI:, BotStatus, images/paused.png
 			Log("[GUI] Game not found.")
 		}
 	}
@@ -342,7 +319,7 @@ GuiPos:
 F8::
 	if (phase = -1) {
 		phase = 0
-		GuiControl, BotGui:, BotStatus, images/running.png
+		GuiControl, BotGUI:, BotStatus, images/running.png
 		WinActivate, Crusaders of The Lost Idols
 	} else {
 		Pause,,1
@@ -350,10 +327,10 @@ F8::
 	if (phase > 0) {
 		if (A_IsPaused) {
 			Log("Paused.")
-			GuiControl, BotGui:, BotStatus, images/paused.png
+			GuiControl, BotGUI:, BotStatus, images/paused.png
 		} else {
 			Log("Unpaused.")
-			GuiControl, BotGui:, BotStatus, images/running.png
+			GuiControl, BotGUI:, BotStatus, images/running.png
 			WinActivate, Crusaders of The Lost Idols
 		}
 	}
@@ -362,12 +339,12 @@ F8::
 BotStatus:
 		if (A_IsPaused) {
 			Log("Unpaused.")
-			GuiControl, BotGui:, BotStatus, images/running.png
+			GuiControl, BotGUI:, BotStatus, images/running.png
 			WinActivate, Crusaders of The Lost Idols
 			Pause,,1
 		} else if (phase = -1 ) {
 			phase = 0
-			GuiControl, BotGui:, BotStatus, images/running.png
+			GuiControl, BotGUI:, BotStatus, images/running.png
 			WinActivate, Crusaders of The Lost Idols
 		}
 	Return
@@ -532,52 +509,147 @@ SetObjective(o, x, y) {
 }
 
 ; Navigate the crusaders bar to find the desired crusader
-; c = crusader t = max loops before we give up
-MoveToCrusader(c, t) {
-	Log("Moving to " . c . ".")
-	i = 0
-	Loop {
-		ImageSearch, OutputX, OutputY, 0, 495, 1000, 675, *50 images/%c%.png
-		if (ErrorLevel = 0) {
-			Log("Found " . c . ".")
-			coords := [OutputX, OutputY]
-			Return coords
+; c = crusader
+MoveToCrusader(c) {
+	global currentCCoords
+	global crusaders
+	apStatus := false
+	if (CheckAutoProgress() = true) {
+		apStatus := true
+		send, {g}
+		Sleep, 5000
+	}
+	currentCIndex[2] := crusaders[c][2]
+	nX := crusaders[c][1] - currentCIndex[1]
+	pagesToMove := 0
+	if (currentCIndex[1] < crusaders[c][1]) {
+		currentCIndex[1] := crusaders[c][1]
+		if (nX > 2) {
+			pagesToMove := nX - 2
+			currentCIndex[1] -= 2
 		} else {
-			PixelGetColor, Output, 15, 585, RGB
-			if (Output != 0xA07107) {
-				Loop {
-					MouseMove, 15, 585
-					Click
-					Sleep, 50
-					PixelGetColor, Output, 15, 585, RGB
-					if (Output = 0xA07107) {
-						Break
-					}
-				}
-			} else {
-				i++
-				Loop {
-					if (i > t) {
-						Return 0
-					}
-					PixelGetColor, Output, 985, 585, RGB
-					if (Output != 0xA07107) {
-						MouseMove, 985, 585
-						Click
-						Sleep, 500
-						ImageSearch, OutputX, OutputY, 0, 495, 1000, 675, *50 images/%c%.png
-						if (ErrorLevel = 0) {
-							Log("Found " . c . ".")
-							coords := [OutputX, OutputY]
-							Return coords
-						}
-					} else {
-						Log("Did not find " . c . ". Going back to the beginning.")
-						Break
-					}
-				}
-			}
+			currentCIndex[1] -= nX
 		}
+	} else {
+		currentCIndex[1] := crusaders[c][1]
+		pagesToMove := nX
+	}
+	if (pagesToMove != 0) {
+		MoveToPage(pagesToMove)
+	}
+	currentCCoords[1] := 37 + 315 * (nX - pagesToMove)
+	currentCCoords[2] := 506 + 86 * (currentCIndex[2] - 1)
+	if (apStatus = true) {
+		Send, {g}
+	}
+	Return
+}
+
+MoveToFirstPage() {
+	currentCIndex := [1, 1]
+	Loop {
+		PixelGetColor, Output, 15, 585, RGB
+		if (Output = 0xA07107) {
+			Break
+		}
+		MouseMove, 15, 585
+		Click
+		Sleep, 50
+	}
+	Return
+}
+
+MoveToPage(p) {
+	if (p > 0) {
+		aX = 985
+		d = 1
+	} else {
+		aX = 15
+		p *= -1
+		d = 0
+	}
+	Loop, %p% {
+		MouseMove, aX, 585
+		PixelGetColor, Output, aX, 585, RGB
+		if (Output != 0x000000) {
+			Click
+		}
+		Sleep, 100
+	}
+	Return
+}
+
+SetCrusadersPixels() {
+	Sleep, 1000
+	initialX = 42
+	i = 0
+	j = 0
+	Loop, 24 {
+		if (A_Index = 9 or A_Index = 17) {
+			j++
+			i = 0
+		}
+		i++
+		PixelGetColor, Output, initialX + (i - 1) * 4, 506 + j * 2, RGB
+		crusaderPixels[A_Index] := Output
+	}
+	Return
+}
+
+CompareCrusadersPixels() {
+	initialX = 42
+	i = 0
+	j = 0
+	Loop, 24 {
+		if (A_Index = 9 or A_Index = 17) {
+			j++
+			i = 0
+		}
+		i++
+		PixelGetColor, Output, initialX + (i - 1) * 4, 506 + j * 2, RGB
+		crusaderPixelsTemp[A_Index] := Output
+	}
+	j = 0
+	for i, e in crusaderPixelsTemp {
+		if (crusaderPixels[i] = crusaderPixelsTemp[i]) {
+			j++
+		}
+	}
+	if (j = crusaderPixels.MaxIndex()) {
+		Return, true
+	}
+	Return, false
+}
+
+; Max levels, the ignore parameter is there to ignore the upgrade button, useful for the level cap check
+maxLevels(ignore) {
+	Log("Max all levels.")
+	MouseMove, 985, 630
+	Click
+	if (ignore = false) {
+		maxAllCount++
+	}
+	Sleep, 3000
+	send, {%formationKey%}
+	if (maxAllCount >= upgAllUntil) {
+		; If the bot did upgAllUntil max all levels, do one buy all upgrades
+		Log("Buy all upgrades.")
+		Sleep, 3000
+		MouseMove, 985, 540
+		Click
+		maxAllCount = 0
+	}
+}
+
+; Use a skill, 0 to use all skills
+useSkill(s) {
+	if (s = 0) {
+		Loop, 8 {
+			Send, %A_Index%
+			Sleep, 25
+		}
+	} else {
+		Send, s
 	}
 }
 
@@ -631,9 +703,20 @@ CheckAutoProgress() {
 	}
 	Log("Auto progress check returned true.")
 	Return, true
-	
-	
 }
+
+SetChatRoom:
+	MouseMove, 1135, 10
+	Sleep, 100
+	Click
+	if (chatRoom > 10) {
+		chatRoom = 10
+	}
+	MouseMove, 1135, 18 + (21 * chatRoom)
+	Sleep, 100
+	Click
+	lastChatRoom := chatRoom
+	Return
 
 ; Log function
 Log(log) {
@@ -658,22 +741,23 @@ RewriteSettings:
 	FileAppend, objective=%objective%`n, settings/settings.txt
 	FileAppend, formation=%formation%`n, settings/settings.txt
 	FileAppend, maindps=%mainDPS%`n, settings/settings.txt
-	GuiControlGet, SUpgAllUntil
-	upgalluntil := SUpgAllUntil
-	GuiControlGet, SAutoProgressCheckDelay
-	autoprogresscheckdelay := SAutoProgressCheckDelay
-	GuiControlGet, SMainDPSDelay
-	maindpsdelay := SMainDPSDelay
-	GuiControlGet, SResetCrusader
-	resetcrusader := SResetCrusader
-	GuiControlGet, SChatRoom
-	chatroom := SChatRoom
-	StringLower, SResetCrusader, SResetCrusader
-	FileAppend, upgalluntil=%SUpgAllUntil%`n, settings/settings.txt
-	FileAppend, autoprogresscheckdelay=%SAutoProgressCheckDelay%`n, settings/settings.txt
-	FileAppend, maindpsdelay=%SMainDPSDelay%`n, settings/settings.txt
-	FileAppend, resetcrusader=%SResetCrusader%`n, settings/settings.txt
-	FileAppend, chatroom=%SChatRoom%`n, settings/settings.txt
+	if (clicking = true) {
+		FileAppend, clicking=true`n, settings/settings.txt
+	} else {
+		FileAppend, clicking=false`n, settings/settings.txt
+	}
+	if (levelCapReset = true) {
+		FileAppend, levelcapreset=true`n, settings/settings.txt
+	} else {
+		FileAppend, levelcapreset=false`n, settings/settings.txt
+	}
+	FileAppend, upgalluntil=%upgAllUntil%`n, settings/settings.txt
+	FileAppend, autoprogresscheckdelay=%autoProgressCheckDelay%`n, settings/settings.txt
+	FileAppend, maindpsdelay=%mainDPSDelay%`n, settings/settings.txt
+	StringLower, resetCrusader, resetCrusader
+	FileAppend, resetcrusader=%resetCrusader%`n, settings/settings.txt
+	FileAppend, chatroom=%chatRoom%`n, settings/settings.txt
+	FileAppend, clickdelay=%clickDelay%`n, settings/settings.txt
 	Return
 
 ;				;
@@ -729,4 +813,143 @@ SetFormationE:
 	GuiControl,, FormationQ, images/f1_off.png
 	GuiControl,, FormationW, images/f2_off.png
 	GuiControl,, FormationE, images/f3_on.png
+	Return
+
+SetClicking:
+	if (clicking = true) {
+		GuiControl,, ClickingStatus, images/off.png
+		clicking := false
+	} else {
+		GuiControl,, ClickingStatus, images/on.png
+		clicking := true
+	}
+	Gosub, RewriteSettings
+	Return
+
+SetLevelCapReset:
+	if (levelCapReset = true) {
+		GuiControl,, LevelCapResetStatus, images/off.png
+		levelCapReset := false
+	} else {
+		GuiControl,, LevelCapResetStatus, images/on.png
+		levelCapReset := true
+	}
+	Gosub, RewriteSettings
+	Return
+	
+SUpgAllUntil:
+	Return
+SMainDPSDelay:
+	Return
+SChatRoom:
+	Return
+SAutoProgressCheckDelay:
+	Return
+SResetCrusader:
+	Return
+SClickDelay:
+	Return
+SHelp:
+	Return	
+
+CloseSettings:
+	Gui, BotGUISettings: Hide
+	Return
+
+ApplySettings:
+	Gui, Submit, NoHide
+	upgAllUntil := SUpgAllUntil
+	autoProgressCheckDelay := SAutoProgressCheckDelay
+	mainDPSDelay := SMainDPSDelay
+	resetCrusader := SResetCrusader
+	lastChatRoom := chatRoom
+	chatRoom := SChatRoom
+	clickDelay := SClickDelay
+	Gosub, RewriteSettings
+	Gui, BotGUISettings: Hide
+	Return
+	
+Settings:
+	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/settings.png
+	WinGetPos, Output2X, Output2Y
+	nX := Output2X + OutputX - 126 + OutputW / 2
+	nY := A_ScreenHeight - Output2Y + OutputH * 2
+	settings := ReadSettings()
+	GuiControl, BotGUISettings:, SUpgAllUntil, % settings["upgalluntil"]
+	GuiControl, BotGUISettings:, SAutoProgressCheckDelay, % settings["autoprogresscheckdelay"]
+	autoProgressCheckDelay := SAutoProgressCheckDelay
+	GuiControl, BotGUISettings:, SMainDPSDelay, % settings["maindpsdelay"]
+	GuiControl, BotGUISettings: ChooseString, SResetCrusader, % settings["resetcrusader"]
+	StringLower, resetCrusader, resetCrusader
+	GuiControl, BotGUISettings:, SChatRoom, % settings["chatroom"]
+	GuiControl, BotGUISettings:, SClickDelay, % settings["clickdelay"]
+	Gui, BotGUISettings: Show, x%nX% y%nY% w252 h406, BotGUI Settings
+	Return
+
+LoadSettings:
+	Log("Reading settings.")
+	settings := Object()
+	Loop, Read, settings/settings.txt
+	{
+		cLine := StrSplit(A_LoopReadLine, "=")
+		if (cLine[1] == "campaign") {
+			campaign := cLine[2]
+		}
+		if (cLine[1] == "objective") {
+			objective := cLine[2]
+		}
+		if (cLine[1] == "formation") {
+			formation := cLine[2]
+			if (formation = 1) {
+				Gosub, SetFormationQ
+			}
+			if (formation = 2) {
+				Gosub, SetFormationW
+			}
+			if (formation = 3) {
+				Gosub, SetFormationE
+			}
+		}
+		if (cLine[1] == "maindps") {
+			mainDPS := cLine[2]
+		}
+		if (cLine[1] == "clicking") {
+			clicking := cLine[2]
+			if (clicking = "true") {
+				clicking := true
+			} else {
+				clicking := false
+			}
+		}
+		if (cLine[1] == "levelcapreset") {
+			levelcapreset := cLine[2]
+			if (levelcapreset = "true") {
+				levelcapreset := true
+			} else {
+				levelcapreset := false
+			}
+		}
+		if (cLine[1] == "upgalluntil") {
+			upgAllUntil := cLine[2]
+		}
+		if (cLine[1] == "autoprogresscheckdelay") {
+			autoProgressCheckDelay := cLine[2]
+		}
+		if (cLine[1] == "maindpsdelay") {
+			mainDPSDelay := cLine[2]
+		}
+		if (cLine[1] == "resetcrusader") {
+			resetCrusader := cLine[2]
+		}
+		if (cLine[1] == "chatroom") {
+			chatRoom := cLine[2]
+		}
+		if (cLine[1] == "clickdelay") {
+			clickDelay := cLine[2]
+		}
+	}
+	Return
+
+ExitBot:
+	ExitApp
 	Return
