@@ -161,6 +161,7 @@ Bot:
 					} else {
 						; If mainDPSDelay hasn't elapsed yet, we max all levels, 
 						maxLevels()
+						maxAllCount++
 						Sleep, 3000
 						; If the bot did upgAllUntil max all levels, do one buy all upgrades
 						if (maxAllCount >= upgAllUntil) {
@@ -624,9 +625,6 @@ MaxLevels() {
 	Log("Max all levels.")
 	MouseMove, 985, 630
 	Click
-	if (ignore = false) {
-		maxAllCount++
-	}
 	send, {%formationKey%}
 }
 
