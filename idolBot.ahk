@@ -18,7 +18,7 @@ launchTime = % UnixTime(A_Now)
 now = 0
 relaunching = false
 
-maxAllCount = 0
+global maxAllCount = 0
 
 lastProgressCheck = 0
 runTime = 0
@@ -160,7 +160,13 @@ Bot:
 						sleep, 100
 					} else {
 						; If mainDPSDelay hasn't elapsed yet, we max all levels, 
-						maxLevels(false)
+						maxLevels()
+						Sleep, 3000
+						; If the bot did upgAllUntil max all levels, do one buy all upgrades
+						if (maxAllCount >= upgAllUntil) {
+							UpgAll()
+							maxAllCount = 0
+						}
 					}
 					; Auto move the mouse to get the gold and quest items for 30 seconds.
 					Log("Get the gold and quest items for 30 seconds.")
@@ -186,20 +192,12 @@ Bot:
 						; We also look for the level cap if the levelCapReset is on
 						if (levelCapReset = true) {
 							Log("Level cap reset check.")
-							maxLevels(true)
-							levelsCapped := true
-							Loop {
-								PixelGetColor, Output, 985, 585, RGB
-								if (Output != 0x503803) {
-									Break
-								}
-								ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/computinglevels.png
-								if (ErrorLevel = 0) {
-									levelsCapped := false
-								}
-							}
-							if (levelsCapped = true) {
+							maxLevels()
+							levelsCapped := false
+							PixelGetColor, Output, 985, 585, RGB
+							if (Output = 0x503803 or Output = 0x805901) {
 								phase = 3
+								levelsCapped := true
 							}
 						}
 						if (CheckAutoProgress() = false and levelsCapped = false) {
@@ -621,24 +619,23 @@ CompareCrusadersPixels() {
 	Return, false
 }
 
-; Max levels, the ignore parameter is there to ignore the upgrade button, useful for the level cap check
-maxLevels(ignore) {
+; Max levels
+MaxLevels() {
 	Log("Max all levels.")
 	MouseMove, 985, 630
 	Click
 	if (ignore = false) {
 		maxAllCount++
 	}
-	Sleep, 3000
 	send, {%formationKey%}
-	if (maxAllCount >= upgAllUntil) {
-		; If the bot did upgAllUntil max all levels, do one buy all upgrades
-		Log("Buy all upgrades.")
-		Sleep, 3000
-		MouseMove, 985, 540
-		Click
-		maxAllCount = 0
-	}
+}
+
+; Upgrade all
+UpgAll() {
+	Log("Buy all upgrades.")
+	Sleep, 3000
+	MouseMove, 985, 540
+	Click
 }
 
 ; Use a skill, 0 to use all skills
