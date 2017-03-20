@@ -1,13 +1,13 @@
 [Settings]
 campaign=7
 objective=1
-formation=1
+formation=3
 maindps=frosty
 clicking=false
 levelcapreset=true
 upgalluntil=5
-autoprogresscheckdelay=5
-maindpsdelay=60
+autoprogresscheckdelay=120
+maindpsdelay=1
 resetcrusader=nate
 chatroom=1
 clickdelay=20

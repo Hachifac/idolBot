@@ -17,6 +17,7 @@ phase = -1 ; -1 = bot not launched, 0 = bot in campaign selection screen, 1 = in
 launchTime = % UnixTime(A_Now)
 now = 0
 relaunching = false
+checkLevelCap := false
 
 global maxAllCount = 0
 
@@ -31,11 +32,16 @@ global crusaderPixelsTemp := Object()
 	
 ; Bot loop
 Bot:
+	FileGetSize, Output, logs/logs.txt, M
+	if (Output >= 10) {
+		FileMove, logs/logs.txt, logs/logs_old.txt
+		FileDelete, logs/logs.txt
+	}
 	Log("------------- CoTLI Bot by Hachifac -------------")
 	IfWinExist, Crusaders of The Lost Idols
 	{
 		WinActivate, Crusaders of The Lost Idols
-		; WinMove, 0, 0
+		WinMove, 0, 0
 		; Self-explanatory
 		if (phase = -1) {
 			Loop {
@@ -159,10 +165,9 @@ Bot:
 						send, {ctrl up}
 						sleep, 100
 					} else {
-						; If mainDPSDelay hasn't elapsed yet, we max all levels, 
+						; If mainDPSDelay hasn't elapsed yet, we max all levels
 						maxLevels()
 						maxAllCount++
-						Sleep, 3000
 						; If the bot did upgAllUntil max all levels, do one buy all upgrades
 						if (maxAllCount >= upgAllUntil) {
 							UpgAll()
@@ -186,22 +191,32 @@ Bot:
 						MouseMove, 840, 355
 						Sleep, %delay%
 					}
+					if (checkLevelCap = true) {
+						MaxLevels()
+					}
 					; If the last time we did an auto progress check is >= than autoProgressCheckDelay, we initiate an auto progress check
-					if (UnixTime(A_Now) - lastProgressCheck >= autoProgressCheckDelay) {
-						lastProgressCheck = % UnixTime(A_Now)
-						; Every 2 minutes we take a look if Auto Progress is still activated, if it's not it means we died so achieved the highest zone we could, we have to reset
-						; We also look for the level cap if the levelCapReset is on
+					if (UnixTime(A_Now) - lastProgressCheck >= autoProgressCheckDelay or checkLevelCap = true) {
 						if (levelCapReset = true) {
 							Log("Level cap reset check.")
-							maxLevels()
-							levelsCapped := false
-							PixelGetColor, Output, 985, 585, RGB
-							if (Output = 0x503803 or Output = 0x805901) {
-								phase = 3
-								levelsCapped := true
+							MoveToLastPage()
+							Sleep, 500
+							PixelGetColor, Output, 872, 594, RGB
+							if (Output = 0x979797) {
+								if (checkLevelCap = false) {
+									checkLevelCap := true
+								} else {
+									Log("Level cap achieved.")
+									MoveToFirstPage()
+									phase = 3
+								}
+							} else {
+								Log("Level cap not achieved.")
+								checkLevelCap := false
 							}
 						}
-						if (CheckAutoProgress() = false and levelsCapped = false) {
+						; Every autoProgressCheckDelay seconds we take a look if Auto Progress is still activated, if it's not it means we died so achieved the highest zone we could, we have to reset
+						lastProgressCheck = % UnixTime(A_Now)
+						if (CheckAutoProgress() = false and checkLevelCap = false) {
 							if (UnixTime(A_Now) - launchTime < 60) {
 								; Stuck at beginning, might be the formation not active
 								Log("Might be stuck at the beginning.")
@@ -558,6 +573,19 @@ MoveToFirstPage() {
 	Return
 }
 
+MoveToLastPage() {
+	Loop {
+		PixelGetColor, Output, 985, 585, RGB
+		if (Output = 0xA07107) {
+			Break
+		}
+		MouseMove, 985, 585
+		Click
+		Sleep, 50
+	}
+	Return
+}
+
 MoveToPage(p) {
 	if (p > 0) {
 		aX = 985
@@ -626,15 +654,30 @@ MaxLevels() {
 	Log("Max all levels.")
 	MouseMove, 985, 630
 	Click
-	send, {%formationKey%}
+	Loop {
+		PixelGetColor, Output, 985, 610, RGB
+		if (Output != 0x226901) {
+			Break
+		}
+		Sleep, 10
+	}
+	Send, {%formationKey%}
+	Return
 }
 
 ; Upgrade all
 UpgAll() {
 	Log("Buy all upgrades.")
-	Sleep, 3000
+	Loop {
+		PixelGetColor, Output, 985, 515, RGB
+		if (Output != 0x194D80) {
+			Break
+		}
+		Sleep, 10
+	}
 	MouseMove, 985, 540
 	Click
+	Return
 }
 
 ; Use a skill, 0 to use all skills
@@ -647,6 +690,7 @@ useSkill(s) {
 	} else {
 		Send, s
 	}
+	Return
 }
 
 ; Sets the auto progress to true
