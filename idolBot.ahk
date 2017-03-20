@@ -622,6 +622,7 @@ CompareCrusadersPixels() {
 
 ; Max levels
 MaxLevels() {
+	global formationKey
 	Log("Max all levels.")
 	MouseMove, 985, 630
 	Click
