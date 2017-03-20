@@ -135,7 +135,7 @@ Bot:
 						Gosub, SetChatRoom
 					}
 					; If mainDPSDelay elapsed between the launchTime and current time, we only max mainDPS until reset phase
-					if (1=1) {
+					if (UnixTime(A_Now) - launchTime > (mainDPSDelay * 60)) {
 						Log("Moving to mainDPS.")
 						if (crusaderPixels.length() = 0) {
 							MoveToCrusader(mainDPS)
@@ -170,7 +170,7 @@ Bot:
 					} else {
 						delay = 40
 					}
-					while (UnixTime(A_Now) - now <= 1) {
+					while (UnixTime(A_Now) - now <= 30) {
 						MouseMove, 840, 240
 						if (clicking = true) {
 							click

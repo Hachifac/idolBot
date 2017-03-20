@@ -1,6 +1,6 @@
 ## The bot
 
-This bot is coded with [autohotkey](https://autohotkey.com/)
+This bot is coded with [autohotkey](https://autohotkey.com/)  
 It is meant to be used with Crusaders of The Lost Idols
 
 ## How to use
