@@ -18,6 +18,7 @@ launchTime = % UnixTime(A_Now)
 now = 0
 relaunching = false
 checkLevelCap := false
+lootItemsDuration = 30
 
 global maxAllCount = 0
 
@@ -144,6 +145,7 @@ Bot:
 					if (UnixTime(A_Now) - launchTime > (mainDPSDelay * 60)) {
 						Log("Moving to mainDPS.")
 						if (crusaderPixels.length() = 0) {
+							MoveToFirstPage()
 							MoveToCrusader(mainDPS)
 							Sleep, 1000
 							SetCrusadersPixels()
@@ -182,7 +184,7 @@ Bot:
 					} else {
 						delay = 40
 					}
-					while (UnixTime(A_Now) - now <= 30) {
+					while (UnixTime(A_Now) - now <= lootItemsDuration) {
 						MouseMove, 840, 240
 						if (clicking = true) {
 							click
@@ -211,6 +213,7 @@ Bot:
 								}
 							} else {
 								Log("Level cap not achieved.")
+								MoveToFirstPage()
 								checkLevelCap := false
 							}
 						}
@@ -654,12 +657,14 @@ MaxLevels() {
 	Log("Max all levels.")
 	MouseMove, 985, 630
 	Click
+	Sleep, 100
 	Loop {
 		PixelGetColor, Output, 985, 610, RGB
-		if (Output != 0x226901) {
+		if (Output != 0x226501) {
 			Break
 		}
 		Sleep, 10
+		
 	}
 	Send, {%formationKey%}
 	Return
@@ -668,6 +673,9 @@ MaxLevels() {
 ; Upgrade all
 UpgAll() {
 	Log("Buy all upgrades.")
+	MouseMove, 985, 540
+	Click
+	Sleep, 100
 	Loop {
 		PixelGetColor, Output, 985, 515, RGB
 		if (Output != 0x194D80) {
@@ -675,8 +683,6 @@ UpgAll() {
 		}
 		Sleep, 10
 	}
-	MouseMove, 985, 540
-	Click
 	Return
 }
 
