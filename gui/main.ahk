@@ -3,7 +3,7 @@
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
-v := "0.95"
+v := "1.0"
 
 Gui, BotGUI: New, -Caption, CotLI Bot
 Gui, Color, 933506

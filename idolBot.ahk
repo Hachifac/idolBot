@@ -3,17 +3,18 @@
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent phaseing directory.
 
-; Include the GUI
+; Include the GUIs
 #include gui/main.ahk
+
+; Include the lists
 #include lists/crusaders.ahk
 
 CoordMode, Pixel, Client
 CoordMode, Mouse, Client
 
-SetTimer, GuiPos, 100 ; Every 100ms we position the GUI below the game
+SetTimer, GUIPos, 100 ; Every 100ms we position the GUI below the game
 
 phase = -1 ; -1 = bot not launched, 0 = bot in campaign selection screen, 1 = initial stuff like looking for overlays, waiting for the game to fully load, 2 = maxing the levels/ main dps and upgrades, 3 = reset phase
-
 launchTime = % UnixTime(A_Now)
 now = 0
 relaunching = false
@@ -42,7 +43,7 @@ Bot:
 	IfWinExist, Crusaders of The Lost Idols
 	{
 		WinActivate, Crusaders of The Lost Idols
-		WinMove, 0, 0
+		; WinMove, 0, 0
 		; Self-explanatory
 		if (phase = -1) {
 			Loop {
@@ -203,6 +204,9 @@ Bot:
 							MoveToLastPage()
 							Sleep, 500
 							PixelGetColor, Output, 872, 594, RGB
+							if (Output = 0x7D2E0C) {
+								PixelGetColor, Output, 872, 508, RGB
+							}
 							if (Output = 0x979797) {
 								if (checkLevelCap = false) {
 									checkLevelCap := true
@@ -313,7 +317,7 @@ Bot:
 	Return
 
 ; Set the GUI below the game
-GuiPos:
+GUIPos:
 	IfWinExist, Crusaders of The Lost Idols
 	{
 		WinGetPos, X, Y, W, H, Crusaders of The Lost Idols
@@ -995,7 +999,7 @@ LoadSettings:
 		}
 	}
 	Return
-
+	
 ExitBot:
 	ExitApp
 	Return
