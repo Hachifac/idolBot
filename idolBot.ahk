@@ -31,7 +31,7 @@ global currentCIndex := [1, 1]
 global currentCCoords := [36, 506]
 global crusaderPixels := Object()
 global crusaderPixelsTemp := Object()
-	
+
 ; Bot loop
 Bot:
 	FileGetSize, Output, logs/logs.txt, M
@@ -199,6 +199,7 @@ Bot:
 					}
 					; If the last time we did an auto progress check is >= than autoProgressCheckDelay, we initiate an auto progress check
 					if (UnixTime(A_Now) - lastProgressCheck >= autoProgressCheckDelay or checkLevelCap = true) {
+						levelCapReset := false
 						if (levelCapReset = true) {
 							Log("Level cap reset check.")
 							MoveToLastPage()
@@ -324,7 +325,7 @@ GUIPos:
 		nY := A_ScreenHeight - (A_ScreenHeight - Y) + H - 2
 		nW := W
 		nX := X + W / 2 - 661 / 2 + 2
-		Gui, BotGUI: Show, x%nX% y%nY% w661 h116 NoActivate, BotGUI
+		Gui, BotGUI: Show, x%nX% y%nY% w661 h115 NoActivate, BotGUI
 	}
 	IfWinNotExist, Crusaders of The Lost Idols
 	{
@@ -877,6 +878,7 @@ SetClicking:
 	Return
 
 SetLevelCapReset:
+	/*
 	if (levelCapReset = true) {
 		GuiControl,, LevelCapResetStatus, images/off.png
 		levelCapReset := false
@@ -885,6 +887,8 @@ SetLevelCapReset:
 		levelCapReset := true
 	}
 	Gosub, RewriteSettings
+	*/
+	MsgBox, Currently not working
 	Return
 	
 SUpgAllUntil:
