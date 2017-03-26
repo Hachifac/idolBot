@@ -1014,7 +1014,3 @@ RewriteSettings:
 	IniWrite, % chatroom, settings/settings.ini, Settings, chatroom
 	IniWrite, % clickdelay, settings/settings.ini, Settings, clickdelay
 	Return
-	
-ExitBot:
-	ExitApp
-	Return
