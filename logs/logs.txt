@@ -1,0 +1,484 @@
+[2017/3/24 - 09:04:18] Reading settings.
+[2017/3/24 - 09:04:18] User changed the formation.
+[2017/3/24 - 09:04:18] Settings changed.
+[2017/3/24 - 09:04:18] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 09:04:21] Settings changed.
+[2017/3/24 - 09:04:22] Settings changed.
+[2017/3/24 - 09:04:23] Settings changed.
+[2017/3/24 - 09:04:24] Settings changed.
+[2017/3/24 - 09:05:18] Reading settings.
+[2017/3/24 - 09:05:18] User changed the formation.
+[2017/3/24 - 09:05:18] Settings changed.
+[2017/3/24 - 09:05:18] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 09:05:20] Settings changed.
+[2017/3/24 - 09:05:22] Settings changed.
+[2017/3/24 - 09:05:22] Settings changed.
+[2017/3/24 - 09:05:29] Settings changed.
+[2017/3/24 - 10:18:32] Reading settings.
+[2017/3/24 - 10:18:32] User changed the formation.
+[2017/3/24 - 10:18:32] Settings changed.
+[2017/3/24 - 10:18:32] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 10:18:34] Settings changed.
+[2017/3/24 - 10:18:36] Settings changed.
+[2017/3/24 - 10:18:38] Reading settings.
+[2017/3/24 - 10:18:38] User changed the formation.
+[2017/3/24 - 10:18:38] Settings changed.
+[2017/3/24 - 10:18:38] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 10:18:43] Settings changed.
+[2017/3/24 - 11:14:08] Reading settings.
+[2017/3/24 - 11:14:08] User changed the formation.
+[2017/3/24 - 11:14:08] Settings changed.
+[2017/3/24 - 11:14:08] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 11:14:16] Settings changed.
+[2017/3/24 - 11:16:29] Reading settings.
+[2017/3/24 - 11:16:29] User changed the formation.
+[2017/3/24 - 11:16:29] Settings changed.
+[2017/3/24 - 11:16:30] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 11:16:35] Settings changed.
+[2017/3/24 - 11:17:25] Reading settings.
+[2017/3/24 - 11:17:25] User changed the formation.
+[2017/3/24 - 11:17:25] Settings changed.
+[2017/3/24 - 11:17:25] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 11:17:38] Settings changed.
+[2017/3/24 - 11:18:32] Reading settings.
+[2017/3/24 - 11:18:32] User changed the formation.
+[2017/3/24 - 11:18:32] Settings changed.
+[2017/3/24 - 11:18:32] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 11:18:57] Reading settings.
+[2017/3/24 - 11:18:57] User changed the formation.
+[2017/3/24 - 11:18:57] Settings changed.
+[2017/3/24 - 11:18:57] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 11:19:00] Settings changed.
+[2017/3/24 - 11:21:02] Reading settings.
+[2017/3/24 - 11:21:02] User changed the formation.
+[2017/3/24 - 11:21:02] Settings changed.
+[2017/3/24 - 11:21:03] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 11:22:35] Reading settings.
+[2017/3/24 - 11:22:35] User changed the formation.
+[2017/3/24 - 11:22:35] Settings changed.
+[2017/3/24 - 11:22:36] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 11:22:58] Reading settings.
+[2017/3/24 - 11:22:58] User changed the formation.
+[2017/3/24 - 11:22:58] Settings changed.
+[2017/3/24 - 11:22:58] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 11:24:12] Reading settings.
+[2017/3/24 - 11:24:12] User changed the formation.
+[2017/3/24 - 11:24:12] Settings changed.
+[2017/3/24 - 11:24:12] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 11:25:40] Settings changed.
+[2017/3/24 - 11:29:13] Reading settings.
+[2017/3/24 - 11:29:13] User changed the formation.
+[2017/3/24 - 11:29:13] Settings changed.
+[2017/3/24 - 11:29:13] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 11:30:31] Reading settings.
+[2017/3/24 - 11:30:31] User changed the formation.
+[2017/3/24 - 11:30:31] Settings changed.
+[2017/3/24 - 11:30:31] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 11:32:53] Reading settings.
+[2017/3/24 - 11:32:53] User changed the formation.
+[2017/3/24 - 11:32:53] Settings changed.
+[2017/3/24 - 11:32:53] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 11:34:02] Reading settings.
+[2017/3/24 - 11:34:02] User changed the formation.
+[2017/3/24 - 11:34:02] Settings changed.
+[2017/3/24 - 11:34:03] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 11:34:40] Reading settings.
+[2017/3/24 - 11:34:40] User changed the formation.
+[2017/3/24 - 11:34:40] Settings changed.
+[2017/3/24 - 11:34:40] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 11:35:35] Reading settings.
+[2017/3/24 - 11:35:35] User changed the formation.
+[2017/3/24 - 11:35:35] Settings changed.
+[2017/3/24 - 11:35:35] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 11:36:01] Reading settings.
+[2017/3/24 - 11:36:01] User changed the formation.
+[2017/3/24 - 11:36:01] Settings changed.
+[2017/3/24 - 11:36:01] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 11:36:08] Reading settings.
+[2017/3/24 - 11:36:08] User changed the formation.
+[2017/3/24 - 11:36:08] Settings changed.
+[2017/3/24 - 11:36:08] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/24 - 12:24:23] Launching bot.
+[2017/3/24 - 12:24:23] Searching for campaign header.
+[2017/3/24 - 12:24:24] Searching for the cog.
+[2017/3/24 - 12:24:24] Found the cog.
+[2017/3/24 - 12:24:24] Bot launched.
+[2017/3/24 - 12:24:24] Waiting for the campaign to load.
+[2017/3/24 - 12:24:24] Campaign loaded.
+[2017/3/24 - 12:24:24] Initial auto progress check...
+[2017/3/24 - 12:24:24] Auto progress check...
+[2017/3/24 - 12:24:25] Paused.
+[2017/3/25 - 11:27:02] Reading settings.
+[2017/3/25 - 11:27:02] User changed the formation.
+[2017/3/25 - 11:27:02] Settings changed.
+[2017/3/25 - 11:27:02] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:27:38] Reading settings.
+[2017/3/25 - 11:27:38] User changed the formation.
+[2017/3/25 - 11:27:38] Settings changed.
+[2017/3/25 - 11:27:39] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:28:24] Reading settings.
+[2017/3/25 - 11:28:24] User changed the formation.
+[2017/3/25 - 11:28:24] Settings changed.
+[2017/3/25 - 11:28:24] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:29:01] Reading settings.
+[2017/3/25 - 11:29:01] User changed the formation.
+[2017/3/25 - 11:29:01] Settings changed.
+[2017/3/25 - 11:29:02] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:29:07] Reading settings.
+[2017/3/25 - 11:29:07] User changed the formation.
+[2017/3/25 - 11:29:07] Settings changed.
+[2017/3/25 - 11:29:07] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:29:26] Reading settings.
+[2017/3/25 - 11:29:26] User changed the formation.
+[2017/3/25 - 11:29:26] Settings changed.
+[2017/3/25 - 11:29:26] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:29:57] Reading settings.
+[2017/3/25 - 11:29:57] User changed the formation.
+[2017/3/25 - 11:29:57] Settings changed.
+[2017/3/25 - 11:29:58] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:30:03] Reading settings.
+[2017/3/25 - 11:30:03] User changed the formation.
+[2017/3/25 - 11:30:03] Settings changed.
+[2017/3/25 - 11:30:03] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:30:08] Reading settings.
+[2017/3/25 - 11:30:08] User changed the formation.
+[2017/3/25 - 11:30:08] Settings changed.
+[2017/3/25 - 11:30:08] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:30:26] Reading settings.
+[2017/3/25 - 11:30:26] User changed the formation.
+[2017/3/25 - 11:30:26] Settings changed.
+[2017/3/25 - 11:30:26] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:35:09] Reading settings.
+[2017/3/25 - 11:35:09] User changed the formation.
+[2017/3/25 - 11:35:09] Settings changed.
+[2017/3/25 - 11:35:09] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:42:38] Reading settings.
+[2017/3/25 - 11:42:38] User changed the formation.
+[2017/3/25 - 11:42:38] Settings changed.
+[2017/3/25 - 11:42:38] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:51:46] Reading settings.
+[2017/3/25 - 11:51:46] User changed the formation.
+[2017/3/25 - 11:51:46] Settings changed.
+[2017/3/25 - 11:51:46] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:53:40] Reading settings.
+[2017/3/25 - 11:53:40] User changed the formation.
+[2017/3/25 - 11:53:40] Settings changed.
+[2017/3/25 - 11:53:40] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:53:53] Reading settings.
+[2017/3/25 - 11:53:53] User changed the formation.
+[2017/3/25 - 11:53:53] Settings changed.
+[2017/3/25 - 11:53:53] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:54:05] Reading settings.
+[2017/3/25 - 11:54:05] User changed the formation.
+[2017/3/25 - 11:54:05] Settings changed.
+[2017/3/25 - 11:54:05] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:54:15] Reading settings.
+[2017/3/25 - 11:54:15] User changed the formation.
+[2017/3/25 - 11:54:15] Settings changed.
+[2017/3/25 - 11:54:15] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:54:20] Reading settings.
+[2017/3/25 - 11:54:20] User changed the formation.
+[2017/3/25 - 11:54:20] Settings changed.
+[2017/3/25 - 11:54:20] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:54:48] Reading settings.
+[2017/3/25 - 11:54:48] User changed the formation.
+[2017/3/25 - 11:54:48] Settings changed.
+[2017/3/25 - 11:54:48] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:54:58] Reading settings.
+[2017/3/25 - 11:54:58] User changed the formation.
+[2017/3/25 - 11:54:58] Settings changed.
+[2017/3/25 - 11:54:58] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:55:18] Reading settings.
+[2017/3/25 - 11:55:18] User changed the formation.
+[2017/3/25 - 11:55:18] Settings changed.
+[2017/3/25 - 11:55:18] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:55:36] Reading settings.
+[2017/3/25 - 11:55:36] User changed the formation.
+[2017/3/25 - 11:55:36] Settings changed.
+[2017/3/25 - 11:55:36] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:56:08] Reading settings.
+[2017/3/25 - 11:56:08] User changed the formation.
+[2017/3/25 - 11:56:08] Settings changed.
+[2017/3/25 - 11:56:08] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:56:39] Reading settings.
+[2017/3/25 - 11:56:39] User changed the formation.
+[2017/3/25 - 11:56:39] Settings changed.
+[2017/3/25 - 11:56:39] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:57:31] Reading settings.
+[2017/3/25 - 11:57:31] User changed the formation.
+[2017/3/25 - 11:57:31] Settings changed.
+[2017/3/25 - 11:57:31] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:57:36] Reading settings.
+[2017/3/25 - 11:57:36] User changed the formation.
+[2017/3/25 - 11:57:36] Settings changed.
+[2017/3/25 - 11:57:36] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:57:41] Reading settings.
+[2017/3/25 - 11:57:41] User changed the formation.
+[2017/3/25 - 11:57:41] Settings changed.
+[2017/3/25 - 11:57:42] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:58:12] Reading settings.
+[2017/3/25 - 11:58:12] User changed the formation.
+[2017/3/25 - 11:58:12] Settings changed.
+[2017/3/25 - 11:58:13] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:58:19] Reading settings.
+[2017/3/25 - 11:58:19] User changed the formation.
+[2017/3/25 - 11:58:19] Settings changed.
+[2017/3/25 - 11:58:19] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:58:24] Reading settings.
+[2017/3/25 - 11:58:24] User changed the formation.
+[2017/3/25 - 11:58:24] Settings changed.
+[2017/3/25 - 11:58:24] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:59:26] Reading settings.
+[2017/3/25 - 11:59:26] User changed the formation.
+[2017/3/25 - 11:59:26] Settings changed.
+[2017/3/25 - 11:59:27] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:59:32] Reading settings.
+[2017/3/25 - 11:59:32] User changed the formation.
+[2017/3/25 - 11:59:32] Settings changed.
+[2017/3/25 - 11:59:32] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 11:59:37] Reading settings.
+[2017/3/25 - 11:59:37] User changed the formation.
+[2017/3/25 - 11:59:37] Settings changed.
+[2017/3/25 - 11:59:37] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:00:20] Reading settings.
+[2017/3/25 - 12:00:20] User changed the formation.
+[2017/3/25 - 12:00:20] Settings changed.
+[2017/3/25 - 12:00:20] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:00:26] Reading settings.
+[2017/3/25 - 12:00:26] User changed the formation.
+[2017/3/25 - 12:00:26] Settings changed.
+[2017/3/25 - 12:00:26] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:00:31] Reading settings.
+[2017/3/25 - 12:00:31] User changed the formation.
+[2017/3/25 - 12:00:31] Settings changed.
+[2017/3/25 - 12:00:32] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:01:15] Reading settings.
+[2017/3/25 - 12:01:15] User changed the formation.
+[2017/3/25 - 12:01:15] Settings changed.
+[2017/3/25 - 12:01:16] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:37:23] Reading settings.
+[2017/3/25 - 12:37:23] User changed the formation.
+[2017/3/25 - 12:37:23] Settings changed.
+[2017/3/25 - 12:37:24] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:37:33] Reading settings.
+[2017/3/25 - 12:37:33] User changed the formation.
+[2017/3/25 - 12:37:33] Settings changed.
+[2017/3/25 - 12:37:34] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:37:40] Reading settings.
+[2017/3/25 - 12:37:40] User changed the formation.
+[2017/3/25 - 12:37:40] Settings changed.
+[2017/3/25 - 12:37:40] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:38:09] Reading settings.
+[2017/3/25 - 12:38:09] User changed the formation.
+[2017/3/25 - 12:38:09] Settings changed.
+[2017/3/25 - 12:38:09] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:38:17] Reading settings.
+[2017/3/25 - 12:38:17] User changed the formation.
+[2017/3/25 - 12:38:17] Settings changed.
+[2017/3/25 - 12:38:17] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:38:57] Reading settings.
+[2017/3/25 - 12:38:57] User changed the formation.
+[2017/3/25 - 12:38:57] Settings changed.
+[2017/3/25 - 12:38:57] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:39:02] Reading settings.
+[2017/3/25 - 12:39:02] User changed the formation.
+[2017/3/25 - 12:39:02] Settings changed.
+[2017/3/25 - 12:39:02] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:39:36] Reading settings.
+[2017/3/25 - 12:39:36] User changed the formation.
+[2017/3/25 - 12:39:36] Settings changed.
+[2017/3/25 - 12:39:37] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:39:47] Settings changed.
+[2017/3/25 - 12:39:53] Settings changed.
+[2017/3/25 - 12:40:52] Settings changed.
+[2017/3/25 - 12:40:55] Reading settings.
+[2017/3/25 - 12:40:55] User changed the formation.
+[2017/3/25 - 12:40:55] Settings changed.
+[2017/3/25 - 12:40:55] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:41:01] Settings changed.
+[2017/3/25 - 12:43:29] Reading settings.
+[2017/3/25 - 12:43:29] User changed the formation.
+[2017/3/25 - 12:43:29] Settings changed.
+[2017/3/25 - 12:43:29] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:43:33] Settings changed.
+[2017/3/25 - 12:43:51] Reading settings.
+[2017/3/25 - 12:43:51] User changed the formation.
+[2017/3/25 - 12:43:51] Settings changed.
+[2017/3/25 - 12:43:51] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:44:01] Settings changed.
+[2017/3/25 - 12:44:25] Reading settings.
+[2017/3/25 - 12:44:25] User changed the formation.
+[2017/3/25 - 12:44:25] Settings changed.
+[2017/3/25 - 12:44:25] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:44:30] Settings changed.
+[2017/3/25 - 12:45:38] Reading settings.
+[2017/3/25 - 12:45:38] User changed the formation.
+[2017/3/25 - 12:45:38] Settings changed.
+[2017/3/25 - 12:45:38] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:46:16] Reading settings.
+[2017/3/25 - 12:46:16] User changed the formation.
+[2017/3/25 - 12:46:16] Settings changed.
+[2017/3/25 - 12:46:16] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:46:31] Settings changed.
+[2017/3/25 - 12:48:38] Settings changed.
+[2017/3/25 - 12:48:43] User changed the formation.
+[2017/3/25 - 12:48:43] Settings changed.
+[2017/3/25 - 12:48:43] User changed the formation.
+[2017/3/25 - 12:48:43] Settings changed.
+[2017/3/25 - 12:48:44] User changed the formation.
+[2017/3/25 - 12:48:44] Settings changed.
+[2017/3/25 - 12:48:47] User changed the formation.
+[2017/3/25 - 12:48:47] Settings changed.
+[2017/3/25 - 12:51:07] Reading settings.
+[2017/3/25 - 12:51:07] User changed the formation.
+[2017/3/25 - 12:51:07] Settings changed.
+[2017/3/25 - 12:51:08] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:51:22] User changed the formation.
+[2017/3/25 - 12:51:22] Settings changed.
+[2017/3/25 - 12:51:23] User changed the formation.
+[2017/3/25 - 12:51:23] Settings changed.
+[2017/3/25 - 12:51:24] User changed the formation.
+[2017/3/25 - 12:51:24] Settings changed.
+[2017/3/25 - 12:51:24] User changed the formation.
+[2017/3/25 - 12:51:24] Settings changed.
+[2017/3/25 - 12:51:25] User changed the formation.
+[2017/3/25 - 12:51:25] Settings changed.
+[2017/3/25 - 12:51:25] User changed the formation.
+[2017/3/25 - 12:51:25] Settings changed.
+[2017/3/25 - 12:51:26] User changed the formation.
+[2017/3/25 - 12:51:26] Settings changed.
+[2017/3/25 - 12:51:26] User changed the formation.
+[2017/3/25 - 12:51:26] Settings changed.
+[2017/3/25 - 12:51:28] User changed the formation.
+[2017/3/25 - 12:51:28] Settings changed.
+[2017/3/25 - 12:51:28] User changed the formation.
+[2017/3/25 - 12:51:28] Settings changed.
+[2017/3/25 - 12:52:45] Reading settings.
+[2017/3/25 - 12:52:45] User changed the formation.
+[2017/3/25 - 12:52:45] Settings changed.
+[2017/3/25 - 12:52:45] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:54:07] Reading settings.
+[2017/3/25 - 12:54:07] User changed the formation.
+[2017/3/25 - 12:54:07] Settings changed.
+[2017/3/25 - 12:54:08] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:54:13] User changed the formation.
+[2017/3/25 - 12:54:13] Settings changed.
+[2017/3/25 - 12:54:16] User changed the formation.
+[2017/3/25 - 12:54:16] Settings changed.
+[2017/3/25 - 12:54:17] User changed the formation.
+[2017/3/25 - 12:54:17] Settings changed.
+[2017/3/25 - 12:54:18] User changed the formation.
+[2017/3/25 - 12:54:18] Settings changed.
+[2017/3/25 - 12:54:19] User changed the formation.
+[2017/3/25 - 12:54:19] Settings changed.
+[2017/3/25 - 12:54:21] User changed the formation.
+[2017/3/25 - 12:54:21] Settings changed.
+[2017/3/25 - 12:54:22] User changed the formation.
+[2017/3/25 - 12:54:22] Settings changed.
+[2017/3/25 - 12:54:22] User changed the formation.
+[2017/3/25 - 12:54:22] Settings changed.
+[2017/3/25 - 12:54:23] User changed the formation.
+[2017/3/25 - 12:54:23] Settings changed.
+[2017/3/25 - 12:54:23] User changed the formation.
+[2017/3/25 - 12:54:23] Settings changed.
+[2017/3/25 - 12:54:24] User changed the formation.
+[2017/3/25 - 12:54:24] Settings changed.
+[2017/3/25 - 12:54:24] User changed the formation.
+[2017/3/25 - 12:54:24] Settings changed.
+[2017/3/25 - 12:54:24] User changed the formation.
+[2017/3/25 - 12:54:24] Settings changed.
+[2017/3/25 - 12:54:25] User changed the formation.
+[2017/3/25 - 12:54:25] Settings changed.
+[2017/3/25 - 12:54:25] User changed the formation.
+[2017/3/25 - 12:54:25] Settings changed.
+[2017/3/25 - 12:54:25] User changed the formation.
+[2017/3/25 - 12:54:25] Settings changed.
+[2017/3/25 - 12:54:27] User changed the formation.
+[2017/3/25 - 12:54:27] Settings changed.
+[2017/3/25 - 12:54:27] User changed the formation.
+[2017/3/25 - 12:54:27] Settings changed.
+[2017/3/25 - 12:54:27] User changed the formation.
+[2017/3/25 - 12:54:27] Settings changed.
+[2017/3/25 - 12:54:28] User changed the formation.
+[2017/3/25 - 12:54:28] Settings changed.
+[2017/3/25 - 12:54:28] User changed the formation.
+[2017/3/25 - 12:54:28] Settings changed.
+[2017/3/25 - 12:54:29] User changed the formation.
+[2017/3/25 - 12:54:29] Settings changed.
+[2017/3/25 - 12:54:31] User changed the formation.
+[2017/3/25 - 12:54:31] Settings changed.
+[2017/3/25 - 12:55:31] Reading settings.
+[2017/3/25 - 12:55:31] User changed the formation.
+[2017/3/25 - 12:55:31] Settings changed.
+[2017/3/25 - 12:55:31] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:57:54] Reading settings.
+[2017/3/25 - 12:57:54] User changed the formation.
+[2017/3/25 - 12:57:54] Settings changed.
+[2017/3/25 - 12:57:54] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 12:57:55] User changed the formation.
+[2017/3/25 - 12:57:55] Settings changed.
+[2017/3/25 - 12:57:57] User changed the formation.
+[2017/3/25 - 12:57:57] Settings changed.
+[2017/3/25 - 12:57:58] User changed the formation.
+[2017/3/25 - 12:57:58] Settings changed.
+[2017/3/25 - 12:57:58] User changed the formation.
+[2017/3/25 - 12:57:58] Settings changed.
+[2017/3/25 - 12:57:59] User changed the formation.
+[2017/3/25 - 12:57:59] Settings changed.
+[2017/3/25 - 12:57:59] User changed the formation.
+[2017/3/25 - 12:57:59] Settings changed.
+[2017/3/25 - 12:58:00] User changed the formation.
+[2017/3/25 - 12:58:00] Settings changed.
+[2017/3/25 - 12:58:00] User changed the formation.
+[2017/3/25 - 12:58:00] Settings changed.
+[2017/3/25 - 12:58:01] User changed the formation.
+[2017/3/25 - 12:58:01] Settings changed.
+[2017/3/25 - 12:58:05] Settings changed.
+[2017/3/25 - 12:58:05] Settings changed.
+[2017/3/25 - 12:58:06] Settings changed.
+[2017/3/25 - 12:58:06] Settings changed.
+[2017/3/25 - 12:58:07] Settings changed.
+[2017/3/25 - 12:58:07] Settings changed.
+[2017/3/25 - 12:58:16] Settings changed.
+[2017/3/25 - 13:00:00] Settings changed.
+[2017/3/25 - 13:00:02] Settings changed.
+[2017/3/25 - 14:46:38] Reading settings.
+[2017/3/25 - 14:46:38] User changed the formation.
+[2017/3/25 - 14:46:38] Settings changed.
+[2017/3/25 - 14:46:38] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 14:46:52] Settings changed.
+[2017/3/25 - 14:46:57] User changed the formation.
+[2017/3/25 - 14:46:57] Settings changed.
+[2017/3/25 - 14:46:58] User changed the formation.
+[2017/3/25 - 14:46:58] Settings changed.
+[2017/3/25 - 14:46:59] User changed the formation.
+[2017/3/25 - 14:46:59] Settings changed.
+[2017/3/25 - 14:51:28] Reading settings.
+[2017/3/25 - 14:51:28] User changed the formation.
+[2017/3/25 - 14:51:28] Settings changed.
+[2017/3/25 - 14:51:29] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 14:51:33] User changed the formation.
+[2017/3/25 - 14:51:33] Settings changed.
+[2017/3/25 - 14:51:39] User changed the formation.
+[2017/3/25 - 14:51:39] Settings changed.
+[2017/3/25 - 14:51:40] User changed the formation.
+[2017/3/25 - 14:51:40] Settings changed.
+[2017/3/25 - 14:53:06] Reading settings.
+[2017/3/25 - 14:53:06] User changed the formation.
+[2017/3/25 - 14:53:06] Settings changed.
+[2017/3/25 - 14:53:06] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 14:56:16] Reading settings.
+[2017/3/25 - 14:56:16] User changed the formation.
+[2017/3/25 - 14:56:16] Settings changed.
+[2017/3/25 - 14:56:17] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 14:56:39] Reading settings.
+[2017/3/25 - 14:56:39] User changed the formation.
+[2017/3/25 - 14:56:39] Settings changed.
+[2017/3/25 - 14:56:39] ------------- CoTLI Bot by Hachifac -------------
+[2017/3/25 - 14:56:40] User changed the formation.
+[2017/3/25 - 14:56:40] Settings changed.
+[2017/3/25 - 14:56:41] User changed the formation.
+[2017/3/25 - 14:56:41] Settings changed.
+[2017/3/25 - 14:56:41] User changed the formation.
+[2017/3/25 - 14:56:41] Settings changed.
+[2017/3/25 - 14:57:14] Settings changed.
