@@ -16,17 +16,15 @@ if (Output < getVersion) {
 	
 }
 
-version = 1.05
-; Run, botChests.ahk, lib,, botChestsPID
+version = 1.1
+
 ; Include the bot
 #include lib/botMain.ahk
-
-
 
 F9::
 	Reload
 	Return
 	
 ExitBot:
-	; Process, Close, %botChestsPID%
+	Process, Close, %botChestsPID%
 	ExitApp
