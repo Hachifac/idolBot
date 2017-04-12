@@ -62116,3 +62116,15 @@
 [2017/4/12 - 05:33:51] ------------- CoTLI Bot by Hachifac -------------
 [2017/4/12 - 05:34:44] Settings changed.
 [2017/4/12 - 05:34:52] Settings changed.
+[2017/4/12 - 07:16:11] Reading settings.
+[2017/4/12 - 07:16:11] Reading stats.
+[2017/4/12 - 07:16:11] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:16:44] Reading settings.
+[2017/4/12 - 07:16:44] Reading stats.
+[2017/4/12 - 07:16:45] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:16:53] Reading settings.
+[2017/4/12 - 07:16:53] Reading stats.
+[2017/4/12 - 07:16:54] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:17:08] Settings changed.
+[2017/4/12 - 07:17:26] Settings changed.
+[2017/4/12 - 07:17:28] Settings changed.

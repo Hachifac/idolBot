@@ -1230,7 +1230,7 @@ About:
 	WinGetPos, Output2X, Output2Y
 	nX := Output2X + OutputX - 126 + OutputW / 2
 	nY := Output2Y - 180
-	Gui, BotGUIAbout: Show, x%nX% y%nY% w252 h208, idolBot About
+	Gui, BotGUIAbout: Show, x%nX% y%nY% w252 h263, idolBot About
 	Return
 
 StormRider:
