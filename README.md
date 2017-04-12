@@ -10,5 +10,4 @@ Press F8 to launch/pause/unpause
 
 ## License
 
-None, do whatever you want it with  
-Can call that Public domain license if you want
+Released under the [MIT License](LICENSE)
