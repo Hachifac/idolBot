@@ -30,8 +30,12 @@ Gui, Add, Edit, x15 y+32
 Gui, Add, UpDown, vClickDelay Range1-2147483647, %clickDelay%
 Gui, Add, Picture, x+30 yp+4 gHelp, images/gui/bHelp.png
 
+Gui, Add, Edit, x15 y+32
+Gui, Add, UpDown, vRunTime Range1-2147483647, %runTime%
+Gui, Add, Picture, x+30 yp+4 gHelp, images/gui/bHelp.png
+
 Gui, Add, Picture, x227 y0 gCloseAdvancedOptions, images/gui/bClose.png
 
-Gui, Add, Picture, x95 y382 gApplyAdvancedOptions, images/gui/bApply.png
+Gui, Add, Picture, x95 y432 gApplyAdvancedOptions, images/gui/bApply.png
 
 GuiControl, ChooseString, ResetCrusader, %resetCrusader%

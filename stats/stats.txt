@@ -5,9 +5,9 @@ lastrun=0
 lastruntime=0
 thissession=0
 [Chests]
-alltime=0
-pastday=0
+alltime=2
+pastday=2
 lastrun=0
 lastruntime=0
-thisrun=0
-thissession=0
+thisrun=1
+thissession=2

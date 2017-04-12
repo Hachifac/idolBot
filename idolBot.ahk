@@ -16,7 +16,7 @@ if (Output < getVersion) {
 	
 }
 
-version = 1.1
+version := Output
 
 ; Include the bot
 #include lib/botMain.ahk

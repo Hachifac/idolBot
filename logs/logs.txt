@@ -62128,3 +62128,224 @@
 [2017/4/12 - 07:17:08] Settings changed.
 [2017/4/12 - 07:17:26] Settings changed.
 [2017/4/12 - 07:17:28] Settings changed.
+[2017/4/12 - 07:40:38] Reading settings.
+[2017/4/12 - 07:40:38] Reading stats.
+[2017/4/12 - 07:40:38] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:42:11] Reading settings.
+[2017/4/12 - 07:42:11] Reading stats.
+[2017/4/12 - 07:42:11] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:42:21] Reading settings.
+[2017/4/12 - 07:42:21] Reading stats.
+[2017/4/12 - 07:42:22] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:42:28] Reading settings.
+[2017/4/12 - 07:42:28] Reading stats.
+[2017/4/12 - 07:42:28] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:42:38] Reading settings.
+[2017/4/12 - 07:42:38] Reading stats.
+[2017/4/12 - 07:42:38] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:43:32] Reading settings.
+[2017/4/12 - 07:43:32] Reading stats.
+[2017/4/12 - 07:43:32] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:43:46] Reading settings.
+[2017/4/12 - 07:43:46] Reading stats.
+[2017/4/12 - 07:43:46] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:44:11] Settings changed.
+[2017/4/12 - 07:44:28] Reading settings.
+[2017/4/12 - 07:44:28] Reading stats.
+[2017/4/12 - 07:44:29] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:45:51] Reading settings.
+[2017/4/12 - 07:45:51] Reading stats.
+[2017/4/12 - 07:45:51] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:46:44] Reading settings.
+[2017/4/12 - 07:46:44] Reading stats.
+[2017/4/12 - 07:46:44] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:47:28] Reading settings.
+[2017/4/12 - 07:47:28] Reading stats.
+[2017/4/12 - 07:47:28] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:48:40] Reading settings.
+[2017/4/12 - 07:48:40] Reading stats.
+[2017/4/12 - 07:48:41] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:48:45] Settings changed.
+[2017/4/12 - 07:49:19] Reading settings.
+[2017/4/12 - 07:49:19] Reading stats.
+[2017/4/12 - 07:49:19] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:50:57] Reading settings.
+[2017/4/12 - 07:50:57] Reading stats.
+[2017/4/12 - 07:50:58] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:51:17] Launching bot.
+[2017/4/12 - 07:51:17] Searching for campaign header.
+[2017/4/12 - 07:51:18] Searching for the cog.
+[2017/4/12 - 07:51:18] Found the cog.
+[2017/4/12 - 07:51:18] Bot launched.
+[2017/4/12 - 07:51:18] Waiting for the campaign to load.
+[2017/4/12 - 07:51:18] Campaign loaded.
+[2017/4/12 - 07:51:18] Moving the characters bar to the beginning.
+[2017/4/12 - 07:51:18] Initial auto progress check...
+[2017/4/12 - 07:51:18] Auto progress check at startup
+[2017/4/12 - 07:51:19] Paused.
+[2017/4/12 - 07:52:27] Reading settings.
+[2017/4/12 - 07:52:27] Reading stats.
+[2017/4/12 - 07:52:27] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:52:36] Reading settings.
+[2017/4/12 - 07:52:36] Reading stats.
+[2017/4/12 - 07:52:37] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:52:53] Reading settings.
+[2017/4/12 - 07:52:53] Reading stats.
+[2017/4/12 - 07:52:53] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:53:02] Reading settings.
+[2017/4/12 - 07:53:02] Reading stats.
+[2017/4/12 - 07:53:03] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:53:15] Reading settings.
+[2017/4/12 - 07:53:15] Reading stats.
+[2017/4/12 - 07:53:16] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:53:24] Reading settings.
+[2017/4/12 - 07:53:24] Reading stats.
+[2017/4/12 - 07:53:24] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:53:43] Reading settings.
+[2017/4/12 - 07:53:43] Reading stats.
+[2017/4/12 - 07:53:44] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:54:30] Reading settings.
+[2017/4/12 - 07:54:30] Reading stats.
+[2017/4/12 - 07:54:31] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:54:43] Reading settings.
+[2017/4/12 - 07:54:43] Reading stats.
+[2017/4/12 - 07:54:44] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:54:57] Reading settings.
+[2017/4/12 - 07:54:57] Reading stats.
+[2017/4/12 - 07:54:58] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:55:04] Reading settings.
+[2017/4/12 - 07:55:04] Reading stats.
+[2017/4/12 - 07:55:05] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:57:47] Reading settings.
+[2017/4/12 - 07:57:47] Reading stats.
+[2017/4/12 - 07:57:48] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:58:34] Reading settings.
+[2017/4/12 - 07:58:34] Reading stats.
+[2017/4/12 - 07:58:35] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:59:04] Reading settings.
+[2017/4/12 - 07:59:04] Reading stats.
+[2017/4/12 - 07:59:04] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 07:59:18] Reading settings.
+[2017/4/12 - 07:59:18] Reading stats.
+[2017/4/12 - 07:59:18] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:00:57] Reading settings.
+[2017/4/12 - 08:00:57] Reading stats.
+[2017/4/12 - 08:00:57] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:01:10] Settings changed.
+[2017/4/12 - 08:04:18] Reading settings.
+[2017/4/12 - 08:04:18] Reading stats.
+[2017/4/12 - 08:04:18] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:04:34] Reading settings.
+[2017/4/12 - 08:04:34] Reading stats.
+[2017/4/12 - 08:04:34] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:09:01] Reading settings.
+[2017/4/12 - 08:09:01] Reading stats.
+[2017/4/12 - 08:09:01] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:10:12] Reading settings.
+[2017/4/12 - 08:10:12] Reading stats.
+[2017/4/12 - 08:10:13] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:10:43] Reading settings.
+[2017/4/12 - 08:10:43] Reading stats.
+[2017/4/12 - 08:10:43] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:11:23] Reading settings.
+[2017/4/12 - 08:11:23] Reading stats.
+[2017/4/12 - 08:11:24] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:13:07] Settings changed.
+[2017/4/12 - 08:13:16] Settings changed.
+[2017/4/12 - 08:14:00] Reading settings.
+[2017/4/12 - 08:14:00] Reading stats.
+[2017/4/12 - 08:14:00] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:14:05] Settings changed.
+[2017/4/12 - 08:14:06] Settings changed.
+[2017/4/12 - 08:14:07] Settings changed.
+[2017/4/12 - 08:14:17] Settings changed.
+[2017/4/12 - 08:15:39] Settings changed.
+[2017/4/12 - 08:15:40] Settings changed.
+[2017/4/12 - 08:16:22] Reading settings.
+[2017/4/12 - 08:16:22] Reading stats.
+[2017/4/12 - 08:16:23] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:16:26] Launching bot.
+[2017/4/12 - 08:16:26] Searching for campaign header.
+[2017/4/12 - 08:16:26] Searching for the cog.
+[2017/4/12 - 08:16:26] Found the cog.
+[2017/4/12 - 08:16:26] Bot launched.
+[2017/4/12 - 08:16:26] Waiting for the campaign to load.
+[2017/4/12 - 08:16:26] Campaign loaded.
+[2017/4/12 - 08:16:26] Moving the characters bar to the beginning.
+[2017/4/12 - 08:16:27] Initial auto progress check...
+[2017/4/12 - 08:16:27] Auto progress check at startup
+[2017/4/12 - 08:16:28] Auto progress check returned true.
+[2017/4/12 - 08:16:28] Setting chat room to 1.
+[2017/4/12 - 08:16:29] Max all levels.
+[2017/4/12 - 08:16:30] Get the gold and quest items for 30 seconds.
+[2017/4/12 - 08:16:32] Paused.
+[2017/4/12 - 08:17:11] Reading settings.
+[2017/4/12 - 08:17:11] Reading stats.
+[2017/4/12 - 08:17:12] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:17:38] Reading settings.
+[2017/4/12 - 08:17:38] Reading stats.
+[2017/4/12 - 08:17:38] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:17:47] Reading settings.
+[2017/4/12 - 08:17:47] Reading stats.
+[2017/4/12 - 08:17:47] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:18:26] Reading settings.
+[2017/4/12 - 08:18:26] Reading stats.
+[2017/4/12 - 08:18:26] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:18:28] Reading settings.
+[2017/4/12 - 08:18:28] Reading stats.
+[2017/4/12 - 08:18:28] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:23:33] Reading settings.
+[2017/4/12 - 08:23:33] Reading stats.
+[2017/4/12 - 08:23:33] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:26:50] Settings changed.
+[2017/4/12 - 08:39:17] Reading settings.
+[2017/4/12 - 08:39:17] Reading stats.
+[2017/4/12 - 08:39:18] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:39:34] Reading settings.
+[2017/4/12 - 08:39:34] Reading stats.
+[2017/4/12 - 08:39:34] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:39:42] Reading settings.
+[2017/4/12 - 08:39:42] Reading stats.
+[2017/4/12 - 08:39:43] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:40:04] Reading settings.
+[2017/4/12 - 08:40:04] Reading stats.
+[2017/4/12 - 08:40:04] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:40:22] Reading settings.
+[2017/4/12 - 08:40:22] Reading stats.
+[2017/4/12 - 08:40:23] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:40:38] Reading settings.
+[2017/4/12 - 08:40:38] Reading stats.
+[2017/4/12 - 08:40:38] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:40:49] Reading settings.
+[2017/4/12 - 08:40:49] Reading stats.
+[2017/4/12 - 08:40:49] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:40:57] Reading settings.
+[2017/4/12 - 08:40:57] Reading stats.
+[2017/4/12 - 08:40:57] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:41:04] Reading settings.
+[2017/4/12 - 08:41:04] Reading stats.
+[2017/4/12 - 08:41:04] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:41:14] Reading settings.
+[2017/4/12 - 08:41:14] Reading stats.
+[2017/4/12 - 08:41:15] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:41:40] Settings changed.
+[2017/4/12 - 08:47:34] Reading settings.
+[2017/4/12 - 08:47:34] Reading stats.
+[2017/4/12 - 08:47:34] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:48:03] Reading settings.
+[2017/4/12 - 08:48:03] Reading stats.
+[2017/4/12 - 08:48:04] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:48:19] Reading settings.
+[2017/4/12 - 08:48:19] Reading stats.
+[2017/4/12 - 08:48:19] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:48:28] Reading settings.
+[2017/4/12 - 08:48:28] Reading stats.
+[2017/4/12 - 08:48:28] ------------- CoTLI Bot by Hachifac -------------
+[2017/4/12 - 08:49:04] Settings changed.
+[2017/4/12 - 08:49:05] Settings changed.
+[2017/4/12 - 08:49:14] Settings changed.
+[2017/4/12 - 08:49:18] Settings changed.
+[2017/4/12 - 09:00:58] Settings changed.
+[2017/4/12 - 09:01:07] Settings changed.
+[2017/4/12 - 09:02:36] Settings changed.
+[2017/4/12 - 09:02:37] Settings changed.

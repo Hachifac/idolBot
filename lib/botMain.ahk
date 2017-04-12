@@ -34,7 +34,6 @@ global maxAllCount = 0
 
 lastProgressCheck = 0
 skipToReset := false
-runTime = 0
 lastChatRoom := chatRoom
 
 global currentCIndex := [1, 1]
@@ -435,19 +434,6 @@ ShowPause(status) {
 	}
 	Return
 }
-	
-BotStatus:
-		if (A_IsPaused) {
-			Log("Unpaused.")
-			ShowPause(false)
-			WinActivate, Crusaders of The Lost Idols
-			Pause,,1
-		} else if (phase = -1 ) {
-			phase = 0
-			ShowPause(false)
-			WinActivate, Crusaders of The Lost Idols
-		}
-	Return
 
 ; Relaunch the game, pretty much self-explanatory
 Relaunch:
@@ -1116,6 +1102,7 @@ Help:
 CloseOptions:
 	Gosub, CloseAdvancedOptions
 	Gui, BotGUIOptions: Hide
+	GuiControl, BotGUI:, BOptions, images/gui/bOptions.png
 	GuiControl, BotGUIOptions: Choose, CampaignChoice, % campaign
 	f1 := "images/gui/bF1_off.png"
 	f2 := "images/gui/bF2_off.png"
@@ -1143,17 +1130,21 @@ CloseAdvancedOptions:
 	GuiControl, BotGUIAdvancedOptions: ChooseString, ResetCrusader, % resetCrusader
 	GuiControl, BotGUIAdvancedOptions:, ChatRoom, % chatRoom
 	GuiControl, BotGUIAdvancedOptions:, ClickDelay, % clickDelay
+	GuiControl, BotGUIAdvancedOptions:, RunTime, % runTime
 	Return	
 
 CloseStats:
+	GuiControl, BotGUI:, BStats, images/gui/bStats.png
 	Gui, BotGUIStats: Hide
 	Return
 
 CloseAbout:
+	GuiControl, BotGUI:, BAbout, images/gui/bAbout.png
 	Gui, BotGUIAbout: Hide
 	Return
 
 CloseStormRider:
+	GuiControl, BotGUI:, BStormRider, images/gui/bStormRider.png
 	Gui, BotGUIStormRider: Hide
 	f1 := "images/gui/bF1_off.png"
 	f2 := "images/gui/bF2_off.png"
@@ -1165,6 +1156,14 @@ CloseStormRider:
 	GuiControl, BotGUIStormRider:, StormRiderFormationE, % f3
 	GuiControl, BotGUIStormRider:, StormRiderFormationD, % f0
 	Return
+
+CloseOtherWindows:
+	Gosub, CloseOptions
+	Gosub, CloseAdvancedOptions
+	Gosub, CloseStormRider
+	Gosub, CloseStats
+	Gosub, CloseAbout
+	Return
 	
 ; Self-explanatory
 ApplyAdvancedOptions:
@@ -1175,6 +1174,7 @@ ApplyAdvancedOptions:
 	lastChatRoom := chatRoom
 	GuiControlGet, chatRoom
 	GuiControlGet, clickDelay
+	GuiControlGet, runTime
 	resetCrusader := tempResetCrusader
 	Gosub, RewriteSettings
 	Gui, BotGUIAdvancedOptions: Hide
@@ -1189,6 +1189,7 @@ ApplyOptions:
 	resetType := tempResetType
 	clicking := tempClicking
 	Gosub, RewriteSettings
+	GuiControl, BotGUI:, BOptions, images/gui/bOptions.png
 	Gui, BotGUIOptions: Hide
 	Return
 	
@@ -1198,47 +1199,66 @@ ApplyStormRider:
 	stormRiderFormationKey := tempStormRiderFormationKey
 	stormRiderMagnify := tempStormRiderMagnify
 	Gosub, RewriteSettings
+	GuiControl, BotGUI:, BStormRider, images/gui/bStormRider.png
 	Gui, BotGUIStormRider: Hide
 	Return	
 
 Options:
-	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/bOptions.png
+	Gosub, CloseOtherWindows
+	GuiControl, BotGUI:, BOptions, images/gui/bOptions_active.png
+	winW = 252
+	winH = 407
+	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/guiMain_bg.png
 	WinGetPos, Output2X, Output2Y
-	nX := Output2X + OutputX - 126 + OutputW / 2
-	nY := Output2Y  - 250
-	Gui, BotGUIOptions: Show, x%nX% y%nY% w252 h408, idolBot Options
+	nX := Output2X - ((winW - OutputW) / 2)
+	nY := Output2Y - winH
+	Gui, BotGUIOptions: Show, x%nX% y%nY% w%winW% h%winH%, idolBot Options
 	Return
 
 AdvancedOptions:
+	winW = 252
+	winH = 477
 	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/bAdvanced.png
 	WinGetPos, Output2X, Output2Y
-	nX := Output2X + OutputX - 126 + OutputW / 2
+	nX := Output2X + 30
 	nY := Output2Y - 30
-	Gui, BotGUIAdvancedOptions: Show, x%nX% y%nY% w252 h422, idolBot Advanced Options
+	Gui, BotGUIAdvancedOptions: Show, x%nX% y%nY% w%winW% h%winH%, idolBot Advanced Options
 	Return
 
 Stats:
-	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/bStats.png
+	Gosub, CloseOtherWindows
+	GuiControl, BotGUI:, BStats, images/gui/bStats_active.png
+	winW = 252
+	winH = 325
+	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/guiMain_bg.png
 	WinGetPos, Output2X, Output2Y
-	nX := Output2X + OutputX - 126 + OutputW / 2
-	nY := Output2Y  - 250
-	Gui, BotGUIStats: Show, x%nX% y%nY% w252 h325, idolBot Stats
+	nX := Output2X - ((winW - OutputW) / 2)
+	nY := Output2Y  - winH
+	Gui, BotGUIStats: Show, x%nX% y%nY% w%winW% h%winH%, idolBot Stats
 	Return
 
 About:
-	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/bAbout.png
+	Gosub, CloseOtherWindows
+	GuiControl, BotGUI:, BAbout, images/gui/bAbout_active.png
+	winW = 252
+	winH = 290
+	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/guiMain_bg.png
 	WinGetPos, Output2X, Output2Y
-	nX := Output2X + OutputX - 126 + OutputW / 2
-	nY := Output2Y - 180
-	Gui, BotGUIAbout: Show, x%nX% y%nY% w252 h263, idolBot About
+	nX := Output2X - ((winW - OutputW) / 2)
+	nY := Output2Y - winH
+	Gui, BotGUIAbout: Show, x%nX% y%nY% w%winW% h%winH%, idolBot About
 	Return
 
 StormRider:
-	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/bStormRider.png
+	Gosub, CloseOtherWindows
+	GuiControl, BotGUI:, BStormRider, images/gui/bStormRider_active.png
+	winW = 182
+	winH = 199
+	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/guiMain_bg.png
 	WinGetPos, Output2X, Output2Y
-	nX := Output2X + OutputX - 91 + OutputW / 2
-	nY := Output2Y - 172
-	Gui, BotGUIStormRider: Show, x%nX% y%nY% w182 h199, idolBot Storm Rider
+	nX := Output2X - ((winW - OutputW) / 2)
+	nY := Output2Y - winH
+	Gui, BotGUIStormRider: Show, x%nX% y%nY% w%winW% h%winH%, idolBot Storm Rider
 	Return
 	
 ; Self-explanatory
@@ -1255,6 +1275,7 @@ LoadSettings:
 	IniRead, resetCrusader, settings/settings.ini, Settings, resetcrusader
 	IniRead, chatRoom, settings/settings.ini, Settings, chatroom
 	IniRead, clickDelay, settings/settings.ini, Settings, clickdelay
+	IniRead, runTime, settings/settings.ini, Settings, runtime
 	IniRead, stormRiderFormation, settings/settings.ini, Settings, stormriderformation
 	IniRead, stormRiderMagnify, settings/settings.ini, Settings, stormridermagnify
 	if (formation = 1) {
@@ -1292,6 +1313,7 @@ LoadSettings:
 	tempResetCrusader := resetCrusader
 	tempChatRoom := chatRoom
 	tempClickDelay := clickDelay
+	tempRunTime := runTime
 	tempStormRiderFormation := stormRiderFormation
 	tempStormRiderFormationKey := stormRiderFormationKey
 	tempStormRiderMagnify := stormRiderMagnify
@@ -1313,6 +1335,7 @@ RewriteSettings:
 	IniWrite, % resetCrusader, settings/settings.ini, Settings, resetcrusader
 	IniWrite, % chatRoom, settings/settings.ini, Settings, chatroom
 	IniWrite, % clickDelay, settings/settings.ini, Settings, clickdelay
+	IniWrite, % runTime, settings/settings.ini, Settings, runtime
 	IniWrite, % stormRiderFormation, settings/settings.ini, Settings, stormriderformation
 	IniWrite, % stormRiderMagnify, settings/settings.ini, Settings, stormridermagnify
 	Return
