@@ -36,7 +36,7 @@ Gui, Add, Picture, x+5 vFormationE gSetFormationE, %f3%
 
 Gui, Add, DropDownList, x15 y+32 w100 vMainDPSChoice gChooseMainDPS, Alan|Bat|Baenarall|Bernard|Billy|Boggins|Brogon|Broot|Bubba|Bush|Cindy|Dark Helper|Draco|Drizzle|Eiralon|Emo|Exterminator|Fright-o-Tron|Frosty|Gloria|Graham|Greyskull|Groklok|Gryphon|Half-Blood Elf|Henry|Hermit|Ilsa|Jack|Jason|Jim|Kaine|Karen|Karl|Katie|Khouri|Kizlblyp|Kyle|Larry|Leerion|Lion|Littlefoot|Merci|Mindy|Momma|Monkey|Montana|Natalie|Nate|Pam|Panda|Paul|Pete|Petra|Phoenix|Princess|Rayna|Reginald|Robbie|Roborabbit|Roboturkey|Rocky|Rudolph|Sal|Sally|Santa|Sarah|Sasha|Shadow Queen|Siri|Sisaron|Snickette|Soldierette|Squiggles|Thalia|Val|Veronica|Warwick|Wendy
 
-Gui, Add, DropDownList, y+32 w190 Choose%resetType% vResetChoice gChooseReset altSubmit, No reset|Max progress|Level cap - Coming soon|Fast - Coming soon|Timed run
+Gui, Add, DropDownList, y+32 w190 Choose%resetType% vResetChoice gChooseReset altSubmit, No reset|Max progress|Level cap - Beta|Fast - Coming soon|Timed run
 
 Gui, Add, Picture, y+32 vClickingStatusOn gSetClickingOn, %clickingStatusOn%
 Gui, Add, Picture, x+2 vClickingStatusOff gSetClickingOff, %clickingStatusOff%

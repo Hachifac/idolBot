@@ -233,6 +233,30 @@ Bot:
 								}
 							}
 						}
+						if (resetType = 3) {
+							if (levelCapResetCheck = true) {
+								MoveToLastPage()
+								Sleep, 500
+								PixelGetColor, Output, 872, 594, RGB
+								if (Output = 0x7D2E0C) {
+									PixelGetColor, Output, 872, 508, RGB
+									if (Output = 0x979797) {
+										phase = 3
+										skipToReset := true
+									}
+								} else if (Output = 0x979797) {
+									phase = 3
+									skipToReset := true
+								}
+							} else {
+								MoveToFirstPage()
+								PixelGetColor, Output, 242, 508, RGB
+								if (Output = 0x979797) {
+									Log("Bush is maxed.")
+									levelCapResetCheck := true
+								}
+							}
+						}
 					}
 					if (stormRiderMagnify = 0) {
 						useSkill(0)
