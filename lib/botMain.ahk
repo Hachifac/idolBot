@@ -28,7 +28,6 @@ resets = 0
 
 now = 0
 relaunching = false
-lootItemsDuration = 5
 
 global maxAllCount = 0
 
@@ -1300,6 +1299,7 @@ LoadSettings:
 	IniRead, chatRoom, settings/settings.ini, Settings, chatroom
 	IniRead, clickDelay, settings/settings.ini, Settings, clickdelay
 	IniRead, runTime, settings/settings.ini, Settings, runtime
+	IniRead, lootItemsDuration, settings.ini, Settings, lootitemsduration
 	IniRead, stormRiderFormation, settings/settings.ini, Settings, stormriderformation
 	IniRead, stormRiderMagnify, settings/settings.ini, Settings, stormridermagnify
 	if (formation = 1) {
@@ -1322,6 +1322,9 @@ LoadSettings:
 	}
 	if (stormRiderFormation = 0) {
 		stormRiderFormationKey = formationKey
+	}
+	if (lootItemsDuration) {
+		lootItemsDuration = 30
 	}
 	StringLower, mainDPS, mainDPS
 	StringLower, resetCrusader, resetCrusader
@@ -1360,6 +1363,7 @@ RewriteSettings:
 	IniWrite, % chatRoom, settings/settings.ini, Settings, chatroom
 	IniWrite, % clickDelay, settings/settings.ini, Settings, clickdelay
 	IniWrite, % runTime, settings/settings.ini, Settings, runtime
+	IniWrite, % lootItemsDuration, settings/settings.ini, Settings, lootitemsduration
 	IniWrite, % stormRiderFormation, settings/settings.ini, Settings, stormriderformation
 	IniWrite, % stormRiderMagnify, settings/settings.ini, Settings, stormridermagnify
 	Return
