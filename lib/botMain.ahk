@@ -1,6 +1,8 @@
 ﻿#NoEnv
 SendMode Input
 
+Log("------------- CoTLI Bot by Hachifac -------------")
+
 Gosub, LoadSettings
 
 chestsThisRun = 0
@@ -48,7 +50,6 @@ Bot:
 		FileMove, logs/logs.txt, logs/logs_old.txt
 		FileDelete, logs/logs.txt
 	}
-	Log("------------- CoTLI Bot by Hachifac -------------")
 	IfWinExist, Crusaders of The Lost Idols
 	{
 		WinActivate, Crusaders of The Lost Idols
@@ -1113,6 +1114,8 @@ Help:
 			help = Chat room to auto join when the bot launches.`nIf you change this setting mid-run the bot will not change the room.
 		} else if (OutputVarControl = "Static7") {
 			help = Delay in milliseconds between each click in the click & loot phase.`nThis can induce lag.
+		} else if (OutputVarControl = "Static8") {
+			help = Delay in minutes before the run resets.
 		} else {
 			ToolTip,
 			Break
@@ -1287,21 +1290,21 @@ StormRider:
 ; Self-explanatory
 LoadSettings:
 	Log("Reading settings.")
-	IniRead, campaign, settings/settings.ini, Settings, campaign
-	IniRead, formation, settings/settings.ini, Settings, formation
-	IniRead, mainDPS, settings/settings.ini, Settings, maindps
-	IniRead, clicking, settings/settings.ini, Settings, clicking
-	IniRead, resetType, settings/settings.ini, Settings, resettype
-	IniRead, upgAllUntil, settings/settings.ini, Settings, upgalluntil
-	IniRead, autoProgressCheckDelay, settings/settings.ini, Settings, autoprogresscheckdelay
-	IniRead, mainDPSDelay, settings/settings.ini, Settings, maindpsdelay
-	IniRead, resetCrusader, settings/settings.ini, Settings, resetcrusader
-	IniRead, chatRoom, settings/settings.ini, Settings, chatroom
-	IniRead, clickDelay, settings/settings.ini, Settings, clickdelay
-	IniRead, runTime, settings/settings.ini, Settings, runtime
-	IniRead, lootItemsDuration, settings.ini, Settings, lootitemsduration
-	IniRead, stormRiderFormation, settings/settings.ini, Settings, stormriderformation
-	IniRead, stormRiderMagnify, settings/settings.ini, Settings, stormridermagnify
+	IniRead, campaign, settings/settings.ini, Settings, campaign, 2
+	IniRead, formation, settings/settings.ini, Settings, formation, 1
+	IniRead, mainDPS, settings/settings.ini, Settings, maindps, Jim
+	IniRead, clicking, settings/settings.ini, Settings, clicking, 0
+	IniRead, resetType, settings/settings.ini, Settings, resettype, 2
+	IniRead, upgAllUntil, settings/settings.ini, Settings, upgalluntil, 5
+	IniRead, autoProgressCheckDelay, settings/settings.ini, Settings, autoprogresscheckdelay, 120
+	IniRead, mainDPSDelay, settings/settings.ini, Settings, maindpsdelay, 60
+	IniRead, resetCrusader, settings/settings.ini, Settings, resetcrusader, Nate
+	IniRead, chatRoom, settings/settings.ini, Settings, chatroom, 1
+	IniRead, clickDelay, settings/settings.ini, Settings, clickdelay, 20
+	IniRead, runTime, settings/settings.ini, Settings, runtime, 60
+	IniRead, lootItemsDuration, settings.ini, Settings, lootitemsduration, 30
+	IniRead, stormRiderFormation, settings/settings.ini, Settings, stormriderformation, 4
+	IniRead, stormRiderMagnify, settings/settings.ini, Settings, stormridermagnify, 1
 	if (formation = 1) {
 		formationKey = q
 	}
@@ -1323,9 +1326,6 @@ LoadSettings:
 	if (stormRiderFormation = 0) {
 		stormRiderFormationKey = formationKey
 	}
-	if (lootItemsDuration) {
-		lootItemsDuration = 30
-	}
 	StringLower, mainDPS, mainDPS
 	StringLower, resetCrusader, resetCrusader
 	tempCampaign := campaign
@@ -1341,6 +1341,7 @@ LoadSettings:
 	tempChatRoom := chatRoom
 	tempClickDelay := clickDelay
 	tempRunTime := runTime
+	tempLootItemsDuration := lootItemsDuration
 	tempStormRiderFormation := stormRiderFormation
 	tempStormRiderFormationKey := stormRiderFormationKey
 	tempStormRiderMagnify := stormRiderMagnify
