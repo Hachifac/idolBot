@@ -18,9 +18,7 @@ FileRead, fVersion, version
 fVersion := StrSplit(fVersion, "#")
 fRVersion := fVersion[2]
 
-StringReplace, numRGVersion, rGVersion,.,, 1
-StringReplace, numFRVersion, fRVersion,.,, 1
-if (numFRVersion < numRGVersion) {
+if (fRVersion < rGVersion) {
 	winW = 200
 	winH = 111
 	nX := A_ScreenWidth / 2 - winW / 2
