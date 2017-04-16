@@ -3,6 +3,10 @@ SendMode Input
 
 __Log("------------- CoTLI Bot by Hachifac -------------")
 
+FileCreateDir, logs
+FileCreateDir, settings
+FileCreateDir, stats
+
 Gosub, _BotLoadSettings
 
 statsChestsThisRun = 0
