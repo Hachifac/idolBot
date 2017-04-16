@@ -358,7 +358,7 @@ idolBot:
 								FileDelete, stats/idols.txt
 								FileMove, stats/idols_temp.txt, stats/idols.txt
 								
-								IniRead, statsIdolsAllTime, stats/stats.txt, Idols, alltime
+								IniRead, statsIdolsAllTime, stats/stats.txt, Idols, alltime, 0
 								statsIdolsAllTime += idolsCount
 								statsIdolsThisSession += idolsCount
 								
@@ -1018,7 +1018,7 @@ _BotScanForChests:
 		statsChestsThisSession++
 		FileDelete, stats/chests.txt
 		FileMove, stats/chests_temp.txt, stats/chests.txt
-		IniRead, chestsAllTime, stats/stats.txt, Chests, alltime
+		IniRead, chestsAllTime, stats/stats.txt, Chests, alltime, 0
 		chestsAllTime += 1
 		IniWrite, % chestsAllTime, stats/stats.txt, Chests, alltime
 		IniWrite, % chestsPastDay, stats/stats.txt, Chests, pastday
@@ -1139,14 +1139,14 @@ _BotRewriteSettings:
 	
 _BotLoadStats:
 	__Log("Reading stats.")
-	IniRead, statsIdolsAllTime, stats/stats.txt, Idols, alltime
-	IniRead, statsIdolsPastDay, stats/stats.txt, Idols, pastday
-	IniRead, statsIdolsLastRun, stats/stats.txt, Idols, lastrun
-	IniRead, statsIdolsLastRunTime, stats/stats.txt, Idols, runtime
-	IniRead, statsChestsAllTime, stats/stats.txt, Chests, alltime
-	IniRead, statsChestsPastDay, stats/stats.txt, Chests, pastday
-	IniRead, statsChestsLastRun, stats/stats.txt, Chests, lastrun
-	IniRead, statsChestsLastRunTime, stats/stats.txt, Chests, runtime
+	IniRead, statsIdolsAllTime, stats/stats.txt, Idols, alltime, 0
+	IniRead, statsIdolsPastDay, stats/stats.txt, Idols, pastday, 0
+	IniRead, statsIdolsLastRun, stats/stats.txt, Idols, lastrun, 0
+	IniRead, statsIdolsLastRunTime, stats/stats.txt, Idols, runtime, 0
+	IniRead, statsChestsAllTime, stats/stats.txt, Chests, alltime, 0
+	IniRead, statsChestsPastDay, stats/stats.txt, Chests, pastday, 0
+	IniRead, statsChestsLastRun, stats/stats.txt, Chests, lastrun, 0
+	IniRead, statsChestsLastRunTime, stats/stats.txt, Chests, runtime, 0
 	Return
 	
 #include lib/guiLabels.ahk
