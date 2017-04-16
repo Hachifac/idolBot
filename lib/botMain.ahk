@@ -1,15 +1,15 @@
 ﻿#NoEnv
 SendMode Input
 
-Log("------------- CoTLI Bot by Hachifac -------------")
+__Log("------------- CoTLI Bot by Hachifac -------------")
 
-Gosub, LoadSettings
+Gosub, _BotLoadSettings
 
-chestsThisRun = 0
-chestsThisSession = 0
-idolsThisSession = 0
+statsChestsThisRun = 0
+statsChestsThisSession = 0
+statsIdolsThisSession = 0
 
-Gosub, LoadStats
+Gosub, _BotLoadStats
 
 ; Include the GUIs
 #include lib/guiMain.ahk
@@ -20,22 +20,35 @@ Gosub, LoadStats
 CoordMode, Pixel, Client
 CoordMode, Mouse, Client
 
-SetTimer, GUIPos, 100 ; Every 100ms we position the GUI below the game
-SetTimer, ScanForChests, 1000
+SetTimer, _GUIPos, 100 ; Every 100ms we position the GUI below the game
+SetTimer, _BotScanForChests, 1000
 
-phase = -1 ; -1 = bot not launched, 0 = bot in campaign selection screen, 1 = initial stuff like looking for overlays, waiting for the game to fully load, 2 = maxing the levels/ main dps and upgrades, 3 = reset phase
-runLaunchTime := UnixTime(A_Now)
-botLaunchTime := UnixTime(A_Now)
-resets = 0
+botLookingForCursor := false ; Quite important little bool, set to true when the _BotGetCurrentLevel timer occurs, it pauses the loot items phase because threads gets messy
+botLevelCursorCoords := [1, 2, 3, 4, 5]
+botLevelCursorCoords[1] := [744, 10, 781, 127]
+botLevelCursorCoords[2] := [788, 10, 825, 127]
+botLevelCursorCoords[3] := [832, 10, 869, 127]
+botLevelCursorCoords[4] := [872, 10, 909, 127]
+botLevelCursorCoords[5] := [912, 10, 949, 127]
+botLevelCurrentCursor = 0
+botLevelPreviousCursor = 0
+botCurrentLevel = 0
+
+SetTimer, _BotGetCurrentLevel, 2000
+SetTimer, _BotNextLevel, 100
+
+botPhase = -1 ; -1 = bot not launched, 0 = bot in campaign selection screen, 1 = initial stuff like looking for overlays, waiting for the game to fully load, 2 = maxing the levels/ main dps and upgrades, 3 = reset phase
+botRunLaunchTime := __UnixTime(A_Now)
+botLaunchTime := __UnixTime(A_Now)
+botSession = 0
 
 now = 0
-relaunching = false
+botRelaunching = false
 
-global maxAllCount = 0
+botMaxAllCount = 0
 
-lastProgressCheck = 0
-skipToReset := false
-lastChatRoom := chatRoom
+botSkipToReset := false
+optLastoptChatRoom := optChatRoom
 
 global currentCIndex := [1, 1]
 global currentCCoords := [36, 506]
@@ -44,7 +57,7 @@ global crusaderPixelsTemp := Object()
 global levelCapPixels := Object()
 
 ; Bot loop
-Bot:
+idolBot:
 	FileGetSize, Output, logs/logs.txt, M
 	if (Output >= 10) {
 		FileMove, logs/logs.txt, logs/logs_old.txt
@@ -53,70 +66,60 @@ Bot:
 	IfWinExist, Crusaders of The Lost Idols
 	{
 		WinActivate, Crusaders of The Lost Idols
-		; WinMove, 0, 0
+		if (optMoveGameWindow > 0) {
+			Gosub, _BotMoveGame
+		}
 		; Self-explanatory
-		if (phase = -1) {
-			ShowPause(true)
+		if (botPhase = -1) {
+			_GUIShowPause(true)
 			Loop {
-				if (phase = 0) {
+				if (botPhase = 0) {
 					Break
 				}
 			}
 		}
 		; Campaign selection, the bot will either start a campaign or realize one is already started
-		if (phase = 0) {
-			Log("Launching bot.")
-			Gosub, CampaignStart
-			phase = 1
+		if (botPhase = 0) {
+			__Log("Launching bot.")
+			Gosub, _BotCampaignStart
+			botPhase = 1
 		}
 		; Campaign selected/game screen loaded/game running
-		if (phase > 0) {
-			Log("Bot launched.")
+		if (botPhase > 0) {
+			__Log("Bot launched.")
 			; We look for overlays throughout phase 1 & 2
 			Loop {
 				WinActivate, Crusaders of The Lost Idols
-				if (phase = 1 or phase = 2) {
-					PixelGetColor, Output, 15, 585, RGB
-					if (Output = 0x503803) {
-						Log("Found an overlay.")
-						ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/news_x.png
-						if (ErrorLevel = 0) {
-							Log("Overlay closed.")
-							MouseMove, OutputX + 10, OutputY + 10
-							Sleep, 100
-							Click
-						}
-					}
+				if (botPhase = 1 or botPhase = 2) {
+					Gosub, _BotCloseWindows
 				}
-				if (phase = 1) {
-					relaunching = false
-					Log("Waiting for the campaign to load.")
+				if (botPhase = 1) {
+					botRelaunching = false
+					MouseMove, 550, 50
+					__Log("Waiting for the campaign to load.")
 					; We look at the left arrow in the crusaders bar, if it's there it means the screen is fully loaded
 					PixelGetColor, Output, 15, 585, RGB
 					if (Output = 0xA07107 or Output = 0xFFB103) {
-						Log("Campaign loaded.")
+						__Log("Campaign loaded.")
 						; Press space bar to close the events/sales tabs
 						Send, {Space}
 						; If the left arrow is gold, it means we're not at the beginning of the characters bar, we're moving back until we detect the gold color
 						if (Output != 0xA07107) {
-							Log("Moving the characters bar to the beginning.")
-							MoveToFirstPage()
+							__Log("Moving the characters bar to the beginning.")
+							__BotMoveToFirstPage()
 						}
-						Loop, 100 {
+						; Open options window to see if auto progress is on
+						__Log("Initial auto progress check...")
+						Gosub, _BotSetAutoProgress
+						Loop {
 							; We look at Jim's buy button to know if we can select the formation
 							PixelGetColor, Output, 244, 595, RGB
 							; If it's not green, we first look if the right arrow is gold, if it is it means the game already started long ago and Jim is probably maxed, meaning we need to put the formation in right now
 							; then we click the monsters until we get some cash to initiate the formation
 							; If it's green, in a few seconds the bot will max all levels and some crusaders will get in formation, eventually the formation set will kick in
+							__Log("Looking for Jim's status.")
 							if (Output != 0x45D402) {
-								PixelGetColor, Output, 985, 585, RGB
-								if (Output != 0xA07107) {
-									send, {%formationKey%}
-									phase = 2
-									Break
-								}
 								; Auto click until Jim lvl up button turns green
-								Log("Clicking until Jim lvl up button turns green.")
 								MouseMove, 695, 325
 								Click
 								Sleep, 40
@@ -127,17 +130,17 @@ Bot:
 								Break
 							}
 						}
-						; Open options window to see if auto progress is on
-						Log("Initial auto progress check...")
-						Gosub, SetAutoProgress
 						; We look at Jim's buy button one last time, if it's green we're good to go to phase 2
 						PixelGetColor, Output, 244, 595, RGB
 						if (Output = 0x45D402 or Output = 0x226A01) {
-							phase = 2
+							botPhase = 2
 						}
-						; Set Chat Room to chatRoom
-						Log("Setting chat room to " . chatRoom . ".")
-						Gosub, SetChatRoom
+						Send, {%optFormationKey%}
+						; Set Chat Room to optChatRoom
+						if (optChatRoom > 0 and botSession = 0) {
+							__Log("Setting chat room to " . optChatRoom . ".")
+							Gosub, _BotSetChatRoom
+						}
 					} else {
 						Sleep, 1000
 					}
@@ -145,258 +148,248 @@ Bot:
 				; Sometimes we get a server failed error, shit happens. We search for it and if it pops up, we relaunch the game.
 				ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/serverfailed.png
 				if (ErrorLevel = 0) {
-					Log("Server failed error. Relaunching the game.")
-					Gosub, Relaunch
+					__Log("Server failed error. Relaunching the game.")
+					Gosub, _BotRelaunch
 				}
 				; Upgrade all/max all/max main dps. Final phase until reset phase.
-				if (phase = 2) {
-					if (lastChatRoom != chatRoom) {
-						Gosub, SetChatRoom
+				if (botPhase = 2 or botDelayReset = true) {
+					if (botSession = 0) {
+						botSession = 1
 					}
-					; If mainDPSDelay elapsed between the runLaunchTime and current time, we only max mainDPS until reset phase
-					if ((resetType <= 2 or resetType = 5) and skipToReset = false) {
-						if (UnixTime(A_Now) - runLaunchTime > (mainDPSDelay * 60)) {
-							Log("Moving to mainDPS.")
-							if (crusaderPixels.length() = 0) {
-								MoveToFirstPage()
-								MoveToCrusader(mainDPS)
-								Sleep, 1000
-								SetCrusadersPixels()
-							} else {
-								if (CompareCrusadersPixels() = false) {
-									Log("We might have moved from the mainDPS, let's go back.")
-									MoveToFirstPage()
-									Sleep, 500
-									MoveToCrusader(mainDPS)
-									Sleep, 1000
-									SetCrusadersPixels()
-								}
-							}
-							Log("Maxing mainDPS.")
-							MouseMove, currentCCoords[1] + 252, currentCCoords[2] + 18
-							send, {ctrl down}
-							sleep, 100
-							click
-							send, {ctrl up}
-							sleep, 100
-						}
+					if (optLastoptChatRoom != optChatRoom and optChatRoom > 0) {
+						Gosub, _BotSetChatRoom
 					}
 					; Max all levels
-					maxLevels()
-					maxAllCount++
-					; If the bot did upgAllUntil max all levels, do one buy all upgrades
-					if (maxAllCount >= upgAllUntil) {
-						UpgAll()
-						maxAllCount = 0
+					__BotMaxLevels()
+					botMaxAllCount++
+					; If the bot did optUpgAllUntil max all levels, do one buy all upgrades
+					if (botMaxAllCount >= optUpgAllUntil) {
+						__BotUpgAll()
+						botMaxAllCount = 0
 					}
-					if (skipToReset = false) {
-						; Auto move the mouse to get the gold and quest items for 30 seconds.
-						Log("Get the gold and quest items for 30 seconds.")
-						now = % UnixTime(A_Now)
-						if (clicking = 1) {
-							delay := clickDelay / 5
-						} else {
-							delay = 20 / 5
-						}
-						while (UnixTime(A_Now) - now <= lootItemsDuration) {
-							MouseMove, 910, 320
-							Sleep, %delay%
-							MouseMove, 860, 320
-							if (clicking = 1) {
-								click
-							}
-							Sleep, %delay%
-							MouseMove, 810, 320
-							Sleep, %delay%
-							MouseMove, 760, 320
-							Sleep, %delay%
-							MouseMove, 710, 320
-							Sleep, %delay%
-							MouseMove, 660, 320
-							Sleep, %delay%
-							Send, {Right}
-						}
-						; If the last time we did an auto progress check is >= than autoProgressCheckDelay, we initiate an auto progress check
-						if (resetType = 2 and UnixTime(A_Now) - lastProgressCheck >= autoProgressCheckDelay) {
-							; Every autoProgressCheckDelay seconds we take a look if Auto Progress is still activated, if it's not it means we died so achieved the highest zone we could, we have to reset
-							lastProgressCheck = % UnixTime(A_Now)
-							Log("Auto progress check for max progress.")
-							if (CheckAutoProgress() = false) {
-								if (UnixTime(A_Now) - runLaunchTime < 60) {
-									; Stuck at beginning, might be the formation not active
-									Log("Might be stuck at the beginning.")
-									send, {%formationKey%}
-									Sleep, 100
-									Send, {g}
-								} else {
-									phase = 3
-								}
-							}
-						}
-						if (resetType = 3) {
-							if (levelCapResetCheck = true) {
-								MoveToLastPage()
-								Sleep, 500
-								PixelGetColor, Output, 872, 594, RGB
-								if (Output = 0x7D2E0C) {
-									PixelGetColor, Output, 872, 508, RGB
-									if (Output = 0x979797) {
-										phase = 3
-										skipToReset := true
-									}
-								} else if (Output = 0x979797) {
-									phase = 3
-									skipToReset := true
-								}
-							} else {
-								MoveToFirstPage()
-								PixelGetColor, Output, 242, 508, RGB
-								if (Output = 0x979797) {
-									Log("Bush is maxed.")
-									levelCapResetCheck := true
-								}
-							}
-						}
-					}
-					if (stormRiderMagnify = 0) {
-						useSkill(0)
+					__Log("Get the gold and quest items for " . optLootItemsDuration . " seconds.")
+					now = % __UnixTime(A_Now)
+					if (optClicking = 1) {
+						delay := optClickDelay
 					} else {
-						PixelSearch, OutputX, OutputY, 382, 449, 421, 488, 0x0000FE,, Fast
-						if (ErrorLevel != 0) {
-							PixelSearch, OutputX, OutputY, 582, 449, 621, 488, 0x0000FE,, Fast
+						delay = 20
+					}
+					SendEvent {Click 660, 320, 0}
+					SetDefaultMouseSpeed, 2
+					while (__UnixTime(A_Now) - now <= optLootItemsDuration) {
+						if (botSkipToReset = true) {
+							Break
+						}
+						SendEvent {Click 910, 320, 0}
+						SendEvent {Click 660, 320, 0}
+						if (optClicking = 1) {
+							click
+						}
+						Sleep, %delay%
+					}
+					SetDefaultMouseSpeed, 0
+					if (optResetType = 1 or optResetType = 2 or optResetType = 5 or optResetType = 6) {
+						
+					}
+					if (optResetType = 2 and maxProgressStatus = true) {
+						__Log("Max progress achieved.")
+						botPhase = 3
+					}
+					if (optResetType = 3) {
+						if (levelCapResetCheck = true) {
+							__BotMoveToLastPage()
+							Sleep, 500
+							PixelGetColor, Output, 872, 594, RGB
+							if (Output = 0x7D2E0C) {
+								PixelGetColor, Output, 872, 508, RGB
+								if (Output = 0x979797) {
+									__Log("Level cap reached.")
+									botPhase = 3
+									botSkipToReset := true
+								}
+							} else if (Output = 0x979797) {
+								__Log("Level cap reached.")
+								botPhase = 3
+								botSkipToReset := true
+							}
+						} else {
+							__BotMoveToFirstPage()
+							PixelGetColor, Output, 242, 508, RGB
+							if (Output = 0x979797) {
+								__Log("Bush is maxed.")
+								levelCapResetCheck := true
+							}
+						}
+					}
+					if (optResetType = 6) {
+						if (botCurrentLevel >= optResetOnLevel) {
+							__Log("Level " . optResetOnLevel . " reached.")
+							botSkipToReset := true
+							botPhase = 3
+						}
+					}
+					if (botSkipToReset = false) {
+						if (optStormRiderMagnify = 0) {
+							__BotUseSkill(0)
+						} else {
+							PixelSearch, OutputX, OutputY, 382, 449, 421, 488, 0x0000FE,, Fast
 							if (ErrorLevel != 0) {
-								Send, {%stormRiderFormationKey%}
-								Sleep, 100
-								MaxLevels()
-								UpgAll()
-								PixelGetColor, Output, 390, 466, RGB
-								if (Output != 0x3A3A3A) {
-									PixelGetColor, Output, 590, 466, RGB
+								PixelSearch, OutputX, OutputY, 582, 449, 621, 488, 0x0000FE,, Fast
+								if (ErrorLevel != 0) {
+									Send, {%optStormRiderFormationKey%}
+									Sleep, 1000
+									__BotMaxLevels()
+									__BotUpgAll()
+									Sleep, 3000
+									Send, {%optStormRiderFormationKey%}
+									Sleep, 3000
+									PixelGetColor, Output, 390, 466, RGB
 									if (Output != 0x3A3A3A) {
-										Send, 2
-										Sleep, 25
-										Send, 7
-										Sleep, 25
+										PixelGetColor, Output, 590, 466, RGB
+										if (Output != 0x3A3A3A) {
+											Send, 2
+											Sleep, 25
+											Send, 7
+											Sleep, 25
+										}
 									}
 								}
 							}
+							__BotUseSkill(1)
+							__BotUseSkill(3)
+							__BotUseSkill(4)
+							__BotUseSkill(5)
+							__BotUseSkill(6)
+							__BotUseSkill(8)
 						}
-						useSkill(1)
-						useSkill(3)
-						useSkill(4)
-						useSkill(5)
-						useSkill(6)
-						useSkill(8)
 					}
 				}
-				; If runTime time elapsed or phase is set at 3, we reset
-				if (((resetType = 5 and UnixTime(A_Now) - runLaunchTime >= runTime) or phase = 3) and resetType != 0) {
-					Log("Cannot progress further, time to reset.")
-					phase = 1
+				; If optRunTime time elapsed or phase is set at 3, we reset
+				if (((optResetType = 5 and __UnixTime(A_Now) - botRunLaunchTime >= (optRunTime * 60)) or botPhase = 3) and optResetType > 1) {
+					botDelayReset := false
+					resetPhase = 0
+					__Log("Cannot progress further, time to reset.")
 					MouseMove, 985, 630
 					Click
 					Sleep, 500
 					; Move to reset crusader
-					Log("Moving to reset crusader.")
-					MoveToFirstPage()
-					Sleep, 500
-					MoveToCrusader(resetCrusader)
-					Sleep, 1000
-					; Get pixel color on resetCrusader skills to know where the reset button is
-					Log("Searching for that reset skill.")
-					cY := currentCCoords[2] + 60
-					if (resetCrusader == "nate" or resetCrusader == "kizlblyp") {
-						cX := currentCCoords[1] + 154
-					}
-					if (resetCrusader == "rudolph") {
-						cX := currentCCoords[1] + 96
-					}
-					PixelGetColor, Output, cX, cY, RGB
-					if (Output = 0x853213) {
-						cX := currentCCoords[1] + 9
-					}
-					Log("Found. Reset inbound.")
-					rL = 0
-					Loop {
-						if (rL >= 5) {
-							rL = 0
-							MoveToFirstPage()
+					if (resetPhase = 0) {
+						resetAttempt = 0
+						Loop {
+							Click
+							__Log("Moving to reset crusader.")
+							__BotMoveToFirstPage()
 							Sleep, 500
-							MoveToCrusader(resetCrusader)
-						}
-						MouseMove, cX, cY
-						Sleep, 500
-						Click
-						Sleep, 1000
-						Log("Reset warning window.")
-						ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/resetwarning.png
-						rL++
-						if (ErrorLevel = 0) {
-							Loop {
-								; Reset button
-								MouseMove, 407, 516
-								Sleep, 500
-								Click
-								Sleep, 2000
-								; Big red button
-								Log("Clicking the red button.")
-								ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/redbutton.png
+							__BotMoveToCrusader("nate")
+							Sleep, 1000
+							; Get pixel color on optResetCrusader skills to know where the reset button is
+							__Log("Searching for that reset skill.")
+							ImageSearch, OutputX, OutputY, 657, 631, 869, 665, *100 images/game/nateReset.png
+							if (ErrorLevel = 0) {
+								resetPhase = 1
+							} else {
+								ImageSearch, OutputX, OutputY, 657, 631, 869, 665, *100 images/game/rudolphReset.png
 								if (ErrorLevel = 0) {
-									MouseMove, 509, 546
-									Sleep, 500
-									Click
-									Sleep, 5000
-								}
-								; Idols screen
-								Log("Idols continue screen.")
-								ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/idolscontinue.png
-								if (ErrorLevel = 0) {
-									idolsCount := GetIdolsCount()
-									FileAppend, % UnixTime(A_Now) . ":" . idolsCount, stats/idols.txt
-									idolsPastDay := 0
-									Loop, read, stats/idols.txt
-									{
-										break := StrSplit(A_LoopReadLine, ":")
-										if (UnixTime(A_Now) - break[1] <= 86400) {
-											FileAppend, % break[1] . ":" . break[2] . "`n", stats/idols_temp.txt
-											idolsPastDay := idolsPastDay + break[2]
-										}
+									resetPhase = 1
+								} else {
+									ImageSearch, OutputX, OutputY, 657, 631, 869, 665, *100 images/game/kizReset.png
+									if (ErrorLevel = 0) {
+										resetPhase = 1
+									} else {
+										botDelayReset := true
+										botSkipToReset := false
+										Break
 									}
-									FileDelete, stats/idols.txt
-									FileMove, stats/idols_temp.txt, stats/idols.txt
-									
-									IniRead, idolsAllTime, stats/stats.txt, Idols, alltime
-									idolsAllTime += idolsCount
-									idolsThisSession += idolsCount
-									
-									cRunTime := UnixTime(A_Now) - runLaunchTime
-									
-									IniWrite, % idolsAllTime, stats/stats.txt, Idols, alltime
-									IniWrite, % idolsPastDay, stats/stats.txt, Idols, pastday
-									IniWrite, % idolsCount, stats/stats.txt, Idols, lastrun
-									IniWrite, % cRunTime, Idols, lastruntime
-									IniWrite, % idolsThisSession, stats/stats.txt, Idols, thissession
-									
-									IniWrite, % chestsThisRun, stats/stats.txt, Chests, lastrun
-									IniWrite, % cRunTime, stats/stats.txt, Chests, lastruntime
-									chestsThisRun = 0
-									IniWrite, % chestsThisSession, stats/stats.txt, Chests, thissession
-									
-									resets++
-									
-									MouseMove, 507, 550
-									Sleep, 500
-									Click
-									Sleep, 2000
-									Break
 								}
 							}
-							Log("Start a new campaign.")
-							Gosub, CampaignStart
-							Sleep, 100
-							phase = 1
-							Break
+							if (resetPhase = 1) {
+								__Log("Found. Reset inbound.")
+								Break
+							}
 						}
+					}
+					if (resetPhase = 1) {
+						Loop {
+							MouseMove, OutputX + 3, OutputY + 3
+							Sleep, 500
+							Click
+							Sleep, 1000
+							__Log("Reset warning window.")
+							ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/resetwarning.png
+							if (ErrorLevel = 0) {
+								__Log("Reset warning window found.")
+								resetPhase = 2
+								Break
+							}
+						}
+					}
+					if (resetPhase = 2) {
+						resetPhase = 3
+						Loop {
+							; Reset button
+							MouseMove, 407, 516
+							Sleep, 500
+							Click
+							Sleep, 500
+							; Big red button
+							__Log("Clicking the red button.")
+							ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/redbutton.png
+							if (ErrorLevel = 0) {
+								MouseMove, 509, 546
+								Sleep, 500
+								Click
+								Sleep, 500
+							}
+							; Idols screen
+							__Log("Idols continue screen.")
+							ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/idolscontinue.png
+							if (ErrorLevel = 0) {
+								idolsCount := __BotGetIdolsCount()
+								FileAppend, % __UnixTime(A_Now) . ":" . idolsCount, stats/idols.txt
+								statsIdolsPastDay := 0
+								Loop, read, stats/idols.txt
+								{
+									break := StrSplit(A_LoopReadLine, ":")
+									if (__UnixTime(A_Now) - break[1] <= 86400) {
+										FileAppend, % break[1] . ":" . break[2] . "`n", stats/idols_temp.txt
+										statsIdolsPastDay := statsIdolsPastDay + break[2]
+									}
+								}
+								FileDelete, stats/idols.txt
+								FileMove, stats/idols_temp.txt, stats/idols.txt
+								
+								IniRead, statsIdolsAllTime, stats/stats.txt, Idols, alltime
+								statsIdolsAllTime += idolsCount
+								statsIdolsThisSession += idolsCount
+								
+								optRunTime := __UnixTime(A_Now) - botRunLaunchTime
+								
+								IniWrite, % statsIdolsAllTime, stats/stats.txt, Idols, alltime
+								IniWrite, % statsIdolsPastDay, stats/stats.txt, Idols, pastday
+								IniWrite, % idolsCount, stats/stats.txt, Idols, lastrun
+								IniWrite, % optRunTime, stats/stats.txt, Idols, lastruntime
+								
+								IniWrite, % statsChestsThisRun, stats/stats.txt, Chests, lastrun
+								IniWrite, % optRunTime, stats/stats.txt, Chests, lastruntime
+								statsChestsThisRun = 0
+								
+								botLevelCurrentCursor = 0
+								botLevelPreviousCursor = 0
+								botCurrentLevel = 0
+								
+								MouseMove, 507, 550
+								Sleep, 500
+								Click
+								Sleep, 500
+								Break
+							}
+						}
+					}
+					if (resetPhase = 3) {
+						__Log("Start a new campaign.")
+						Gosub, _BotCampaignStart
+						Sleep, 100
+						botPhase = 1
 					}
 				}
 			}
@@ -404,53 +397,63 @@ Bot:
 	}
 	IfWinNotExist, Crusaders of The Lost Idols
 	{
-		Log("Game not found.")
+		__Log("Game not found.")
 	}
 	Return
 
 ; Set the GUI below the game
-GUIPos:
+_GUIPos:
 	IfWinExist, Crusaders of The Lost Idols
 	{
 		WinGetPos, X, Y, W, H, Crusaders of The Lost Idols
-		nY := A_ScreenHeight - (A_ScreenHeight - Y) + H - 2
-		nW := W
-		nX := X + W / 2 - 225 / 2 + 2
-		Gui, BotGUI: Show, x%nX% y%nY% w227 h35 NoActivate, BotGUI
+		if (X != oldX or Y != oldY) {
+			oldX := X
+			oldY := Y
+			nY := A_ScreenHeight - (A_ScreenHeight - Y) + H - 2
+			nW := W
+			nX := X + W / 2 - 225 / 2 + 2
+			Gui, BotGUI: Show, x%nX% y%nY% w227 h35 NoActivate, BotGUI
+		}
 	}
 	IfWinNotExist, Crusaders of The Lost Idols
 	{
-		if (relaunching = false) {
+		if (botRelaunching = false) {
 			Pause,, 1
-			ShowPause(1)
-			Log("[GUI] Game not found.")
+			_GUIShowPause(1)
+			__Log("[GUI] Game not found.")
 		}
 	}
 	Return
 
 ; Pause key
 F8::
-	if (phase = -1) {
-		phase = 0
-		ShowPause(false)
+	CoordMode, Pixel, Client
+	CoordMode, Mouse, Client
+	if (botPhase = -1) {
+		botPhase = 0
+		_GUIShowPause(false)
 		WinActivate, Crusaders of The Lost Idols
 	} else {
 		Pause,, 1
 	}
-	if (phase > 0) {
+	if (botPhase >= 0) {
 		if (A_IsPaused) {
-			Log("Paused.")
-			ShowPause(true)
+			__Log("Paused.")
+			_GUIShowPause(true)
 		} else {
-			Log("Unpaused.")
-			ShowPause(false)
+			__Log("Unpaused.")
+			_GUIShowPause(false)
 			WinActivate, Crusaders of The Lost Idols
+			if (botPhase = 1 or botPhase = 2) {
+				Gosub, _BotCloseWindows
+				Gosub, _BotSetAutoProgress
+			}
 		}
 	}
 	Return
 
 ; Self-explanatory
-ShowPause(status) {
+_GUIShowPause(status) {
 	if (status = false) {
 		GuiControl, BotGUI:, BotStatus, images/gui/running.png
 	} else {
@@ -459,12 +462,26 @@ ShowPause(status) {
 	Return
 }
 
+_BotCloseWindows:
+	PixelGetColor, Output, 15, 585, RGB
+	if (Output = 0x503803) {
+		__Log("Found an overlay.")
+		ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/close.png
+		if (ErrorLevel = 0) {
+			__Log("Overlay closed.")
+			MouseMove, OutputX + 10, OutputY + 10
+			Sleep, 100
+			Click
+		}
+	}
+	Return
+
 ; Relaunch the game, pretty much self-explanatory
-Relaunch:
-	Log("Closing the game.")
-	relaunching = true;
+_BotRelaunch:
+	__Log("Closing the game.")
+	botRelaunching = true;
 	WinClose, Crusaders of The Lost Idols
-	Log("Waiting on the game to close.")
+	__Log("Waiting on the game to close.")
 	WinWaitClose, Crusaders of The Lost Idols,,180
 	Loop {
 		Process, Exist, Crusaders of the Lost Idols.exe
@@ -475,15 +492,15 @@ Relaunch:
 		}
 		Sleep, 500
 	}
-	Log("Game closed. Relaunching.")
+	__Log("Game closed. Relaunching.")
 	Run, steam://Rungameid/402840,,UseErrorLevel
-	Log("Waiting on the game to launch.")
+	__Log("Waiting on the game to launch.")
 	WinWait, Crusaders of The Lost Idols,,300
-	relaunching = false
+	botRelaunching = false
 	WinActivate, Crusaders of The Lost Idols
 	WinMove, Crusaders of The Lost Idols,,15,15
 	seen = 0
-	Log("Searching for start button.")
+	__Log("Searching for start button.")
 	Loop {
 		ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/start.png
 		if (ErrorLevel = 0) {
@@ -493,7 +510,7 @@ Relaunch:
 			Click
 		} else {
 			if (seen = 1) {
-				phase = 1
+				botPhase = 1
 				Break
 			}
 		}
@@ -501,41 +518,62 @@ Relaunch:
 	}
 	Return
 
+_BotMoveGame:
+	WinGetPos,,, OutputW, OutputH
+	SysGet, OutputX, 76
+	SysGet, OutputX2, 78
+	SysGet, OutputY, MonitorWorkArea, 1
+	centerX := (A_ScreenWidth - OutputW) / 2
+	centerY := (OutputYBottom - OutputH) / 2
+	if (optMoveGameWindow = 2) {
+		WinMove, OutputX, centerY
+	} else if (optMoveGameWindow = 3) {
+		WinMove, OutputX, OutputYTop
+	} else if (optMoveGameWindow = 4) {
+		WinMove, centerX, OutputYTop
+	} else if (optMoveGameWindow = 5) {
+		WinMove, OutputX2 + OutputX - OutputW, OutputYTop
+	} else if (optMoveGameWindow = 6) {
+		WinMove, OutputX2 + OutputX - OutputW, centerY
+	} else if (optMoveGameWindow = 7) {
+		WinMove, centerX, centerY
+	}
+	Return
+	
 ; Campaign screen, well at least triggered when we think it's the campaign screen or we just did a reset
-CampaignStart:
-	Log("Searching for campaign header.")
+_BotCampaignStart:
+	__Log("Searching for campaign header.")
 	Loop {
 		; If the campaign.png is found (which is the big campaign text at the top of the screen), we know for sure that's where we are
 		; If not found, we look for the cog (settings button), we're instead still/already in the game
 		ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/campaign.png
 		if (ErrorLevel = 0) {
-			Log("Found the campaign header.")
-			SetCampaign(campaign, objective)
+			__Log("Found the campaign header.")
+			__BotSetCampaign(optCampaign, objective)
 			MouseMove, 781, 571
 			Sleep, 5000
 			Click
-			runLaunchTime = % UnixTime(A_Now)
-			lastProgressCheck = 0
-			maxAllCount = 0
-			skipToReset := false
-			if (phase = 1) {
-				Log("Relaunching CoTLI.")
-				Gosub, Relaunch
+			botRunLaunchTime = % __UnixTime(A_Now)
+			botMaxAllCount = 0
+			botSkipToReset := false
+			if (botPhase = 1 and optRelaunchGame = 1) {
+				__Log("Relaunching CoTLI.")
+				Gosub, _BotRelaunch
 			}
 			Break
 		} else {
-			Log("Searching for the cog.")
+			__Log("Searching for the cog.")
 			ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/cog.png
 			if (ErrorLevel = 0) {
-				Log("Found the cog.")
+				__Log("Found the cog.")
 				Break
 			} else {
-				Log("Didn't find the cog, looking for left arrow instead.")
+				__Log("Didn't find the cog, looking for left arrow instead.")
 				PixelGetColor, Output, 15, 585, RGB
 				if (Output = 0x503803) {
 					Break
 				} else {
-					Log("Left arrow not found, looking for the Start button.")
+					__Log("Left arrow not found, looking for the Start button.")
 					ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/start.png
 					if (ErrorLevel = 0) {
 						MouseMove, 498, 540
@@ -549,22 +587,22 @@ CampaignStart:
 	Return
 
 ; Browse the campaign screen to find the desired one, will scan up and down until the proper campaign image is found
-; Once the campaign is found, we set the objective by calling the function SetObjective
-SetCampaign(c, o) {
-	Log("Setting the campaign.")
+; Once the campaign is found, we set the objective by calling the function __BotSetObjective
+__BotSetCampaign(c, o) {
+	__Log("Setting the campaign.")
 	if (c = 1) {
 		MouseMove, 535, 195
 		Sleep, 500
 		Click
-		Log("Starting the event campaign.")
+		__Log("Starting the event campaign.")
 		Return
 	} else {
 		currentPos = 0
-		Log("Searching for the campaign.")
+		__Log("Searching for the campaign.")
 		ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/c%c%.png
 		if (ErrorLevel = 0) {
-			Log("Found the campaign.")
-			SetObjective(o, OutputX, OutputY)
+			__Log("Found the campaign.")
+			__BotSetObjective(o, OutputX, OutputY)
 			Return
 		} else {
 			ImageSearch, upX, upY, 0, 0, 997, 671, *100 images/game/campaign_uparrow_active.png
@@ -593,8 +631,8 @@ SetCampaign(c, o) {
 				Sleep, 500
 				ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/c%c%.png
 				if (ErrorLevel = 0) {
-					Log("Found the campaign.")
-					SetObjective(o, OutputX, OutputY)
+					__Log("Found the campaign.")
+					__BotSetObjective(o, OutputX, OutputY)
 					Return
 				}
 				ImageSearch, downX, downY, 0, 0, 997, 671, *100 images/game/campaign_downarrow_inactive.png
@@ -614,29 +652,22 @@ SetCampaign(c, o) {
 	}
 }
 
-; Set the objective, called by SetCampaign(c, o)
+; Set the objective, called by __BotSetCampaign(c, o)
 ; c = campaign, x and y = the campaign image's location
-SetObjective(o, x, y) {
-	Log("Setting the objective.")
+__BotSetObjective(o, x, y) {
+	__Log("Setting the objective.")
 	MouseMove, x + 505, y + 85
 	Sleep, 500
 	Click
-	Log("Objective set.")
+	__Log("Objective set.")
 	Return
 }
 
 ; Navigate the crusaders bar to find the desired crusader
 ; c = crusader
-MoveToCrusader(c) {
+__BotMoveToCrusader(c) {
 	global currentCCoords
 	global crusaders
-	apStatus := false
-	Log("Auto progress check before moving to crusader.")
-	if (CheckAutoProgress() = true) {
-		apStatus := true
-		send, {g}
-		Sleep, 5000
-	}
 	currentCIndex[2] := crusaders[c][2]
 	nX := crusaders[c][1] - currentCIndex[1]
 	pagesToMove := 0
@@ -653,17 +684,14 @@ MoveToCrusader(c) {
 		pagesToMove := nX
 	}
 	if (pagesToMove != 0) {
-		MoveToPage(pagesToMove)
+		__BotMoveToPage(pagesToMove)
 	}
 	currentCCoords[1] := 37 + 315 * (nX - pagesToMove)
 	currentCCoords[2] := 506 + 86 * (currentCIndex[2] - 1)
-	if (apStatus = true) {
-		Send, {g}
-	}
 	Return
 }
 
-MoveToFirstPage() {
+__BotMoveToFirstPage() {
 	currentCIndex := [1, 1]
 	Loop {
 		PixelGetColor, Output, 15, 585, RGB
@@ -677,7 +705,7 @@ MoveToFirstPage() {
 	Return
 }
 
-MoveToLastPage() {
+__BotMoveToLastPage() {
 	Loop {
 		PixelGetColor, Output, 985, 585, RGB
 		if (Output = 0xA07107) {
@@ -690,7 +718,7 @@ MoveToLastPage() {
 	Return
 }
 
-MoveToPage(p) {
+__BotMoveToPage(p) {
 	if (p > 0) {
 		aX = 985
 		d = 1
@@ -710,7 +738,7 @@ MoveToPage(p) {
 	Return
 }
 
-SetCrusadersPixels() {
+__BotSetCrusadersPixels() {
 	Sleep, 1000
 	initialX = 42
 	i = 0
@@ -727,7 +755,7 @@ SetCrusadersPixels() {
 	Return
 }
 
-CompareCrusadersPixels() {
+__BotCompareCrusadersPixels() {
 	initialX = 42
 	i = 0
 	j = 0
@@ -753,11 +781,11 @@ CompareCrusadersPixels() {
 }
 
 ; Max levels
-MaxLevels() {
-	global formationKey
-	global resetType
-	global phase
-	Log("Max all levels.")
+__BotMaxLevels() {
+	global optFormationKey
+	global optResetType
+	global botPhase
+	__Log("Max all levels.")
 	MouseMove, 985, 630
 	Click
 	Sleep, 100
@@ -769,13 +797,13 @@ MaxLevels() {
 		}
 		Sleep, 10
 	}
-	Send, {%formationKey%}
+	Send, {%optFormationKey%}
 	Return
 }
 
 ; Upgrade all
-UpgAll() {
-	Log("Buy all upgrades.")
+__BotUpgAll() {
+	__Log("Buy all upgrades.")
 	MouseMove, 985, 540
 	Click
 	Sleep, 100
@@ -790,7 +818,7 @@ UpgAll() {
 }
 
 ; Use a skill, 0 to use all skills
-useSkill(s) {
+__BotUseSkill(s) {
 	if (s = 0) {
 		Loop, 8 {
 			Send, %A_Index%
@@ -802,23 +830,22 @@ useSkill(s) {
 	Return
 }
 
-; Sets the auto progress to true
-SetAutoProgress:
-	lastProgressCheck = % UnixTime(A_Now)
-	Log("Auto progress check at startup")
-	if (CheckAutoProgress() = false) {
+; Sets the auto progress to false
+_BotSetAutoProgress:
+	__Log("Auto progress check at startup")
+	if (__BotCheckAutoProgress() = true) {
 		Send, {g}
 	}
 	Return
 
 ; Check if the auto progress is set to true or false
-CheckAutoProgress() {
+__BotCheckAutoProgress() {
 	Loop {
 		MouseMove, 317, 111
 		Sleep, 100
 		Click
 		Sleep, 500
-		ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/options.png
+		ImageSearch, OutputX2, OutputY2, 0, 0, 997, 671, *100 images/game/options.png
 		Sleep, 500
 		; If the big options header is found, it means the options window is open
 		if (ErrorLevel = 0) {
@@ -836,10 +863,9 @@ CheckAutoProgress() {
 					}
 				}
 			}
-			lastProgressCheck = % UnixTime(A_Now)
-			ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/news_x.png
+			ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/close.png
 			Loop {
-				ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/news_x.png
+				ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/close.png
 				if (ErrorLevel = 0) {
 					MouseMove, OutputX + 10, OutputY + 10
 					Click
@@ -850,64 +876,29 @@ CheckAutoProgress() {
 			if (c = 0) {
 				Break
 			} else {
-				Log("Auto progress check returned false.")
+				__Log("Auto progress check returned false.")
 				Return, false
 			}
 		}
 	}
-	Log("Auto progress check returned true.")
+	__Log("Auto progress check returned true.")
 	Return, true
 }
 
-GetLevelCapPixels() {
-	ImageSearch, OutputX, OutputY, 240, 548, 335, 575, *100 images/game/lvl.png
-	if (ErrorLevel = 0) {
-		X := OutputX + 16
-		Y := OutputY + 1
-		i = 0
-		pixels := Object()
-		Loop, 28 {
-			nX := X + i * 4
-			if (i = 7) {
-				i = 0
-				Y += 2
-			}
-			PixelGetColor, Output, nX, Y, RGB
-			pixels[A_Index] := Output
-			i++
-		}
-	}
-	Return, pixels
-}
-
-CompareLevelCapPixels() {
-	pixelsTemp := GetLevelCapPixels()
-	j = 0
-	for i, e in pixelsTemp {
-		if (pixelsTemp[i] = levelCapPixels[i]) {
-			j++
-		}
-	}
-	if (j = pixelsTemp.MaxIndex()) {
-		Return, true
-	}
-	Return, false
-}
-
-SetChatRoom:
+_BotSetChatRoom:
 	MouseMove, 1135, 10
 	Sleep, 100
 	Click
-	if (chatRoom > 10) {
-		chatRoom = 10
+	if (optChatRoom > 10) {
+		optChatRoom = 10
 	}
-	MouseMove, 1135, 18 + (21 * chatRoom)
+	MouseMove, 1135, 18 + (21 * optChatRoom)
 	Sleep, 100
 	Click
-	lastChatRoom := chatRoom
+	optLastoptChatRoom := optChatRoom
 	Return
 
-GetIdolsCount() {
+__BotGetIdolsCount() {
 	Loop {
 		ImageSearch, lastX, lastY, 0, 0, A_ScreenWidth, A_ScreenHeight, *100 images/game/iplus.png
 		if (ErrorLevel = 0) {
@@ -923,7 +914,6 @@ GetIdolsCount() {
 						lastX := OutputX + 8
 						Break
 					}
-					ToolTip,
 					i++
 					
 				}
@@ -938,49 +928,122 @@ GetIdolsCount() {
 	}
 }
 
-ScanForChests:
+_BotGetCurrentLevel:
+	if (botPhase = 2) {
+		botLookingForCursor := true
+		CoordMode, Pixel, Client
+		CoordMode, Mouse, Client
+		i = 1
+		Loop {
+			PixelGetColor, Output, 308, 104, RGB
+			if (Output != 0x290F07) {
+				if (i > 5) {
+					i = 1
+				}
+				ImageSearch, OutputX, OutputY, botLevelCursorCoords[i][1], botLevelCursorCoords[i][2], botLevelCursorCoords[i][3], botLevelCursorCoords[i][4], *25 images/game/lArrow.png
+				if (ErrorLevel = 0) {
+					if (botLevelCurrentCursor = 0) {
+						botLevelPreviousCursor := i
+						botCurrentLevel := i
+					}
+					botLevelCurrentCursor := i
+					botLookingForCursor := false
+					Break
+				} else {
+					i++
+				}
+				Sleep, 25
+			} else {
+				Break
+			}
+		}
+		if (botLevelCurrentCursor > botLevelPreviousCursor) {
+			if (botLevelCurrentCursor = 5 and botLevelPreviousCursor = 1) {
+				botCurrentLevel--
+				botLevelPreviousCursor = 5
+				if (optResetType = 2) {
+					maxProgressStatus := true
+					botSkipToReset := true
+				}
+			} else {
+				if (botLevelCurrentCursor - botLevelPreviousCursor > 1) { ; Lost count
+					__Log("Lost level count... Reset might not occur.")
+					botLevelPreviousCursor := botLevelCurrentCursor
+				} else {
+					botCurrentLevel++
+					botLevelPreviousCursor++
+				}
+			}
+		} else if (botLevelCurrentCursor < botLevelPreviousCursor) {
+			if (botLevelCurrentCursor = 1 and botLevelPreviousCursor = 5) {
+				botCurrentLevel++
+				botLevelPreviousCursor = 1
+			} else {
+				if (botLevelPreviousCursor - botLevelCurrentCursor > 1) { ; Lost count
+					__Log("Lost level count... Reset might not occur.")
+					botLevelPreviousCursor := botLevelCurrentCursor
+				} else {
+					botCurrentLevel--
+					botLevelPreviousCursor := botLevelCurrentCursor
+					if (optResetType = 2) {
+						maxProgressStatus := true
+						botSkipToReset := true
+					}
+				}
+			}
+		}
+	}
+	Return
+
+_BotNextLevel:
+	if (botPhase = 2) {
+		Send, {Right}
+	}
+	Return
+	
+_BotScanForChests:
 	ImageSearch, OutputX, OutputY, 742, 12, 956, 138, *100 images/game/chest1.png
 	if (ErrorLevel = 0) {
-		FileAppend, % UnixTime(A_Now) . ":S", stats/chests.txt
+		FileAppend, % __UnixTime(A_Now) . ":S", stats/chests.txt
 		chestsPastDay = 0
 		Loop, read, stats/chests.txt
 		{
 			break := StrSplit(A_LoopReadLine, ":")
-			if (UnixTime(A_Now) - break[1] <= 86400) {
+			if (__UnixTime(A_Now) - break[1] <= 86400) {
 				FileAppend, % break[1] . ":" . break[2] . "`n", stats/chests_temp.txt
 				chestsPastDay++
 			}
 		}
-		chestsThisRun++
-		chestsThisSession++
+		statsChestsThisRun++
+		statsChestsThisSession++
 		FileDelete, stats/chests.txt
 		FileMove, stats/chests_temp.txt, stats/chests.txt
 		IniRead, chestsAllTime, stats/stats.txt, Chests, alltime
 		chestsAllTime += 1
 		IniWrite, % chestsAllTime, stats/stats.txt, Chests, alltime
 		IniWrite, % chestsPastDay, stats/stats.txt, Chests, pastday
-		IniWrite, % chestsThisRun, stats/stats.txt, Chests, thisrun
-		IniWrite, % chestsThisSession, stats/stats.txt, Chests, thissession
+		IniWrite, % statsChestsThisRun, stats/stats.txt, Chests, thisrun
+		IniWrite, % statsChestsThisSession, stats/stats.txt, Chests, thissession
 		Sleep, 9000
 	}
 	Return
 
-; Log function
-Log(log) {
+; __Log function
+__Log(__Log) {
 	FormatTime, TimeOutput, A_Now, yyyy/M/d - HH:mm:ss
-	FileAppend, [%TimeOutput%] %log%`n, logs/logs.txt
+	FileAppend, [%TimeOutput%] %__Log%`n, logs/logs.txt
 	Return
 }
 
 ; Transforms YYYYMMDDHH24MISS date format to Unix
-UnixTime(Time) {
+__UnixTime(Time) {
 	Result := Time
 	Result -= 19700101000000, Seconds
 	Return, Result
 }
 
 ; Rounds a number (n) to d decimals
-RoundNumber(n, d) {
+__RoundNumber(n, d) {
 	Transform, n, Round, n, d
 	e := StrSplit(n, ".")
 	if (e[2] != null) {
@@ -990,395 +1053,100 @@ RoundNumber(n, d) {
 	Return, n
 }
 
-;				;
-;	GUI Labels	;
-;				;
-
-ChooseCampaign:
-	Gui, Submit, NoHide
-	tempCampaign := CampaignChoice
-	Return
-
-SetFormationQ:
-	GuiControl,, FormationQ, images/gui/bF1_on.png
-	GuiControl,, FormationW, images/gui/bF2_off.png
-	GuiControl,, FormationE, images/gui/bF3_off.png
-	tempFormation = 1
-	tempFormationKey = q
-	Return
-	
-SetFormationW:
-	GuiControl,, FormationQ, images/gui/bF1_off.png
-	GuiControl,, FormationW, images/gui/bF2_on.png
-	GuiControl,, FormationE, images/gui/bF3_off.png
-	tempFormation = 2
-	tempFormationKey = w
-	Return
-
-SetFormationE:
-	GuiControl,, FormationQ, images/gui/bF1_off.png
-	GuiControl,, FormationW, images/gui/bF2_off.png
-	GuiControl,, FormationE, images/gui/bF3_on.png
-	tempFormation = 3
-	tempFormationKey = e
-	Return
-
-ChooseMainDPS:
-	Gui, Submit, NoHide
-	tempMainDPS := MainDPSChoice
-	Return
-
-ChooseReset:
-	Gui, Submit, NoHide
-	tempResetType := ResetChoice
-	Return
-	
-SetClickingOn:
-	GuiControl,, ClickingStatusOn, images/gui/bOn_on.png
-	GuiControl,, ClickingStatusOff, images/gui/bOff_off.png
-	tempClicking = 1
-	Return
-
-SetClickingOff:
-	GuiControl,, ClickingStatusOn, images/gui/bOn_off.png
-	GuiControl,, ClickingStatusOff, images/gui/bOff_on.png
-	tempClicking = 0
-	Return
-
-ChooseResetCrusader:
-	Gui, Submit, NoHide
-	tempResetCrusader := ResetCrusader
-	Return
-	
-SetStormRiderFormationQ:
-	GuiControl,, StormRiderFormationQ, images/gui/bF1_on.png
-	GuiControl,, StormRiderFormationW, images/gui/bF2_off.png
-	GuiControl,, StormRiderFormationE, images/gui/bF3_off.png
-	GuiControl,, StormRiderFormationD, images/gui/bF0_off.png
-	tempStormRiderFormation = 1
-	tempStormRiderFormationKey = q
-	Return
-	
-SetStormRiderFormationW:
-	GuiControl,, StormRiderFormationQ, images/gui/bF1_off.png
-	GuiControl,, StormRiderFormationW, images/gui/bF2_on.png
-	GuiControl,, StormRiderFormationE, images/gui/bF3_off.png
-	GuiControl,, StormRiderFormationD, images/gui/bF0_off.png
-	tempStormRiderFormation = 2
-	tempStormRiderFormationKey = w
-	Return
-
-SetStormRiderFormationE:
-	GuiControl,, StormRiderFormationQ, images/gui/bF1_off.png
-	GuiControl,, StormRiderFormationW, images/gui/bF2_off.png
-	GuiControl,, StormRiderFormationE, images/gui/bF3_on.png
-	GuiControl,, StormRiderFormationD, images/gui/bF0_off.png
-	tempStormRiderFormation = 3
-	tempStormRiderFormationKey = e
-	Return
-	
-SetStormRiderFormationD:
-	GuiControl,, StormRiderFormationQ, images/gui/bF1_off.png
-	GuiControl,, StormRiderFormationW, images/gui/bF2_off.png
-	GuiControl,, StormRiderFormationE, images/gui/bF3_off.png
-	GuiControl,, StormRiderFormationD, images/gui/bF0_on.png
-	tempStormRiderFormation := 0
-	tempStormRiderFormationKey := formationKey
-	Return
-	
-SetMagnifyOn:
-	GuiControl,, MagnifyStatusOn, images/gui/bOn_on.png
-	GuiControl,, MagnifyStatusOff, images/gui/bOff_off.png
-	tempStormRiderMagnify = 1
-	Return
-
-SetMagnifyOff:
-	GuiControl,, MagnifyStatusOn, images/gui/bOn_off.png
-	GuiControl,, MagnifyStatusOff, images/gui/bOff_on.png
-	tempStormRiderMagnify = 0
-	Return
-	
-Help:
-	Loop {
-		MouseGetPos,,,, OutputVarControl
-		help := null
-		if (OutputVarControl = "Static2") {
-			help = Once the bot max all the levels [VALUE] of times, it will buy all upgrades.`nExample: If the value is 5, after 5 max all levels the bot will upgrade.
-		} else if (OutputVarControl = "Static3") {
-			help = Delay in seconds in which the bot checks if the auto progress option is on or off. It is used to make progression checks.`nThe lower this value is set, the more frequently the bot will check.
-		} else if (OutputVarControl = "Static4") {
-			help = Delay in minutes in which the bot will start leveling up the Main DPS while ignoring the other crusaders.
-		} else if (OutputVarControl = "Static5") {
-			help = The crusader with whom you want to reset.`nThe bot will still try to reset with the other crusaders if it cannot find yours.
-		} else if (OutputVarControl = "Static6") {
-			help = Chat room to auto join when the bot launches.`nIf you change this setting mid-run the bot will not change the room.
-		} else if (OutputVarControl = "Static7") {
-			help = Delay in milliseconds between each click in the click & loot phase.`nThis can induce lag.
-		} else if (OutputVarControl = "Static8") {
-			help = Delay in minutes before the run resets.
-		} else {
-			ToolTip,
-			Break
-		}
-		ToolTip, % help
-		Sleep, 100
-	}
-	Return	
-
-CloseOptions:
-	Gosub, CloseAdvancedOptions
-	Gui, BotGUIOptions: Hide
-	GuiControl, BotGUI:, BOptions, images/gui/bOptions.png
-	GuiControl, BotGUIOptions: Choose, CampaignChoice, % campaign
-	f1 := "images/gui/bF1_off.png"
-	f2 := "images/gui/bF2_off.png"
-	f3 := "images/gui/bF3_off.png"
-	f%formation% := "images/gui/bF" . formation . "_on.png"
-	GuiControl, BotGUIOptions:, FormationQ, % f1
-	GuiControl, BotGUIOptions:, FormationW, % f2
-	GuiControl, BotGUIOptions:, FormationE, % f3
-	GuiControl, BotGUIOptions: ChooseString, MainDPSChoice, % mainDPS
-	GuiControl, BotGUIOptions: Choose, ResetChoice, % resetType
-	if (clicking = 1) {
-		GuiControl, BotGUIOptions:, ClickingStatusOn, images/gui/bOn_on.png
-		GuiControl, BotGUIOptions:, ClickingStatusOff, images/gui/bOff_off.png
-	} else {
-		GuiControl, BotGUIOptions:, ClickingStatusOn, images/gui/bOn_off.png
-		GuiControl, BotGUIOptions:, ClickingStatusOff, images/gui/bOff_on.png
-	}
-	Return
-
-CloseAdvancedOptions:
-	Gui, BotGUIAdvancedOptions: Hide
-	GuiControl, BotGUIAdvancedOptions:, UpgAllUntil, % upgAllUntil
-	GuiControl, BotGUIAdvancedOptions:, AutoProgressCheckDelay, % autoProgressCheckDelay
-	GuiControl, BotGUIAdvancedOptions:, MainDPSDelay, % mainDPSDelay
-	GuiControl, BotGUIAdvancedOptions: ChooseString, ResetCrusader, % resetCrusader
-	GuiControl, BotGUIAdvancedOptions:, ChatRoom, % chatRoom
-	GuiControl, BotGUIAdvancedOptions:, ClickDelay, % clickDelay
-	GuiControl, BotGUIAdvancedOptions:, RunTime, % runTime
-	Return	
-
-CloseStats:
-	GuiControl, BotGUI:, BStats, images/gui/bStats.png
-	Gui, BotGUIStats: Hide
-	Return
-
-CloseAbout:
-	GuiControl, BotGUI:, BAbout, images/gui/bAbout.png
-	Gui, BotGUIAbout: Hide
-	Return
-
-CloseStormRider:
-	GuiControl, BotGUI:, BStormRider, images/gui/bStormRider.png
-	Gui, BotGUIStormRider: Hide
-	f1 := "images/gui/bF1_off.png"
-	f2 := "images/gui/bF2_off.png"
-	f3 := "images/gui/bF3_off.png"
-	f0 := "images/gui/bF0_off.png"
-	f%stormRiderFormation% := "images/gui/bF" . stormRiderFormation . "_on.png"
-	GuiControl, BotGUIStormRider:, StormRiderFormationQ, % f1
-	GuiControl, BotGUIStormRider:, StormRiderFormationW, % f2
-	GuiControl, BotGUIStormRider:, StormRiderFormationE, % f3
-	GuiControl, BotGUIStormRider:, StormRiderFormationD, % f0
-	Return
-
-CloseOtherWindows:
-	Gosub, CloseOptions
-	Gosub, CloseAdvancedOptions
-	Gosub, CloseStormRider
-	Gosub, CloseStats
-	Gosub, CloseAbout
-	Return
-	
 ; Self-explanatory
-ApplyAdvancedOptions:
-	Gui, Submit, NoHide
-	GuiControlGet, upgAllUntil
-	GuiControlGet, autoProgressCheckDelay
-	GuiControlGet, mainDPSDelay
-	lastChatRoom := chatRoom
-	GuiControlGet, chatRoom
-	GuiControlGet, clickDelay
-	GuiControlGet, runTime
-	resetCrusader := tempResetCrusader
-	Gosub, RewriteSettings
-	Gui, BotGUIAdvancedOptions: Hide
-	Return
-	
-ApplyOptions:
-	Gui, Submit, NoHide
-	campaign := tempCampaign
-	formation := tempFormation
-	formationKey := tempFormationKey
-	mainDPS := tempMainDPS
-	resetType := tempResetType
-	clicking := tempClicking
-	Gosub, RewriteSettings
-	GuiControl, BotGUI:, BOptions, images/gui/bOptions.png
-	Gui, BotGUIOptions: Hide
-	Return
-	
-ApplyStormRider:
-	Gui, Submit, NoHide
-	stormRiderFormation := tempStormRiderFormation
-	stormRiderFormationKey := tempStormRiderFormationKey
-	stormRiderMagnify := tempStormRiderMagnify
-	Gosub, RewriteSettings
-	GuiControl, BotGUI:, BStormRider, images/gui/bStormRider.png
-	Gui, BotGUIStormRider: Hide
-	Return	
-
-Options:
-	Gosub, CloseOtherWindows
-	GuiControl, BotGUI:, BOptions, images/gui/bOptions_active.png
-	winW = 252
-	winH = 407
-	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/guiMain_bg.png
-	WinGetPos, Output2X, Output2Y
-	nX := Output2X - ((winW - OutputW) / 2)
-	nY := Output2Y - winH
-	Gui, BotGUIOptions: Show, x%nX% y%nY% w%winW% h%winH%, idolBot Options
-	Return
-
-AdvancedOptions:
-	winW = 252
-	winH = 477
-	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/bAdvanced.png
-	WinGetPos, Output2X, Output2Y
-	nX := Output2X + 30
-	nY := Output2Y - 30
-	Gui, BotGUIAdvancedOptions: Show, x%nX% y%nY% w%winW% h%winH%, idolBot Advanced Options
-	Return
-
-Stats:
-	Gosub, CloseOtherWindows
-	GuiControl, BotGUI:, BStats, images/gui/bStats_active.png
-	winW = 252
-	winH = 325
-	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/guiMain_bg.png
-	WinGetPos, Output2X, Output2Y
-	nX := Output2X - ((winW - OutputW) / 2)
-	nY := Output2Y  - winH
-	Gui, BotGUIStats: Show, x%nX% y%nY% w%winW% h%winH%, idolBot Stats
-	Return
-
-About:
-	Gosub, CloseOtherWindows
-	GuiControl, BotGUI:, BAbout, images/gui/bAbout_active.png
-	winW = 252
-	winH = 290
-	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/guiMain_bg.png
-	WinGetPos, Output2X, Output2Y
-	nX := Output2X - ((winW - OutputW) / 2)
-	nY := Output2Y - winH
-	Gui, BotGUIAbout: Show, x%nX% y%nY% w%winW% h%winH%, idolBot About
-	Return
-
-StormRider:
-	Gosub, CloseOtherWindows
-	GuiControl, BotGUI:, BStormRider, images/gui/bStormRider_active.png
-	winW = 182
-	winH = 199
-	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/guiMain_bg.png
-	WinGetPos, Output2X, Output2Y
-	nX := Output2X - ((winW - OutputW) / 2)
-	nY := Output2Y - winH
-	Gui, BotGUIStormRider: Show, x%nX% y%nY% w%winW% h%winH%, idolBot Storm Rider
-	Return
-	
-; Self-explanatory
-LoadSettings:
-	Log("Reading settings.")
-	IniRead, campaign, settings/settings.ini, Settings, campaign, 2
-	IniRead, formation, settings/settings.ini, Settings, formation, 1
-	IniRead, mainDPS, settings/settings.ini, Settings, maindps, Jim
-	IniRead, clicking, settings/settings.ini, Settings, clicking, 0
-	IniRead, resetType, settings/settings.ini, Settings, resettype, 2
-	IniRead, upgAllUntil, settings/settings.ini, Settings, upgalluntil, 5
-	IniRead, autoProgressCheckDelay, settings/settings.ini, Settings, autoprogresscheckdelay, 120
-	IniRead, mainDPSDelay, settings/settings.ini, Settings, maindpsdelay, 60
-	IniRead, resetCrusader, settings/settings.ini, Settings, resetcrusader, Nate
-	IniRead, chatRoom, settings/settings.ini, Settings, chatroom, 1
-	IniRead, clickDelay, settings/settings.ini, Settings, clickdelay, 20
-	IniRead, runTime, settings/settings.ini, Settings, runtime, 60
-	IniRead, lootItemsDuration, settings.ini, Settings, lootitemsduration, 30
-	IniRead, stormRiderFormation, settings/settings.ini, Settings, stormriderformation, 4
-	IniRead, stormRiderMagnify, settings/settings.ini, Settings, stormridermagnify, 1
-	if (formation = 1) {
-		formationKey = q
+_BotLoadSettings:
+	__Log("Reading settings.")
+	IniRead, optCampaign, settings/settings.ini, Settings, campaign, 2
+	IniRead, optFormation, settings/settings.ini, Settings, formation, 1
+	IniRead, optMainDPS, settings/settings.ini, Settings, maindps, Jim
+	IniRead, optClicking, settings/settings.ini, Settings, clicking, 0
+	IniRead, optResetType, settings/settings.ini, Settings, resettype, 2
+	IniRead, optUpgAllUntil, settings/settings.ini, Settings, upgalluntil, 5
+	IniRead, optMainDPSDelay, settings/settings.ini, Settings, maindpsdelay, 60
+	IniRead, optChatRoom, settings/settings.ini, Settings, chatroom, 0
+	IniRead, optClickDelay, settings/settings.ini, Settings, clickdelay, 20
+	IniRead, optRunTime, settings/settings.ini, Settings, runtime, 60
+	IniRead, optResetOnLevel, settings/settings.ini, Settings, resetonlevel, 100
+	IniRead, optRelaunchGame, settings/settings.ini, Settings, relaunchgame, 0
+	IniRead, optMoveGameWindow, settings/settings.ini, Settings, movegamewindow, 0
+	IniRead, optLootItemsDuration, settings/settings.ini, Settings, lootitemsduration, 30
+	IniRead, optStormRiderFormation, settings/settings.ini, Settings, stormriderformation, 4
+	IniRead, optStormRiderMagnify, settings/settings.ini, Settings, stormridermagnify, 1
+	if (optFormation = 1) {
+		optFormationKey = q
 	}
-	if (formation = 2) {
-		formationKey = w
+	if (optFormation = 2) {
+		optFormationKey = w
 	}
-	if (formation = 3) {
-		formationKey = e
+	if (optFormation = 3) {
+		optFormationKey = e
 	}
-	if (stormRiderFormation = 1) {
-		stormRiderFormationKey = q
+	if (optStormRiderFormation = 1) {
+		optStormRiderFormationKey = q
 	}
-	if (stormRiderFormation = 2) {
-		stormRiderFormationKey = w
+	if (optStormRiderFormation = 2) {
+		optStormRiderFormationKey = w
 	}
-	if (stormRiderFormation = 3) {
-		stormRiderFormationKey = e
+	if (optStormRiderFormation = 3) {
+		optStormRiderFormationKey = e
 	}
-	if (stormRiderFormation = 0) {
-		stormRiderFormationKey = formationKey
+	if (optStormRiderFormation = 0) {
+		optStormRiderFormationKey = optFormationKey
 	}
-	StringLower, mainDPS, mainDPS
-	StringLower, resetCrusader, resetCrusader
-	tempCampaign := campaign
-	tempFormation := formation
-	tempFormationKey := formationKey
-	tempMainDPS := mainDPS
-	tempResetType := resetType
-	tempClicking := clicking
-	tempUpgAllUntil := upgAllUntil
-	tempAutoProgressCheckDelay := autoProgressCheckDelay
-	tempMainDPSDelay := mainDPSDelay
-	tempResetCrusader := resetCrusader
-	tempChatRoom := chatRoom
-	tempClickDelay := clickDelay
-	tempRunTime := runTime
-	tempLootItemsDuration := lootItemsDuration
-	tempStormRiderFormation := stormRiderFormation
-	tempStormRiderFormationKey := stormRiderFormationKey
-	tempStormRiderMagnify := stormRiderMagnify
+	StringLower, optMainDPS, optMainDPS
+	StringLower, optResetCrusader, optResetCrusader
+	optTempCampaign := optCampaign
+	optTempFormation := optFormation
+	optTempFormationKey := optFormationKey
+	optTempMainDPS := optMainDPS
+	optTempResetType := optResetType
+	optTempClicking := optClicking
+	optTempUpgAllUntil := optUpgAllUntil
+	optTempMainDPSDelay := optMainDPSDelay
+	optTempChatRoom := optChatRoom
+	optTempClickDelay := optClickDelay
+	optTempRunTime := optRunTime
+	optTempResetOnLevel := optResetOnLevel
+	optTempRelaunchGame := optRelaunchGame
+	optTempMoveGameWindow := optMoveGameWindow
+	optTempStormRiderFormation := optStormRiderFormation
+	optTempStormRiderFormationKey := optStormRiderFormationKey
+	optTempStormRiderMagnify := optStormRiderMagnify
 	Return
 
 ; Self-explanatory
-RewriteSettings:
-	Log("Settings changed.")
-	StringLower, mainDPS, mainDPS
-	StringLower, resetCrusader, resetCrusader
-	IniWrite, % campaign, settings/settings.ini, Settings, campaign
-	IniWrite, % formation, settings/settings.ini, Settings, formation
-	IniWrite, % mainDPS, settings/settings.ini, Settings, maindps
-	IniWrite, % clicking, settings/settings.ini, Settings, clicking
-	IniWrite, % resetType, settings/settings.ini, Settings, resettype
-	IniWrite, % upgAllUntil, settings/settings.ini, Settings, upgalluntil
-	IniWrite, % autoProgressCheckDelay, settings/settings.ini, Settings, autoprogresscheckdelay
-	IniWrite, % mainDPSDelay, settings/settings.ini, Settings, maindpsdelay
-	IniWrite, % resetCrusader, settings/settings.ini, Settings, resetcrusader
-	IniWrite, % chatRoom, settings/settings.ini, Settings, chatroom
-	IniWrite, % clickDelay, settings/settings.ini, Settings, clickdelay
-	IniWrite, % runTime, settings/settings.ini, Settings, runtime
-	IniWrite, % lootItemsDuration, settings/settings.ini, Settings, lootitemsduration
-	IniWrite, % stormRiderFormation, settings/settings.ini, Settings, stormriderformation
-	IniWrite, % stormRiderMagnify, settings/settings.ini, Settings, stormridermagnify
+_BotRewriteSettings:
+	__Log("Settings changed.")
+	StringLower, optMainDPS, optMainDPS
+	StringLower, optResetCrusader, optResetCrusader
+	IniWrite, % optCampaign, settings/settings.ini, Settings, campaign
+	IniWrite, % optFormation, settings/settings.ini, Settings, formation
+	IniWrite, % optMainDPS, settings/settings.ini, Settings, maindps
+	IniWrite, % optClicking, settings/settings.ini, Settings, clicking
+	IniWrite, % optResetType, settings/settings.ini, Settings, resettype
+	IniWrite, % optUpgAllUntil, settings/settings.ini, Settings, upgalluntil
+	IniWrite, % optMainDPSDelay, settings/settings.ini, Settings, maindpsdelay
+	IniWrite, % optChatRoom, settings/settings.ini, Settings, chatroom
+	IniWrite, % optClickDelay, settings/settings.ini, Settings, clickdelay
+	IniWrite, % optRunTime, settings/settings.ini, Settings, runtime
+	IniWrite, % optResetOnLevel, settings/settings.ini, Settings, resetonlevel
+	IniWrite, % optRelaunchGame, settings/settings.ini, Settings, relaunchgame
+	IniWrite, % optMoveGameWindow, settings/settings.ini, Settings, movegamewindow
+	IniWrite, % optLootItemsDuration, settings/settings.ini, Settings, lootitemsduration
+	IniWrite, % optStormRiderFormation, settings/settings.ini, Settings, stormriderformation
+	IniWrite, % optStormRiderMagnify, settings/settings.ini, Settings, stormridermagnify
 	Return
 	
-LoadStats:
-	Log("Reading stats.")
-	IniRead, idolsAllTime, stats/stats.txt, Idols, alltime
-	IniRead, idolsPastDay, stats/stats.txt, Idols, pastday
-	IniRead, idolsLastRun, stats/stats.txt, Idols, lastrun
-	IniRead, idolsLastRunTime, stats/stats.txt, Idols, lastruntime
-	IniRead, idolsThisSession, stats/stats.txt, Idols, thissession
-	IniRead, chestsAllTime, stats/stats.txt, Chests, alltime
-	IniRead, chestsPastDay, stats/stats.txt, Chests, pastday
-	IniRead, chestsLastRun, stats/stats.txt, Chests, lastrun
-	IniRead, chestsLastRunTime, stats/stats.txt, Chests, lastruntime
-	IniRead, chestsThisSession, stats/stats.txt, Chests, thissession
+_BotLoadStats:
+	__Log("Reading stats.")
+	IniRead, statsIdolsAllTime, stats/stats.txt, Idols, alltime
+	IniRead, statsIdolsPastDay, stats/stats.txt, Idols, pastday
+	IniRead, statsIdolsLastRun, stats/stats.txt, Idols, lastrun
+	IniRead, statsIdolsLastRunTime, stats/stats.txt, Idols, runtime
+	IniRead, statsChestsAllTime, stats/stats.txt, Chests, alltime
+	IniRead, statsChestsPastDay, stats/stats.txt, Chests, pastday
+	IniRead, statsChestsLastRun, stats/stats.txt, Chests, lastrun
+	IniRead, statsChestsLastRunTime, stats/stats.txt, Chests, runtime
 	Return
+	
+#include lib/guiLabels.ahk

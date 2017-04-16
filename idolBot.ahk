@@ -1,4 +1,5 @@
 ﻿#NoEnv
+#SingleInstance force
 SendMode Input
 SetWorkingDir %A_ScriptDir%
 
@@ -36,7 +37,7 @@ F9::
 	Reload
 	Return
 	
-CloseUpdate:
+_GUICloseUpdate:
 	Pause, Toggle
 	Gui, BotGUIUpdate: Hide
 	Return

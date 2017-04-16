@@ -7,4 +7,4 @@ Gui, Font, s14 norm cFEFEFE, System
 
 Gui, Add, Picture, x0 y0, images/gui/guiUpdate_bg.png
 
-Gui, Add, Picture, x175 y0 gCloseUpdate, images/gui/bClose.png
+Gui, Add, Picture, x175 y0 g_GUICloseUpdate, images/gui/bClose.png
