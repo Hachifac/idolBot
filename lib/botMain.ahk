@@ -1074,7 +1074,7 @@ _BotLoadSettings:
 	IniRead, optRelaunchGame, settings/settings.ini, Settings, relaunchgame, 0
 	IniRead, optMoveGameWindow, settings/settings.ini, Settings, movegamewindow, 0
 	IniRead, optLootItemsDuration, settings/settings.ini, Settings, lootitemsduration, 30
-	IniRead, optStormRiderFormation, settings/settings.ini, Settings, stormriderformation, 4
+	IniRead, optStormRiderFormation, settings/settings.ini, Settings, stormriderformation, 0
 	IniRead, optStormRiderMagnify, settings/settings.ini, Settings, stormridermagnify, 1
 	if (optFormation = 1) {
 		optFormationKey = q
