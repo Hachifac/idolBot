@@ -1,7 +1,8 @@
 ﻿#NoEnv
 SendMode Input
 
-__Log("------------- CoTLI Bot by Hachifac -------------")
+__Log("------------- idolBot by Hachifac -------------")
+__Log("------- Crusaders of The Lost Idols bot -------")
 
 FileCreateDir, logs
 FileCreateDir, settings
@@ -915,7 +916,7 @@ __BotGetIdolsCount() {
 				i := 0
 				Loop, 10 {
 					WinActivate, Crusaders of The Lost Idols
-					ImageSearch, OutputX, OutputY, lastX, lastY - 5, lastX + 23, lastY + 25, *100 images/game/i%i%.png
+					ImageSearch, OutputX, OutputY, lastX, lastY - 5, lastX + 20, lastY + 23, *100 images/game/i%i%.png
 					if (ErrorLevel = 0) {
 						idols := idols . i
 						lastX := OutputX + 8
