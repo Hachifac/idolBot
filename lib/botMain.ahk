@@ -1077,7 +1077,7 @@ _BotLoadSettings:
 	IniRead, optRunTime, settings/settings.ini, Settings, runtime, 60
 	IniRead, optResetOnLevel, settings/settings.ini, Settings, resetonlevel, 100
 	IniRead, optRelaunchGame, settings/settings.ini, Settings, relaunchgame, 0
-	IniRead, optMoveGameWindow, settings/settings.ini, Settings, movegamewindow, 0
+	IniRead, optMoveGameWindow, settings/settings.ini, Settings, movegamewindow, 1
 	IniRead, optLootItemsDuration, settings/settings.ini, Settings, lootitemsduration, 30
 	IniRead, optStormRiderFormation, settings/settings.ini, Settings, stormriderformation, 0
 	IniRead, optStormRiderMagnify, settings/settings.ini, Settings, stormridermagnify, 1
