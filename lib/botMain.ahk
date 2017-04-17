@@ -288,15 +288,15 @@ idolBot:
 							Sleep, 1000
 							; Get pixel color on optResetCrusader skills to know where the reset button is
 							__Log("Searching for that reset skill.")
-							ImageSearch, OutputX, OutputY, 657, 631, 869, 665, *100 images/game/nateReset.png
+							ImageSearch, resetOutputX, resetOutputY, 657, 631, 869, 665, *100 images/game/nateReset.png
 							if (ErrorLevel = 0) {
 								resetPhase = 1
 							} else {
-								ImageSearch, OutputX, OutputY, 657, 631, 869, 665, *100 images/game/rudolphReset.png
+								ImageSearch, resetOutputX, resetOutputY, 657, 631, 869, 665, *100 images/game/rudolphReset.png
 								if (ErrorLevel = 0) {
 									resetPhase = 1
 								} else {
-									ImageSearch, OutputX, OutputY, 657, 631, 869, 665, *100 images/game/kizReset.png
+									ImageSearch, resetOutputX, resetOutputY, 657, 631, 869, 665, *100 images/game/kizReset.png
 									if (ErrorLevel = 0) {
 										resetPhase = 1
 									} else {
@@ -314,8 +314,8 @@ idolBot:
 					}
 					if (resetPhase = 1) {
 						Loop {
-							MouseMove, OutputX + 3, OutputY + 3
-							Sleep, 500
+							MouseMove, resetOutputX + 3, resetOutputY + 3
+							Sleep, 25
 							Click
 							Sleep, 1000
 							__Log("Reset warning window.")
@@ -603,49 +603,52 @@ __BotSetCampaign(c, o) {
 	} else {
 		currentPos = 0
 		__Log("Searching for the campaign.")
-		ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/c%c%.png
+		ImageSearch, OutputX, OutputY, 30, 295, 176, 626, *25 images/game/c%c%.png
 		if (ErrorLevel = 0) {
 			__Log("Found the campaign.")
 			__BotSetObjective(o, OutputX, OutputY)
 			Return
 		} else {
-			ImageSearch, upX, upY, 0, 0, 997, 671, *100 images/game/campaign_uparrow_active.png
+			ImageSearch, upX, upY, 0, 0, 997, 671, *50 images/game/campaign_uparrow_active.png
 			if (ErrorLevel = 0) {
 				upX += 10
 				upY += 10
 				Loop {
+					__Log("Up1")
 					MouseMove, upX, upY
 					Click
 					Sleep, 500
-					ImageSearch, upX, upY, 0, 0, 997, 671, *100 images/game/campaign_uparrow_inactive.png
+					ImageSearch, upX, upY, 0, 0, 997, 671, *50 images/game/campaign_uparrow_inactive.png
 					if (ErrorLevel = 0) {
 						Break
 					}
 				}
 			}
-			ImageSearch, upX, upY, 0, 0, 997, 671, *100 images/game/campaign_uparrow_inactive.png
-			ImageSearch, downX, downY, 0, 0, 997, 671, *100 images/game/campaign_downarrow_active.png
+			ImageSearch, upX, upY, 0, 0, 997, 671, *50 images/game/campaign_uparrow_inactive.png
+			ImageSearch, downX, downY, 0, 0, 997, 671, *50 images/game/campaign_downarrow_active.png
 			upX += 10
 			upY += 10
 			downX += 10
 			downY += 10
 			Loop {
+				__Log("Down1" . downX . " - " . downY)
 				MouseMove, downX, downY
 				Click
 				Sleep, 500
-				ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/c%c%.png
+				ImageSearch, OutputX, OutputY, 30, 295, 176, 626, *25 images/game/c%c%.png
 				if (ErrorLevel = 0) {
 					__Log("Found the campaign.")
 					__BotSetObjective(o, OutputX, OutputY)
 					Return
 				}
-				ImageSearch, downX, downY, 0, 0, 997, 671, *100 images/game/campaign_downarrow_inactive.png
+				ImageSearch, downX, downY, 0, 0, 997, 671, *50 images/game/campaign_downarrow_inactive.png
 				if (ErrorLevel = 0) {
 					Loop {
+						__Log("Up2")
 						MouseMove, upX, upY
 						Click
 						Sleep, 500
-						ImageSearch, upX, upY, 0, 0, 997, 671, *100 images/game/campaign_uparrow_inactive.png
+						ImageSearch, upX, upY, 0, 0, 997, 671, *50 images/game/campaign_uparrow_inactive.png
 						if (ErrorLevel = 0) {
 							Break
 						}
@@ -927,7 +930,9 @@ __BotGetIdolsCount() {
 			}
 			
 		}
-		Return, idols
+		if (idols) {
+			Return, idols
+		}
 		Sleep, 1000
 	}
 }

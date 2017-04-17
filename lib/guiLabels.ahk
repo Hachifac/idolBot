@@ -293,8 +293,6 @@ _GUIAdvancedOptions:
 	winW = 252
 	winH = 477
 	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/bAdvanced.png
-	guiAdvancedOptionsAdvancedTabImage = images/gui/guiAdvancedOptionsAdvanced_tab_active.png
-	guiAdvancedOptionsMoreTabImage = images/gui/guiAdvancedOptionsMore_tab_inactive.png
 	WinGetPos, Output2X, Output2Y
 	nX := Output2X + 30
 	nY := Output2Y - 30
@@ -334,7 +332,7 @@ _GUIStats:
 	Gosub, _GUICloseOtherWindows
 	GuiControl, BotGUI:, buttonStats, images/gui/bStats_active.png
 	winW = 252
-	winH = 325
+	winH = 261
 	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/guiMain_bg.png
 	WinGetPos, Output2X, Output2Y
 	nX := Output2X - ((winW - OutputW) / 2)
@@ -359,6 +357,20 @@ _GUIStats:
 	Gui, BotGUIStats: Show, x%nX% y%nY% w%winW% h%winH%, idolBot Stats
 	Return
 
+_GUIStatsIdolsTab:
+	GuiControl, BotGUIStats:, guiStatsIdolsTab, images/gui/guiStatsIdols_tab_active.png
+	GuiControl, BotGUIStats:, guiStatsChestsTab, images/gui/guiStatsChests_tab_inactive.png
+	GuiControl, BotGUIStats:Choose, guiStatsTabs, 1
+	Gui, BotGUIStats: Show, h261, idolBot Stats
+	Return
+	
+_GUIStatsChestsTab:
+	GuiControl, BotGUIStats:, guiStatsIdolsTab, images/gui/guiStatsIdols_tab_inactive.png
+	GuiControl, BotGUIStats:, guiStatsChestsTab, images/gui/guiStatsChests_tab_active.png
+	GuiControl, BotGUIStats:Choose, guiStatsTabs, 2
+	Gui, BotGUIStats: Show, h304, idolBot Stats
+	Return
+	
 _GUIAbout:
 	Gosub, _GUICloseOtherWindows
 	GuiControl, BotGUI:, buttonAbout, images/gui/bAbout_active.png

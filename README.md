@@ -5,7 +5,7 @@ It is meant to be used with Crusaders of The Lost Idols
 
 ## How to use
 
-Download the latest release [here](https://github.com/Hachifac/idolBot/releases)  
+Install [autohotkey](https://autohotkey.com/) then double-click (or right-click then run) idolBot.ahk  
 Press F8 to launch/pause/unpause
 
 ## License
