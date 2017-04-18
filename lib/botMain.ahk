@@ -10,17 +10,20 @@ FileCreateDir, stats
 
 Gosub, _BotLoadSettings
 
+Gosub, _BotSetHotkeys
+
 statsChestsThisRun = 0
 statsChestsThisSession = 0
 statsIdolsThisSession = 0
 
 Gosub, _BotLoadStats
 
-; Include the GUIs
-#include lib/guiMain.ahk
-
 ; Include the lists
 #include lib/listCrusaders.ahk
+#include lib/listKeys.ahk
+
+; Include the GUIs
+#include lib/guiMain.ahk
 
 CoordMode, Pixel, Client
 CoordMode, Mouse, Client
@@ -431,7 +434,7 @@ _GUIPos:
 	Return
 
 ; Pause key
-F8::
+_BotPause:
 	CoordMode, Pixel, Client
 	CoordMode, Mouse, Client
 	if (botPhase = -1) {
@@ -457,6 +460,27 @@ F8::
 	}
 	Return
 
+_BotSetHotkeys:
+	if (optPauseHotkey2) {
+		optPauseHotkey = %optPauseHotkey1% & %optPauseHotkey2%
+	} else {
+		optPauseHotkey := optPauseHotkey1
+	}
+	Hotkey, %optPauseHotkey%, _BotPause
+	if (optReloadHotkey2) {
+		optReloadHotkey = %optReloadHotkey1% & %optReloadHotkey2%
+	} else {
+		optReloadHotkey := optReloadHotkey1
+	}
+	Hotkey, %optReloadHotkey%, _BotReload
+	if (optExitHotkey2) {
+		optExitHotkey = %optExitHotkey1% & %optExitHotkey2%
+	} else {
+		optExitHotkey := optExitHotkey1
+	}
+	Hotkey, %optExitHotkey%, _BotExit
+	Return
+	
 ; Self-explanatory
 _GUIShowPause(status) {
 	if (status = false) {
@@ -929,12 +953,8 @@ __BotGetIdolsCount() {
 					Break
 				}
 			}
-			
 		}
-		if (idols) {
-			Return, idols
-		}
-		Sleep, 1000
+		Return, idols
 	}
 }
 
@@ -1082,6 +1102,12 @@ _BotLoadSettings:
 	IniRead, optLootItemsDuration, settings/settings.ini, Settings, lootitemsduration, 30
 	IniRead, optStormRiderFormation, settings/settings.ini, Settings, stormriderformation, 0
 	IniRead, optStormRiderMagnify, settings/settings.ini, Settings, stormridermagnify, 1
+	IniRead, optPauseHotkey1, settings/settings.ini, Settings, pausehotkey1, F8
+	IniRead, optPauseHotkey2, settings/settings.ini, Settings, pausehotkey2, %A_Space%
+	IniRead, optReloadHotkey1, settings/settings.ini, Settings, reloadhotkey1, F9
+	IniRead, optReloadHotkey2, settings/settings.ini, Settings, reloadhotkey2, %A_Space%
+	IniRead, optExitHotkey1, settings/settings.ini, Settings, exithotkey1, F10
+	IniRead, optExitHotkey2, settings/settings.ini, Settings, exithotkey2, %A_Space%
 	if (optFormation = 1) {
 		optFormationKey = q
 	}
@@ -1122,6 +1148,12 @@ _BotLoadSettings:
 	optTempStormRiderFormation := optStormRiderFormation
 	optTempStormRiderFormationKey := optStormRiderFormationKey
 	optTempStormRiderMagnify := optStormRiderMagnify
+	optTempPauseHotkey1 := optPauseHotkey1
+	optTempPauseHotkey2 := optPauseHotkey2
+	optTempReloadHotkey1 := optReloadHotkey1
+	optTempReloadHotkey2 := optReloadHotkey2
+	optTempExitHotkey1 := optExitHotkey1
+	optTempExitHotkey2 := optExitHotkey2
 	Return
 
 ; Self-explanatory
@@ -1145,6 +1177,12 @@ _BotRewriteSettings:
 	IniWrite, % optLootItemsDuration, settings/settings.ini, Settings, lootitemsduration
 	IniWrite, % optStormRiderFormation, settings/settings.ini, Settings, stormriderformation
 	IniWrite, % optStormRiderMagnify, settings/settings.ini, Settings, stormridermagnify
+	IniWrite, % optPauseHotkey1, settings/settings.ini, Settings, pausehotkey1
+	IniWrite, % optPauseHotkey2, settings/settings.ini, Settings, pausehotkey2
+	IniWrite, % optReloadHotkey1, settings/settings.ini, Settings, reloadhotkey1
+	IniWrite, % optReloadHotkey2, settings/settings.ini, Settings, reloadhotkey2
+	IniWrite, % optExitHotkey1, settings/settings.ini, Settings, exithotkey1
+	IniWrite, % optExitHotkey2, settings/settings.ini, Settings, exithotkey2
 	Return
 	
 _BotLoadStats:

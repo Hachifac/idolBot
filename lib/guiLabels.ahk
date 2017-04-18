@@ -203,6 +203,22 @@ _GUICloseAdvancedOptions:
 		GuiControl, BotGUIAdvancedOptions:, guiRelaunchGameStatusOff, images/gui/bOff_on.png
 	}
 	GuiControl, BotGUIAdvancedOptions: Choose, guiMoveGameWindowChoice, % optMoveGameWindow
+	GuiControl, BotGUIAdvancedOptions: ChooseString, guiPauseHotkey1Choice, % optPauseHotkey1
+	if (optPauseHotkey2) {
+		GuiControl, BotGUIAdvancedOptions: ChooseString, guiPauseHotkey2Choice, % optPauseHotkey2
+	} else {
+		GuiControl, BotGUIAdvancedOptions: Choose, guiPauseHotkey2Choice, 1
+	}
+	if (optReloadHotkey2) {
+		GuiControl, BotGUIAdvancedOptions: ChooseString, guiReloadHotkey2Choice, % optReloadHotkey2
+	} else {
+		GuiControl, BotGUIAdvancedOptions: Choose, guiReloadHotkey2Choice, 1
+	}
+	if (optExitHotkey2) {
+		GuiControl, BotGUIAdvancedOptions: ChooseString, guiExitHotkey2Choice, % optExitHotkey2
+	} else {
+		GuiControl, BotGUIAdvancedOptions: Choose, guiExitHotkey2Choice, 1
+	}
 	Return	
 
 _GUICloseStats:
@@ -250,8 +266,23 @@ _GUIApplyAdvancedOptions:
 	GuiControlGet, optLootItemsDuration,, guiLootItemsDuration
 	optRelaunchGame := optTempRelaunchGame
 	optMoveGameWindow := optTempMoveGameWindow
-	Gosub, _BotRewriteSettings
-	Gui, BotGUIAdvancedOptions: Hide
+	if (optTempPauseHotkey1 = optTempReloadHotkey1 and optTempPauseHotkey2 = optTempReloadHotkey2) {
+		MsgBox, You cannot have the same hotkeys for different actions.
+	} else if (optTempPauseHotkey1 = optTempExitHotkey1 and optTempPauseHotkey2 = optTempExitHotkey2) {
+		MsgBox, You cannot have the same hotkeys for different actions.
+	} else if (optTempReloadHotkey1 = optTempExitHotkey1 and optTempReloadHotkey2 = optTempExitHotkey2) {
+		MsgBox, You cannot have the same hotkeys for different actions.
+	} else {
+		optPauseHotkey1 := optTempPauseHotkey1
+		optPauseHotkey2 := optTempPauseHotkey2
+		optReloadHotkey1 := optTempReloadHotkey1
+		optReloadHotkey2 := optTempReloadHotkey2
+		optExitHotkey1 := optTempExitHotkey1
+		optExitHotkey2 := optTempExitHotkey2
+		Gosub, _BotRewriteSettings
+		Gosub, _BotSetHotkeys
+		Gui, BotGUIAdvancedOptions: Hide
+	}
 	Return
 	
 _GUIApplyOptions:
@@ -302,14 +333,127 @@ _GUIAdvancedOptions:
 _GUIAdvancedOptionsAdvancedTab:
 	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsAdvancedTab, images/gui/guiAdvancedOptionsAdvanced_tab_active.png
 	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsMoreTab, images/gui/guiAdvancedOptionsMore_tab_inactive.png
+	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsHotkeysTab, images/gui/guiAdvancedOptionsHotkeys_tab_inactive.png
 	GuiControl, BotGUIAdvancedOptions:Choose, guiAdvancedOptionsTabs, 1
 	Return
 	
 _GUIAdvancedOptionsMoreTab:
 	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsAdvancedTab, images/gui/guiAdvancedOptionsAdvanced_tab_inactive.png
 	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsMoreTab, images/gui/guiAdvancedOptionsMore_tab_active.png
+	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsHotkeysTab, images/gui/guiAdvancedOptionsHotkeys_tab_inactive.png
 	GuiControl, BotGUIAdvancedOptions:Choose, guiAdvancedOptionsTabs, 2
 	Return
+	
+_GUIAdvancedOptionsHotkeysTab:
+	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsAdvancedTab, images/gui/guiAdvancedOptionsAdvanced_tab_inactive.png
+	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsMoreTab, images/gui/guiAdvancedOptionsMore_tab_inactive.png
+	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsHotkeysTab, images/gui/guiAdvancedOptionsHotkeys_tab_active.png
+	GuiControl, BotGUIAdvancedOptions:Choose, guiAdvancedOptionsTabs, 3
+	Return
+
+ _GUIPauseHotkey1Unmask:
+	GuiControl, Hide, guiPauseHotkey1Mask
+	guiPauseHotkey1Show := true
+	GuiControl, BotGUIAdvancedOptions:, guiPauseHotkey1Choice, % listKeys
+	GuiControl, Show, guiPauseHotkey1Choice
+	Return
+	
+ _GUIPauseHotkey2Unmask:
+	if (guiPauseHotkey1Show = true) {
+		GuiControl, Hide, guiPauseHotkey2Mask
+		GuiControlGet, guiPauseHotkey1Choice
+		pauseHotkey2Choices := listKeys
+		GuiControl,, guiPauseHotkey2Choice, ||%pauseHotkey2Choices%
+		GuiControl, Show, guiPauseHotkey2Choice
+		GuiControl, ChooseString, guiPauseHotkey2Choice, % optPauseHotkey2
+	}
+	Return
+
+_GUIChoosePauseHotkey1:
+	Gui, Submit, NoHide
+	pauseHotkey2Choices := __ListKeysRemove(listKeys, guiPauseHotkey1Choice)
+	GuiControl,, guiPauseHotkey2Choice, ||%pauseHotkey2Choices%
+	GuiControl, ChooseString, guiPauseHotkey2Choice, % optTempPauseHotkey2
+	optTempPauseHotkey1 := guiPauseHotkey1Choice
+	Return
+	
+_GUIChoosePauseHotkey2:
+	Gui, Submit, NoHide
+	pauseHotkey1Choices := __ListKeysRemove(listKeys, guiPauseHotkey2Choice)
+	GuiControl,, guiPauseHotkey1Choice, ||%pauseHotkey1Choices%
+	GuiControl, ChooseString, guiPauseHotkey1Choice, % optTempPauseHotkey1
+	optTempPauseHotkey2 = %guiPauseHotkey2Choice%
+	Return
+
+ _GUIReloadHotkey1Unmask:
+	GuiControl, Hide, guiReloadHotkey1Mask
+	guiReloadHotkey1Show := true
+	GuiControl, BotGUIAdvancedOptions:, guiReloadHotkey1Choice, % listKeys
+	GuiControl, Show, guiReloadHotkey1Choice
+	GuiControl, ChooseString, guiReloadHotkey1Choice, % optReloadHotkey1
+	Return
+	
+ _GUIReloadHotkey2Unmask:
+	if (guiReloadHotkey1Show = true) {
+		GuiControl, Hide, guiReloadHotkey2Mask
+		GuiControlGet, guiReloadHotkey1Choice
+		reloadHotkey2Choices := __ListKeysRemove(listKeys, guiReloadHotkey1Choice)
+		GuiControl,, guiReloadHotkey2Choice, ||%reloadHotkey2Choices%
+		GuiControl, Show, guiReloadHotkey2Choice
+		GuiControl, ChooseString, guiReloadHotkey2Choice, % optReloadHotkey2
+	}
+	Return
+
+_GUIChooseReloadHotkey1:
+	Gui, Submit, NoHide
+	reloadHotkey2Choices := __ListKeysRemove(listKeys, guiReloadHotkey1Choice)
+	GuiControl,, guiReloadHotkey2Choice, ||%reloadHotkey2Choices%
+	GuiControl, ChooseString, guiReloadHotkey2Choice, % optTempReloadHotkey2
+	optTempReloadHotkey1 := guiReloadHotkey1Choice
+	Return
+	
+_GUIChooseReloadHotkey2:
+	Gui, Submit, NoHide
+	ReloadHotkey1Choices := __ListKeysRemove(listKeys, guiReloadHotkey2Choice)
+	GuiControl,, guiReloadHotkey1Choice, ||%ReloadHotkey1Choices%
+	GuiControl, ChooseString, guiReloadHotkey1Choice, % optTempReloadHotkey1
+	optTempReloadHotkey2 = %guiReloadHotkey2Choice%
+	Return
+
+ _GUIExitHotkey1Unmask:
+	GuiControl, Hide, guiExitHotkey1Mask
+	guiExitHotkey1Show := true
+	GuiControl, BotGUIAdvancedOptions:, guiExitHotkey1Choice, % listKeys
+	GuiControl, Show, guiExitHotkey1Choice
+	GuiControl, ChooseString, guiExitHotkey1Choice, % optExitHotkey1
+	Return
+	
+ _GUIExitHotkey2Unmask:
+	if (guiExitHotkey1Show = true) {
+		GuiControl, Hide, guiExitHotkey2Mask
+		GuiControlGet, guiExitHotkey1Choice
+		exitHotkey2Choices := __ListKeysRemove(listKeys, guiExitHotkey1Choice)
+		GuiControl,, guiExitHotkey2Choice, ||%exitHotkey2Choices%
+		GuiControl, Show, guiExitHotkey2Choice
+		GuiControl, ChooseString, guiExitHotkey2Choice, % optExitHotkey2
+	}
+	Return
+
+_GUIChooseExitHotkey1:
+	Gui, Submit, NoHide
+	exitHotkey2Choices := __ListKeysRemove(listKeys, guiExitHotkey1Choice)
+	GuiControl,, guiExitHotkey2Choice, ||%exitHotkey2Choices%
+	GuiControl, ChooseString, guiExitHotkey2Choice, % optTempExitHotkey2
+	optTempExitHotkey1 := guiExitHotkey1Choice
+	Return
+	
+_GUIChooseExitHotkey2:
+	Gui, Submit, NoHide
+	ExitHotkey1Choices := __ListKeysRemove(listKeys, guiExitHotkey2Choice)
+	GuiControl,, guiExitHotkey1Choice, ||%ExitHotkey1Choices%
+	GuiControl, ChooseString, guiExitHotkey1Choice, % optTempExitHotkey1
+	optTempExitHotkey2 = %guiExitHotkey2Choice%
+	Return	
 
 _GUISetRelaunchGameOn:
 	GuiControl,, guiRelaunchGameStatusOn, images/gui/bOn_on.png

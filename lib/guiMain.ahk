@@ -18,4 +18,4 @@ Gui, Add, Picture, x+2 yp+3 vbuttonOptions g_GUIOptions, images/gui/bOptions.png
 Gui, Add, Picture, x+5 vbuttonStormRider g_GUIStormRider, images/gui/bStormRider.png
 Gui, Add, Picture, x+5 vbuttonStats g_GUIStats, images/gui/bStats.png
 Gui, Add, Picture, x+5 vbuttonAbout g_GUIAbout, images/gui/bAbout.png
-Gui, Add, Picture, x+5 vbuttonClose gExitBot, images/gui/bClose.png
+Gui, Add, Picture, x+5 vbuttonClose g_BotExit, images/gui/bClose.png

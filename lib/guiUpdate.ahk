@@ -6,5 +6,10 @@ Gui, Color, 6C2509
 Gui, Font, s14 norm cFEFEFE, System
 
 Gui, Add, Picture, x0 y0, images/gui/guiUpdate_bg.png
+Gui, Add, Picture, x276 y0 g_GUICloseUpdate, images/gui/bClose.png
 
-Gui, Add, Picture, x175 y0 g_GUICloseUpdate, images/gui/bClose.png
+FileRead, changeLog, changelog.txt
+
+Gui, Add, Edit, x25 y46 w251 h229 ReadOnly, % changeLog
+Gui, Add, Picture, x67 y280 g_GUIUpdateDownload, images/gui/bDownload.png
+Gui, Add, Picture, x153 y280 g_GUIUpdateIgnore, images/gui/bIgnore.png

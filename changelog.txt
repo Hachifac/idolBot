@@ -1,0 +1,49 @@
+# 1.2.8
+---
+- Fixed a reset bug
+- Added custom hotkeys
+---
+# 1.2.7
+---
+- Fixed a reset bug
+- Removed useless files from the images folder
+---
+# 1.2.6
+---
+- Fixed a reset bug
+- Faster campaign selection
+- New stats GUI
+---
+#1.2.5
+---
+- Optional game relaunch
+- Optional move game window
+- Chat rooms can be disabled when set to 0
+- Lots of stability improvements
+- Added "On level" reset
+- Different loot items phase, the mouse now moves along the screen to better grab the loot
+- Added new options
+- Added Reset on level
+- Redid the reset phase
+- Better auto progress check (almost entirely removed)
+- Added new help buttons in the GUI
+- Changed how the GUI positioning behaves
+- Reworked the whole code, everything seems to work but a bug or two might have slipped in
+---
+# 1.2.0
+---
+- Added an update checker
+- Added default settings values
+---
+# 1.13.1
+---
+- Added lootItemsDuration in the settings/settings.ini, defaults at 30s
+- Added Level cap reset, currently in beta and requires enough gold after each loot items phase so not to reset prematurely
+---
+# 1.12
+---
+- Redesigned the UI
+- Added Stats
+- Added the use of Storm Rider with options
+- Added About
+- Added timed runs
