@@ -356,8 +356,9 @@ _GUIAdvancedOptionsHotkeysTab:
 	guiPauseHotkey1Show := true
 	GuiControl, BotGUIAdvancedOptions:, guiPauseHotkey1Choice, % listKeys
 	GuiControl, Show, guiPauseHotkey1Choice
+	GuiControl, ChooseString, guiPauseHotkey1Choice, % optPauseHotkey1
 	Return
-	
+
  _GUIPauseHotkey2Unmask:
 	if (guiPauseHotkey1Show = true) {
 		GuiControl, Hide, guiPauseHotkey2Mask

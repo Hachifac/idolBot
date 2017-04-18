@@ -28,6 +28,8 @@ Gosub, _BotLoadStats
 CoordMode, Pixel, Client
 CoordMode, Mouse, Client
 
+lastProgressCheck = 0
+
 SetTimer, _GUIPos, 100 ; Every 100ms we position the GUI below the game
 SetTimer, _BotScanForChests, 1000
 
@@ -118,7 +120,11 @@ idolBot:
 						}
 						; Open options window to see if auto progress is on
 						__Log("Initial auto progress check...")
-						Gosub, _BotSetAutoProgress
+						if (optResetType = 2) {
+							_BotSetAutoProgress(true)
+						} else {
+							_BotSetAutoProgress(false)
+						}
 						Loop {
 							; We look at Jim's buy button to know if we can select the formation
 							PixelGetColor, Output, 244, 595, RGB
@@ -199,9 +205,22 @@ idolBot:
 					if (optResetType = 1 or optResetType = 2 or optResetType = 5 or optResetType = 6) {
 						
 					}
-					if (optResetType = 2 and maxProgressStatus = true) {
-						__Log("Max progress achieved.")
-						botPhase = 3
+					; If the last time we did an auto progress check is >= than autoProgressCheckDelay, we initiate an auto progress check
+					if (optResetType = 2 and __UnixTime(A_Now) - lastProgressCheck >= optAutoProgressCheckDelay) {
+						; Every autoProgressCheckDelay seconds we take a look if Auto Progress is still activated, if it's not it means we died so achieved the highest zone we could, we have to reset
+						lastProgressCheck = % __UnixTime(A_Now)
+						Log("Auto progress check for max progress.")
+						if (__BotCheckAutoProgress() = false) {
+							if (__UnixTime(A_Now) - botRunLaunchTime < 60) {
+								; Stuck at beginning, might be the formation not active
+								Log("Might be stuck at the beginning.")
+								send, {%optFormationKey%}
+								Sleep, 100
+								Send, {g}
+							} else {
+								botPhase = 3
+							}
+						}
 					}
 					if (optResetType = 3) {
 						if (levelCapResetCheck = true) {
@@ -452,9 +471,9 @@ _BotPause:
 			__Log("Unpaused.")
 			_GUIShowPause(false)
 			WinActivate, Crusaders of The Lost Idols
-			if (botPhase = 1 or botPhase = 2) {
+			if (botPhase = 1 or botPhase = 2 and optResetType != 2) {
 				Gosub, _BotCloseWindows
-				Gosub, _BotSetAutoProgress
+				_BotSetAutoProgress(false)
 			}
 		}
 	}
@@ -863,12 +882,15 @@ __BotUseSkill(s) {
 }
 
 ; Sets the auto progress to false
-_BotSetAutoProgress:
+_BotSetAutoProgress(s) {
 	__Log("Auto progress check at startup")
-	if (__BotCheckAutoProgress() = true) {
+	Global lastProgressCheck
+	lastProgressCheck = % __UnixTime(A_Now)
+	if (__BotCheckAutoProgress() != s) {
 		Send, {g}
 	}
 	Return
+}
 
 ; Check if the auto progress is set to true or false
 __BotCheckAutoProgress() {
@@ -991,10 +1013,6 @@ _BotGetCurrentLevel:
 			if (botLevelCurrentCursor = 5 and botLevelPreviousCursor = 1) {
 				botCurrentLevel--
 				botLevelPreviousCursor = 5
-				if (optResetType = 2) {
-					maxProgressStatus := true
-					botSkipToReset := true
-				}
 			} else {
 				if (botLevelCurrentCursor - botLevelPreviousCursor > 1) { ; Lost count
 					__Log("Lost level count... Reset might not occur.")
@@ -1015,10 +1033,6 @@ _BotGetCurrentLevel:
 				} else {
 					botCurrentLevel--
 					botLevelPreviousCursor := botLevelCurrentCursor
-					if (optResetType = 2) {
-						maxProgressStatus := true
-						botSkipToReset := true
-					}
 				}
 			}
 		}
@@ -1099,6 +1113,7 @@ _BotLoadSettings:
 	IniRead, optResetOnLevel, settings/settings.ini, Settings, resetonlevel, 100
 	IniRead, optRelaunchGame, settings/settings.ini, Settings, relaunchgame, 0
 	IniRead, optMoveGameWindow, settings/settings.ini, Settings, movegamewindow, 1
+	IniRead, optAutoProgressCheckDelay, settings/settings.ini, Settings, autoprogresscheckdelay, 120
 	IniRead, optLootItemsDuration, settings/settings.ini, Settings, lootitemsduration, 30
 	IniRead, optStormRiderFormation, settings/settings.ini, Settings, stormriderformation, 0
 	IniRead, optStormRiderMagnify, settings/settings.ini, Settings, stormridermagnify, 1
@@ -1145,6 +1160,7 @@ _BotLoadSettings:
 	optTempResetOnLevel := optResetOnLevel
 	optTempRelaunchGame := optRelaunchGame
 	optTempMoveGameWindow := optMoveGameWindow
+	optTempAutoProgressCheckDelay := optAutoProgressCheckDelay
 	optTempStormRiderFormation := optStormRiderFormation
 	optTempStormRiderFormationKey := optStormRiderFormationKey
 	optTempStormRiderMagnify := optStormRiderMagnify
@@ -1175,6 +1191,7 @@ _BotRewriteSettings:
 	IniWrite, % optRelaunchGame, settings/settings.ini, Settings, relaunchgame
 	IniWrite, % optMoveGameWindow, settings/settings.ini, Settings, movegamewindow
 	IniWrite, % optLootItemsDuration, settings/settings.ini, Settings, lootitemsduration
+	IniWrite, % optAutoProgressCheckDelay, settings/settings.ini, Settings, autoprogresscheckdelay
 	IniWrite, % optStormRiderFormation, settings/settings.ini, Settings, stormriderformation
 	IniWrite, % optStormRiderMagnify, settings/settings.ini, Settings, stormridermagnify
 	IniWrite, % optPauseHotkey1, settings/settings.ini, Settings, pausehotkey1
