@@ -45,7 +45,8 @@ _GUIUpdateDownload:
 	Return
 	
 _GUIUpdateIgnore:
-	FileAppend, #%download%, version
+	FileDelete, version
+	FileAppend, % fVersion[1] . "#" . fVersion[2] . "#" . gVersion[2], version
 	Goto, _GUICloseUpdate
 	Return
 	

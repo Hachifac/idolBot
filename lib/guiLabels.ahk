@@ -122,6 +122,12 @@ _GUIHelpAdvanced:
 			help = When active, the bot will relaunch the game after every resets.`nThis is useful if your game experiences memory leak.
 		} else if (OutputVarControl = "Static13") {
 			help = Move the game to the desired position when launching the bot
+		} else if (OutputVarControl = "Static16") {
+			help = When activated, the bot will check if max progress has been achieved regardless of the reset type (Fast mode excluded).`nExample: You set reset to On level 400 but your formation dies on 300, the bot will reset.
+		} else if (OutputVarControl = "Static17") {
+			help = Delay, in seconds, between each Auto progress check
+		} else if (OutputVarControl = "Static20") {
+			help = Due to some limitations, if you proceed to pause the bot then manually play for a while, the bot could lose the current level.`nExample: You set reset to level 750 and you pause the bot on level 500 and unpause it on level 700, the bot still thinks it's on level 500 and won't reset until the game reaches the level 950.`nTurning this on will prompt you with a popup to set the current level every time you unpause.
 		} else {
 			ToolTip,
 			Break
@@ -203,7 +209,25 @@ _GUICloseAdvancedOptions:
 		GuiControl, BotGUIAdvancedOptions:, guiRelaunchGameStatusOff, images/gui/bOff_on.png
 	}
 	GuiControl, BotGUIAdvancedOptions: Choose, guiMoveGameWindowChoice, % optMoveGameWindow
+	if (optAutoProgressCheck = 1) {
+		GuiControl, BotGUIAdvancedOptions:, guiAutoProgressCheckStatusOn, images/gui/bOn_on.png
+		GuiControl, BotGUIAdvancedOptions:, guiAutoProgressCheckStatusOff, images/gui/bOff_off.png
+	} else {
+		GuiControl, BotGUIAdvancedOptions:, guiAutoProgressCheckStatusOn, images/gui/bOn_off.png
+		GuiControl, BotGUIAdvancedOptions:, guiAutoProgressCheckStatusOff, images/gui/bOff_on.png
+	}
+	GuiControl, BotGUIAdvancedOptions:, guiAutoProgressCheckDelay, % optAutoProgressCheckDelay
+	GuiControl, BotGUIAdvancedOptions: Choose, guiMoveGameWindowChoice, % optMoveGameWindow
+	if (optPromptCurrentLevel = 1) {
+		GuiControl, BotGUIAdvancedOptions:, guiPromptCurrentLevelStatusOn, images/gui/bOn_on.png
+		GuiControl, BotGUIAdvancedOptions:, guiPromptCurrentLevelStatusOff, images/gui/bOff_off.png
+	} else {
+		GuiControl, BotGUIAdvancedOptions:, guiPromptCurrentLevelStatusOn, images/gui/bOn_off.png
+		GuiControl, BotGUIAdvancedOptions:, guiPromptCurrentLevelStatusOff, images/gui/bOff_on.png
+	}
 	GuiControl, BotGUIAdvancedOptions: ChooseString, guiPauseHotkey1Choice, % optPauseHotkey1
+	GuiControl, BotGUIAdvancedOptions: ChooseString, guiReloadHotkey1Choice, % optReloadHotkey1
+	GuiControl, BotGUIAdvancedOptions: ChooseString, guiExitHotkey1Choice, % optExitHotkey1
 	if (optPauseHotkey2) {
 		GuiControl, BotGUIAdvancedOptions: ChooseString, guiPauseHotkey2Choice, % optPauseHotkey2
 	} else {
@@ -266,13 +290,32 @@ _GUIApplyAdvancedOptions:
 	GuiControlGet, optLootItemsDuration,, guiLootItemsDuration
 	optRelaunchGame := optTempRelaunchGame
 	optMoveGameWindow := optTempMoveGameWindow
-	if (optTempPauseHotkey1 = optTempReloadHotkey1 and optTempPauseHotkey2 = optTempReloadHotkey2) {
-		MsgBox, You cannot have the same hotkeys for different actions.
-	} else if (optTempPauseHotkey1 = optTempExitHotkey1 and optTempPauseHotkey2 = optTempExitHotkey2) {
-		MsgBox, You cannot have the same hotkeys for different actions.
-	} else if (optTempReloadHotkey1 = optTempExitHotkey1 and optTempReloadHotkey2 = optTempExitHotkey2) {
-		MsgBox, You cannot have the same hotkeys for different actions.
+	optAutoProgressCheck := optTempAutoProgressCheck
+	GuiControlGet, optAutoProgressCheckDelay,, guiAutoProgressCheckDelay
+	optPromptCurrentLevel := optTempPromptCurrentLevel
+	proceed := false
+	if (optTempPauseHotkey1 = optTempReloadHotkey1) {
+		if (optTempPauseHotkey2 = optTempReloadHotkey2) {
+			MsgBox, You cannot have the same hotkeys for different actions.
+		} else {
+			proceed := true
+		}
+	} else if (optTempPauseHotkey1 = optTempExitHotkey1) {
+		if (optTempPauseHotkey2 = optTempExitHotkey2) {
+			MsgBox, You cannot have the same hotkeys for different actions.
+		} else {
+			proceed := true
+		}
+	} else if (optTempReloadHotkey1 = optTempExitHotkey1) {
+		if (optTempReloadHotkey2 = optTempExitHotkey2) {
+			MsgBox, You cannot have the same hotkeys for different actions.
+		} else {
+			proceed := true
+		}
 	} else {
+		proceed := true
+	}
+	if (proceed = true) {
 		optPauseHotkey1 := optTempPauseHotkey1
 		optPauseHotkey2 := optTempPauseHotkey2
 		optReloadHotkey1 := optTempReloadHotkey1
@@ -308,6 +351,23 @@ _GUIApplyStormRider:
 	Gui, BotGUIStormRider: Hide
 	Return	
 
+_GUIApplyCurrentLevel:
+	GuiControlGet, botCurrentLevel,, guiCurrentLevel
+	Gui, BotGUICurrentLevel: Hide
+	Pause,, 1
+	__GUIShowPause(false)
+	Return
+
+_GUICurrentLevel:
+	Pause,, 1
+	winW = 220
+	winH = 149
+	WinGetPos, X, Y, W, H, Crusaders of The Lost Idols
+	nX := X + W / 2 - winW / 2
+	nY := Y + H / 2 - winH / 2
+	Gui, BotGUICurrentLevel: Show, x%nX% y%nY% w%winW% h%winH%, BotGUICurrentLevel
+	Return
+	
 _GUIOptions:
 	Gosub, _GUICloseOtherWindows
 	GuiControl, BotGUI:, buttonOptions, images/gui/bOptions_active.png
@@ -317,6 +377,9 @@ _GUIOptions:
 	WinGetPos, Output2X, Output2Y
 	nX := Output2X - ((winW - OutputW) / 2)
 	nY := Output2Y - winH
+	if (botPhase > 0) {
+		GuiControl, BotGUIOptions:Disable, guiResetChoice
+	}
 	Gui, BotGUIOptions: Show, x%nX% y%nY% w%winW% h%winH%, idolBot Options
 	Return
 
@@ -360,14 +423,12 @@ _GUIAdvancedOptionsHotkeysTab:
 	Return
 
  _GUIPauseHotkey2Unmask:
-	if (guiPauseHotkey1Show = true) {
-		GuiControl, Hide, guiPauseHotkey2Mask
-		GuiControlGet, guiPauseHotkey1Choice
-		pauseHotkey2Choices := listKeys
-		GuiControl,, guiPauseHotkey2Choice, ||%pauseHotkey2Choices%
-		GuiControl, Show, guiPauseHotkey2Choice
-		GuiControl, ChooseString, guiPauseHotkey2Choice, % optPauseHotkey2
-	}
+	GuiControl, Hide, guiPauseHotkey2Mask
+	GuiControlGet, guiPauseHotkey1Choice
+	pauseHotkey2Choices := listKeys
+	GuiControl,, guiPauseHotkey2Choice, ||%pauseHotkey2Choices%
+	GuiControl, Show, guiPauseHotkey2Choice
+	GuiControl, ChooseString, guiPauseHotkey2Choice, % optPauseHotkey2
 	Return
 
 _GUIChoosePauseHotkey1:
@@ -386,23 +447,20 @@ _GUIChoosePauseHotkey2:
 	optTempPauseHotkey2 = %guiPauseHotkey2Choice%
 	Return
 
- _GUIReloadHotkey1Unmask:
+_GUIReloadHotkey1Unmask:
 	GuiControl, Hide, guiReloadHotkey1Mask
-	guiReloadHotkey1Show := true
 	GuiControl, BotGUIAdvancedOptions:, guiReloadHotkey1Choice, % listKeys
 	GuiControl, Show, guiReloadHotkey1Choice
 	GuiControl, ChooseString, guiReloadHotkey1Choice, % optReloadHotkey1
 	Return
 	
- _GUIReloadHotkey2Unmask:
-	if (guiReloadHotkey1Show = true) {
-		GuiControl, Hide, guiReloadHotkey2Mask
-		GuiControlGet, guiReloadHotkey1Choice
-		reloadHotkey2Choices := __ListKeysRemove(listKeys, guiReloadHotkey1Choice)
-		GuiControl,, guiReloadHotkey2Choice, ||%reloadHotkey2Choices%
-		GuiControl, Show, guiReloadHotkey2Choice
-		GuiControl, ChooseString, guiReloadHotkey2Choice, % optReloadHotkey2
-	}
+_GUIReloadHotkey2Unmask:
+	GuiControl, Hide, guiReloadHotkey2Mask
+	GuiControlGet, guiReloadHotkey1Choice
+	reloadHotkey2Choices := __ListKeysRemove(listKeys, guiReloadHotkey1Choice)
+	GuiControl,, guiReloadHotkey2Choice, ||%reloadHotkey2Choices%
+	GuiControl, Show, guiReloadHotkey2Choice
+	GuiControl, ChooseString, guiReloadHotkey2Choice, % optReloadHotkey2
 	Return
 
 _GUIChooseReloadHotkey1:
@@ -421,23 +479,20 @@ _GUIChooseReloadHotkey2:
 	optTempReloadHotkey2 = %guiReloadHotkey2Choice%
 	Return
 
- _GUIExitHotkey1Unmask:
+_GUIExitHotkey1Unmask:
 	GuiControl, Hide, guiExitHotkey1Mask
-	guiExitHotkey1Show := true
 	GuiControl, BotGUIAdvancedOptions:, guiExitHotkey1Choice, % listKeys
 	GuiControl, Show, guiExitHotkey1Choice
 	GuiControl, ChooseString, guiExitHotkey1Choice, % optExitHotkey1
 	Return
 	
- _GUIExitHotkey2Unmask:
-	if (guiExitHotkey1Show = true) {
-		GuiControl, Hide, guiExitHotkey2Mask
-		GuiControlGet, guiExitHotkey1Choice
-		exitHotkey2Choices := __ListKeysRemove(listKeys, guiExitHotkey1Choice)
-		GuiControl,, guiExitHotkey2Choice, ||%exitHotkey2Choices%
-		GuiControl, Show, guiExitHotkey2Choice
-		GuiControl, ChooseString, guiExitHotkey2Choice, % optExitHotkey2
-	}
+_GUIExitHotkey2Unmask:
+	GuiControl, Hide, guiExitHotkey2Mask
+	GuiControlGet, guiExitHotkey1Choice
+	exitHotkey2Choices := __ListKeysRemove(listKeys, guiExitHotkey1Choice)
+	GuiControl,, guiExitHotkey2Choice, ||%exitHotkey2Choices%
+	GuiControl, Show, guiExitHotkey2Choice
+	GuiControl, ChooseString, guiExitHotkey2Choice, % optExitHotkey2
 	Return
 
 _GUIChooseExitHotkey1:
@@ -472,6 +527,30 @@ _GUIChooseMoveGameWindow:
 	Gui, Submit, NoHide
 	optTempMoveGameWindow := guiMoveGameWindowChoice
 	Return
+
+_GUISetAutoProgressCheckOn:
+	GuiControl,, guiAutoProgressCheckStatusOn, images/gui/bOn_on.png
+	GuiControl,, guiAutoProgressCheckStatusOff, images/gui/bOff_off.png
+	optTempAutoProgressCheck = 1
+	Return
+
+_GUISetAutoProgressCheckOff:
+	GuiControl,, guiAutoProgressCheckStatusOn, images/gui/bOn_off.png
+	GuiControl,, guiAutoProgressCheckStatusOff, images/gui/bOff_on.png
+	optTempAutoProgressCheck = 0
+	Return
+	
+_GUISetPromptCurrentLevelOn:
+	GuiControl,, guiPromptCurrentLevelStatusOn, images/gui/bOn_on.png
+	GuiControl,, guiPromptCurrentLevelStatusOff, images/gui/bOff_off.png
+	optTempPromptCurrentLevel = 1
+	Return
+
+_GUISetPromptCurrentLevelOff:
+	GuiControl,, guiPromptCurrentLevelStatusOn, images/gui/bOn_off.png
+	GuiControl,, guiPromptCurrentLevelStatusOff, images/gui/bOff_on.png
+	optTempPromptCurrentLevel = 0
+	Return	
 	
 _GUIStats:
 	Gosub, _GUICloseOtherWindows

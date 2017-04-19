@@ -6,6 +6,7 @@ SendMode Input
 #include lib/guiStormRider.ahk
 #include lib/guiStats.ahk
 #include lib/guiAbout.ahk
+#include lib/guiCurrentLevel.ahk
 
 Gui, BotGUI: New, -Caption, idolBot
 Gui, Color, 913A0D

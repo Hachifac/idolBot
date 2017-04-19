@@ -56,6 +56,34 @@ Gui, Add, Picture, x+148 yp+4 g_GUIHelpAdvanced, images/gui/bHelp.png
 Gui, Add, DropDownList, x15 y+32 w120 Choose%optMoveGameWindow% vguiMoveGameWindowChoice g_GUIChooseMoveGameWindow altSubmit, Don't move|Left|Top-Left|Top-Center|Top-Right|Right|Center
 Gui, Add, Picture, x+90 yp+4 g_GUIHelpAdvanced, images/gui/bHelp.png
 
+if (optAutoProgressCheck = 1) {
+	autoProgressCheckStatusOn := "images/gui/bOn_on.png"
+	autoProgressCheckStatusOff := "images/gui/bOff_off.png"
+} else {
+	autoProgressCheckStatusOn := "images/gui/bOn_off.png"
+	autoProgressCheckStatusOff := "images/gui/bOff_on.png"
+}
+
+Gui, Add, Picture, x15 y+32 vguiAutoProgressCheckStatusOn g_GUISetAutoProgressCheckOn, %autoProgressCheckStatusOn%
+Gui, Add, Picture, x+2 vguiAutoProgressCheckStatusOff g_GUISetAutoProgressCheckOff, %autoProgressCheckStatusOff%
+Gui, Add, Picture, x+148 yp+4 g_GUIHelpAdvanced, images/gui/bHelp.png
+
+Gui, Add, Edit, x15 y+30 w180
+Gui, Add, UpDown, vguiAutoProgressCheckDelay Range1-2147483647, %optAutoProgressCheckDelay%
+Gui, Add, Picture, x+30 yp+4 g_GUIHelpAdvanced, images/gui/bHelp.png
+
+if (optPromptCurrentLevel = 1) {
+	promptCurrentLevelStatusOn := "images/gui/bOn_on.png"
+	promptCurrentLevelStatusOff := "images/gui/bOff_off.png"
+} else {
+	promptCurrentLevelStatusOn := "images/gui/bOn_off.png"
+	promptCurrentLevelStatusOff := "images/gui/bOff_on.png"
+}
+
+Gui, Add, Picture, x15 y+32 vguiPromptCurrentLevelStatusOn g_GUISetPromptCurrentLevelOn, %promptCurrentLevelStatusOn%
+Gui, Add, Picture, x+2 vguiPromptCurrentLevelStatusOff g_GUISetPromptCurrentLevelOff, %promptCurrentLevelStatusOff%
+Gui, Add, Picture, x+148 yp+4 g_GUIHelpAdvanced, images/gui/bHelp.png
+
 Gui, Tab, 3
 Gui, Add, Picture, x0 y0, images/gui/guiAdvancedOptionsHotkeys_bg.png
 
@@ -82,21 +110,15 @@ Gui, Add, Picture, x227 y0 g_GUICloseAdvancedOptions, images/gui/bClose.png
 Gui, Add, Picture, x95 y432 g_GUIApplyAdvancedOptions, images/gui/bApply.png
 
 GuiControl, ChooseString, guiResetCrusader, %optResetCrusader%
-if (optPauseHotkey1 != "F8") {
+if (optPauseHotkey1 != "F8" or (optPauseHotkey1 = "F8" and optPauseHotkey2)) {
 	Gosub, _GUIPauseHotkey1Unmask
-}
-if (optPauseHotkey2) {
 	Gosub, _GUIPauseHotkey2Unmask
 }
-if (optReloadHotkey1 != "F9") {
+if (optReloadHotkey1 != "F9" or (optReloadHotkey1 = "F9" and optReloadHotkey2)) {
 	Gosub, _GUIReloadHotkey1Unmask
-}
-if (optReloadHotkey2) {
 	Gosub, _GUIReloadHotkey2Unmask
 }
-if (optExitHotkey1 != "F10") {
+if (optExitHotkey1 != "F10" or (optExitHotkey1 = "F10" and optExitHotkey2)) {
 	Gosub, _GUIExitHotkey1Unmask
-}
-if (optExitHotkey2) {
 	Gosub, _GUIExitHotkey2Unmask
 }

@@ -1,6 +1,13 @@
-# 1.2.9
 ---
-- Changed Max progress reset
+# http://www.reddit.com/r/cotlibot
+---
+# 1.3.0
+---
+- Auto progress checks are now enforced on Max progress resets
+- Auto progress checks can be activated for other reset types
+- Added an optional current level prompt, when the reset is set at On level and the user pauses then unpauses the bot, he can set the current run level
+- New update window with ignore update feature and direct download link
+- Redid the whole campaign selection phase
 ---
 # 1.2.8
 ---
