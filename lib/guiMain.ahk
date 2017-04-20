@@ -7,6 +7,7 @@ SendMode Input
 #include lib/guiStats.ahk
 #include lib/guiAbout.ahk
 #include lib/guiCurrentLevel.ahk
+#include lib/guiDev.ahk
 
 Gui, BotGUI: New, -Caption, idolBot
 Gui, Color, 913A0D

@@ -618,3 +618,13 @@ _GUIStormRider:
 	nY := Output2Y - winH
 	Gui, BotGUIStormRider: Show, x%nX% y%nY% w%winW% h%winH%, idolBot Storm Rider
 	Return
+	
+_GUIDevLogging:
+	if (optDevLogging = 1) {
+		optDevLogging = 0
+		GuiControl, BotGUIDev:, guiDevLoggingStatus, images/gui/bLoggingOff.png
+	} else {
+		optDevLogging = 1
+		GuiControl, BotGUIDev:, guiDevLoggingStatus, images/gui/bLoggingOn.png
+	}
+	Return

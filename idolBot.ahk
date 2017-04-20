@@ -11,17 +11,15 @@ whr.Send()
 whr.WaitForResponse()
 gVersion := whr.ResponseText
 gVersion := StrSplit(gVersion, "#")
-rGVersion := gVersion[2]
 
 FileRead, fVersion, version
 fVersion := StrSplit(fVersion, "#")
-fRVersion := fVersion[2]
 
 download := gVersion[2]
 
 #include lib/guiUpdate.ahk
 
-if (fRVersion < rGVersion and gVersion[2] > fVersion[3]) {
+if (fVersion[1] < gVersion[2] and gVersion[2] > fVersion[3]) {
 	winW = 301
 	winH = 321
 	nX := A_ScreenWidth / 2 - winW / 2

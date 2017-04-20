@@ -1,8 +1,9 @@
 ﻿#NoEnv
 SendMode Input
 
-__Log("------------- idolBot by Hachifac -------------")
-__Log("------- Crusaders of The Lost Idols bot -------")
+optDevConsole = 0
+__Log("- idolBot by Hachifac -")
+__Log("- Crusaders of The Lost Idols bot -")
 
 FileCreateDir, logs
 FileCreateDir, settings
@@ -25,7 +26,6 @@ Gosub, _BotLoadStats
 
 ; Include the GUIs
 #include lib/guiMain.ahk
-
 CoordMode, Pixel, Client
 CoordMode, Mouse, Client
 
@@ -101,12 +101,18 @@ idolBot:
 		if (botPhase > 0) {
 			__Log("Bot launched.")
 			; We look for overlays throughout phase 1 & 2
+			attempt = 0
 			Loop {
 				WinActivate, Crusaders of The Lost Idols
 				if (botPhase = 1 or botPhase = 2) {
 					Gosub, _BotCloseWindows
 				}
 				if (botPhase = 1) {
+					attempt++
+					if (attempt > 5) {
+						attempt = 0
+						Gosub, _BotCampaignStart
+					}
 					botRelaunching = false
 					MouseMove, 550, 50
 					__Log("Waiting for the campaign to load.")
@@ -251,6 +257,12 @@ idolBot:
 							}
 						}
 					}
+					
+					if (optResetType = 5 and __UnixTime(A_Now) - botRunLaunchTime >= (optRunTime * 60)) {
+						botSkipToReset := true
+						botPhase = 3
+					}
+					
 					if (optResetType = 6) {
 						if (botCurrentLevel >= optResetOnLevel) {
 							__Log("Level " . optResetOnLevel . " reached.")
@@ -260,6 +272,7 @@ idolBot:
 					}
 					if (botSkipToReset = false) {
 						if (optStormRiderMagnify = 0) {
+							__Log("Using all skills.")
 							__BotUseSkill(0)
 						} else {
 							PixelSearch, OutputX, OutputY, 382, 449, 421, 488, 0x0000FE,, Fast
@@ -277,6 +290,7 @@ idolBot:
 									if (Output != 0x3A3A3A) {
 										PixelGetColor, Output, 590, 466, RGB
 										if (Output != 0x3A3A3A) {
+											__Log("Using Storm Rider.")
 											Send, 2
 											Sleep, 25
 											Send, 7
@@ -295,7 +309,7 @@ idolBot:
 					}
 				}
 				; If optRunTime time elapsed or phase is set at 3, we reset
-				if (((optResetType = 5 and __UnixTime(A_Now) - botRunLaunchTime >= (optRunTime * 60)) or botPhase = 3) and optResetType > 1) {
+				if (botPhase = 3 and optResetType > 1) {
 					botDelayReset := false
 					resetPhase = 0
 					__Log("Cannot progress further, time to reset.")
@@ -445,6 +459,17 @@ _GUIPos:
 			nW := W
 			nX := X + W / 2 - 225 / 2 + 2
 			Gui, BotGUI: Show, x%nX% y%nY% w227 h35 NoActivate, BotGUI
+			nX := X + W
+			nY := Y + H - 677
+		}
+		if (optDevConsole = 1) {
+			GuiControl, BotGUIDev:, guiDevLogs, % devLogs
+			if (!botDevGUIID) {
+				WinGet, botDevGUIID, ID, BotGUI Dev ahk_class AutoHotkeyGUI
+			}
+			WM_VSCROLL = 0x115
+			SB_BOTTOM = 7
+			SendMessage, WM_VSCROLL, SB_BOTTOM, 0, Edit2, ahk_id %botDevGUIID%
 		}
 	}
 	IfWinNotExist, Crusaders of The Lost Idols
@@ -490,6 +515,18 @@ _BotPause:
 	WinActivate, Crusaders of The Lost Idols
 	Return
 
+; Dev console key = ~
+#IfWinActive Crusaders of The Lost Idols
+SC029::
+	if (optDevConsole = 0) {
+		optDevConsole = 1
+		Gui, BotGUIDev: Show, x%nX% y%nY% w300 h675 NoActivate, BotGUI Dev
+	} else {
+		optDevConsole = 0
+		Gui, BotGUIDev: Hide
+	}
+	Return
+	
 _BotSetHotkeys:
 	if (optPauseHotkey2) {
 		optPauseHotkey = %optPauseHotkey1% & %optPauseHotkey2%
@@ -654,36 +691,53 @@ __BotSetCampaign(c) {
 		__Log("Starting the event campaign.")
 		Return
 	} else {
-		MouseMove, 585, 165
-		Loop, 10 {
-			Click
-			Sleep, 25
+		Loop {
+			__Log("Setting the campaign.")
+			fpX = 540
+			__Log("Determining if an event is going on.")
+			ImageSearch, upX, upY, 565, 150, 610, 185, *150 images/game/campaign_uparrow_active.png
+			if (ErrorLevel = 0) {
+				__Log("No event is going on.")
+				down = 1
+				fpY = 2
+			} else {
+				ImageSearch, upX, upY, 565, 150, 610, 185, *150 images/game/campaign_uparrow_inactive.png
+				if (ErrorLevel = 0) {
+					__Log("No event is going on.")
+					down = 1
+					fpY = 2
+				}  else {
+					__Log("An event is going on.")
+					down = 3
+					fpY = 4
+				}
+			}
+			if (down = 1) {
+				MouseMove, 585, 165
+			} else {
+				MouseMove, 585, 310
+			}
+			Loop, 10 {
+				Click
+				Sleep, 25
+			}
+			MouseMove, 585, 605
+			Loop, % listCampaigns[c][down] {
+				Click
+				Sleep, 250
+			}
+			Sleep, 500
+			ImageSearch, cX, cY, 30, 150, 184, 620, *100 images/game/c%c%.png
+			if (ErrorLevel = 0) {
+				MouseMove, cX + 508, cY + 83
+				Click
+				Sleep, 100
+				MouseMove, 785, 570
+				Sleep, 25
+				Click
+				Break
+			}
 		}
-		__Log("Setting the campaign.")
-		fpX = 540
-		__Log("Determining if an event is going on.")
-		ImageSearch, wwX, wwY, 34, 153, 175, 263, *150 images/game/ww.png
-		if (ErrorLevel = 0) {
-			__Log("No event is going on.")
-			down = 1
-			fpY = 2
-		} else {
-			__Log("An event is going on.")
-			down = 3
-			fpY = 4
-		}
-		MouseMove, 585, 605
-		Loop, % listCampaigns[c][down] {
-			Click
-			Sleep, 100
-		}
-		Sleep, 500
-		MouseMove, fpX, listCampaigns[c][fpY]
-		Click
-		Sleep, 100
-		MouseMove, 785, 570
-		Sleep, 25
-		Click
 	}
 }
 
@@ -1046,9 +1100,17 @@ _BotScanForChests:
 	Return
 
 ; __Log function
-__Log(__Log) {
+__Log(log) {
+	Global devLogs
+	Global optDevConsole
+	Global optDevLogging
 	FormatTime, TimeOutput, A_Now, yyyy/M/d - HH:mm:ss
-	FileAppend, [%TimeOutput%] %__Log%`n, logs/logs.txt
+	FileAppend, [%TimeOutput%] %log%`n, logs/logs.txt
+	if (optDevLogging = 1) {
+		FormatTime, TimeOutput, A_Now, HH:mm:ss
+		devLogs = %devLogs%`n%TimeOutput%: %log%
+		devLogs := regexreplace(devLogs, "^\s+")
+	}
 	Return
 }
 
