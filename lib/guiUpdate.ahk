@@ -8,7 +8,7 @@ Gui, Font, s14 norm cFEFEFE, System
 Gui, Add, Picture, x0 y0, images/gui/guiUpdate_bg.png
 Gui, Add, Picture, x276 y0 g_GUICloseUpdate, images/gui/bClose.png
 
-whr.Open("GET", "https://github.com/Hachifac/idolBot/blob/master/changelog.txt", true)
+whr.Open("GET", "https://raw.githubusercontent.com/Hachifac/idolBot/master/changelog.txt", true)
 whr.Send()
 whr.WaitForResponse()
 changeLog := whr.ResponseText
