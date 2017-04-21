@@ -606,7 +606,7 @@ _GUIAbout:
 	Gosub, _GUICloseOtherWindows
 	GuiControl, BotGUI:, buttonAbout, images/gui/bAbout_active.png
 	winW = 252
-	winH = 290
+	winH = 348
 	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/guiMain_bg.png
 	WinGetPos, Output2X, Output2Y
 	nX := Output2X - ((winW - OutputW) / 2)
