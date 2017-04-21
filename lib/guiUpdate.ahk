@@ -8,6 +8,7 @@ Gui, Font, s14 norm cFEFEFE, System
 Gui, Add, Picture, x0 y0, images/gui/guiUpdate_bg.png
 Gui, Add, Picture, x276 y0 g_GUICloseUpdate, images/gui/bClose.png
 
+whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 whr.Open("GET", "https://raw.githubusercontent.com/Hachifac/idolBot/master/changelog.txt", true)
 whr.Send()
 whr.WaitForResponse()
