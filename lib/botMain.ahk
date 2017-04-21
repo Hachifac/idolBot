@@ -52,11 +52,13 @@ SetTimer, _BotNextLevel, 100
 
 botPhase = -1 ; -1 = bot not launched, 0 = bot in campaign selection screen, 1 = initial stuff like looking for overlays, waiting for the game to fully load, 2 = maxing the levels/ main dps and upgrades, 3 = reset phase
 botRunLaunchTime := __UnixTime(A_Now)
+botLastRelaunch := __UnixTime(A_Now)
 botLaunchTime := __UnixTime(A_Now)
 botSession = 0
+botRelaunched := false
 
 now = 0
-botRelaunching = false
+botRelaunching := false
 
 botMaxAllCount = 0
 
@@ -113,7 +115,7 @@ idolBot:
 						attempt = 0
 						Gosub, _BotCampaignStart
 					}
-					botRelaunching = false
+					botRelaunching := false
 					MouseMove, 550, 50
 					__Log("Waiting for the campaign to load.")
 					; We look at the left arrow in the crusaders bar, if it's there it means the screen is fully loaded
@@ -160,8 +162,9 @@ idolBot:
 						}
 						Send, {%optFormationKey%}
 						; Set Chat Room to optChatRoom
-						if (optChatRoom > 0 and botSession = 0) {
+						if (optChatRoom > 0 and (botSession = 0 or botRelaunched = true)) {
 							__Log("Setting chat room to " . optChatRoom . ".")
+							botRelaunched := false
 							Gosub, _BotSetChatRoom
 						}
 					} else {
@@ -179,7 +182,8 @@ idolBot:
 					if (botSession = 0) {
 						botSession = 1
 					}
-					if (optLastoptChatRoom != optChatRoom and optChatRoom > 0) {
+					if (optChatRoom > 0 and (optLastoptChatRoom != optChatRoom or botRelaunched = true)) {
+						botRelaunched := false
 						Gosub, _BotSetChatRoom
 					}
 					; Max all levels
@@ -408,15 +412,15 @@ idolBot:
 								statsIdolsAllTime += idolsCount
 								statsIdolsThisSession += idolsCount
 								
-								optRunTime := __UnixTime(A_Now) - botRunLaunchTime
+								statsRunTime := __UnixTime(A_Now) - botRunLaunchTime
 								
 								IniWrite, % statsIdolsAllTime, stats/stats.txt, Idols, alltime
 								IniWrite, % statsIdolsPastDay, stats/stats.txt, Idols, pastday
 								IniWrite, % idolsCount, stats/stats.txt, Idols, lastrun
-								IniWrite, % optRunTime, stats/stats.txt, Idols, lastruntime
+								IniWrite, % statsRunTime, stats/stats.txt, Idols, lastruntime
 								
 								IniWrite, % statsChestsThisRun, stats/stats.txt, Chests, lastrun
-								IniWrite, % optRunTime, stats/stats.txt, Chests, lastruntime
+								IniWrite, % statsRunTime, stats/stats.txt, Chests, lastruntime
 								statsChestsThisRun = 0
 								
 								botLevelCurrentCursor = 0
@@ -432,10 +436,16 @@ idolBot:
 						}
 					}
 					if (resetPhase = 3) {
+						botPhase = 1
 						__Log("Start a new campaign.")
 						Gosub, _BotCampaignStart
 						Sleep, 100
-						botPhase = 1
+					}
+				}
+				if (optRelaunchGame = 1 and optRelaunchGameFrequency > 1) {
+					if ((__UnixTime(A_Now) - botLastRelaunch) / 60 >= (optRelaunchGameFrequency - 1) * 60) {
+						__Log((optRelaunchGameFrequency - 1) * 60 . " minutes elapsed. Time to reset.")
+						Gosub, _BotRelaunch
 					}
 				}
 			}
@@ -458,26 +468,7 @@ _GUIPos:
 			nY := A_ScreenHeight - (A_ScreenHeight - Y) + H - 2
 			nW := W
 			nX := X + W / 2 - 225 / 2 + 2
-			Gui, BotGUI: Show, x%nX% y%nY% w227 h35 NoActivate, BotGUI
-			nX := X + W
-			nY := Y + H - 677
-		}
-		if (optDevConsole = 1) {
-			GuiControl, BotGUIDev:, guiDevLogs, % devLogs
-			if (!botDevGUIID) {
-				WinGet, botDevGUIID, ID, BotGUI Dev ahk_class AutoHotkeyGUI
-			}
-			WM_VSCROLL = 0x115
-			SB_BOTTOM = 7
-			SendMessage, WM_VSCROLL, SB_BOTTOM, 0, Edit2, ahk_id %botDevGUIID%
-		}
-	}
-	IfWinNotExist, Crusaders of The Lost Idols
-	{
-		if (botRelaunching = false) {
-			Pause,, 1
-			__GUIShowPause(1)
-			__Log("[GUI] Game not found.")
+			Gui, BotGUI: Show, x%nX% y%nY% w227 h35 NoActivate, idolBot
 		}
 	}
 	Return
@@ -520,7 +511,10 @@ _BotPause:
 SC029::
 	if (optDevConsole = 0) {
 		optDevConsole = 1
-		Gui, BotGUIDev: Show, x%nX% y%nY% w300 h675 NoActivate, BotGUI Dev
+		WinGetPos, X, Y, W, H, Crusaders of The Lost Idols
+		nX := X + W
+		nY := Y + H - 677
+		Gui, BotGUIDev: Show, x%nX% y%nY% w300 h675 NoActivate, idolBot Dev
 	} else {
 		optDevConsole = 0
 		Gui, BotGUIDev: Hide
@@ -575,12 +569,12 @@ _BotCloseWindows:
 ; Relaunch the game, pretty much self-explanatory
 _BotRelaunch:
 	__Log("Closing the game.")
-	botRelaunching = true;
+	botRelaunching := true
 	WinClose, Crusaders of The Lost Idols
 	__Log("Waiting on the game to close.")
 	WinWaitClose, Crusaders of The Lost Idols,,180
 	Loop {
-		Process, Exist, Crusaders of the Lost Idols.exe
+		Process, Exist, Crusaders of The Lost Idols.exe
 		if (ErrorLevel > 0) {
 			Process, Close, ErrorLevel
 		} else {
@@ -592,7 +586,6 @@ _BotRelaunch:
 	Run, steam://Rungameid/402840,,UseErrorLevel
 	__Log("Waiting on the game to launch.")
 	WinWait, Crusaders of The Lost Idols,,300
-	botRelaunching = false
 	WinActivate, Crusaders of The Lost Idols
 	WinMove, Crusaders of The Lost Idols,,15,15
 	seen = 0
@@ -607,6 +600,12 @@ _BotRelaunch:
 		} else {
 			if (seen = 1) {
 				botPhase = 1
+				botRelaunched := true
+				botRelaunching := false
+				botLastRelaunch := __UnixTime(A_Now)
+				if (optMoveGameWindow > 0) {
+					Gosub, _BotMoveGame
+				}
 				Break
 			}
 		}
@@ -645,11 +644,11 @@ _BotCampaignStart:
 		ImageSearch, OutputX, OutputY, 257, 57, 428, 110, *150 images/game/campaign.png
 		if (ErrorLevel = 0) {
 			__Log("Found the campaign header.")
-			__BotSetCampaign(optCampaign)
+			Gosub, _BotSetCampaign
 			botRunLaunchTime = % __UnixTime(A_Now)
 			botMaxAllCount = 0
 			botSkipToReset := false
-			if (botPhase = 1 and optRelaunchGame = 1) {
+			if (botPhase = 1 and optRelaunchGame = 1 and optRelaunchGameFrequency = 1) {
 				__Log("Relaunching CoTLI.")
 				Gosub, _BotRelaunch
 			}
@@ -681,9 +680,8 @@ _BotCampaignStart:
 
 ; Browse the campaign screen to find the desired one, will scan up and down until the proper campaign image is found
 ; Once the campaign is found, we set the objective by calling the function __BotSetObjective
-__BotSetCampaign(c) {
+_BotSetCampaign:
 	Global listCampaigns
-	__Log("Setting the campaign.")
 	if (c = 1) {
 		MouseMove, 535, 195
 		Sleep, 500
@@ -691,55 +689,55 @@ __BotSetCampaign(c) {
 		__Log("Starting the event campaign.")
 		Return
 	} else {
-		Loop {
-			__Log("Setting the campaign.")
-			fpX = 540
-			__Log("Determining if an event is going on.")
-			ImageSearch, upX, upY, 565, 150, 610, 185, *150 images/game/campaign_uparrow_active.png
+		__Log("Setting the campaign.")
+		fpX = 540
+		__Log("Determining if an event is going on.")
+		ImageSearch, upX, upY, 565, 150, 610, 185, *150 images/game/campaign_uparrow_active.png
+		if (ErrorLevel = 0) {
+			__Log("Up arrow active - no event is going on.")
+			down = 1
+			fpY = 2
+		} else {
+			ImageSearch, upX, upY, 565, 150, 610, 185, *150 images/game/campaign_uparrow_inactive.png
 			if (ErrorLevel = 0) {
-				__Log("No event is going on.")
+				__Log("Up arrow inactive - no event is going on.")
 				down = 1
 				fpY = 2
-			} else {
-				ImageSearch, upX, upY, 565, 150, 610, 185, *150 images/game/campaign_uparrow_inactive.png
-				if (ErrorLevel = 0) {
-					__Log("No event is going on.")
-					down = 1
-					fpY = 2
-				}  else {
-					__Log("An event is going on.")
-					down = 3
-					fpY = 4
-				}
-			}
-			if (down = 1) {
-				MouseMove, 585, 165
-			} else {
-				MouseMove, 585, 310
-			}
-			Loop, 10 {
-				Click
-				Sleep, 25
-			}
-			MouseMove, 585, 605
-			Loop, % listCampaigns[c][down] {
-				Click
-				Sleep, 250
-			}
-			Sleep, 500
-			ImageSearch, cX, cY, 30, 150, 184, 620, *100 images/game/c%c%.png
-			if (ErrorLevel = 0) {
-				MouseMove, cX + 508, cY + 83
-				Click
-				Sleep, 100
-				MouseMove, 785, 570
-				Sleep, 25
-				Click
-				Break
+			}  else {
+				__Log("An event is going on.")
+				down = 3
+				fpY = 4
 			}
 		}
+		if (down = 1) {
+			MouseMove, 585, 165
+		} else {
+			MouseMove, 585, 310
+		}
+		Loop, 10 {
+			Click
+			Sleep, 25
+		}
+		MouseMove, 585, 605
+		Loop, % listCampaigns[optCampaign][down] {
+			Click
+			Sleep, 250
+		}
+		Sleep, 500
+		__Log("Searching for the campaign.")
+		ImageSearch, cX, cY, 30, 150, 184, 620, *100 images/game/c%optCampaign%.png
+		if (ErrorLevel = 0) {
+			__Log("Found the campaign, starting the free play.")
+			MouseMove, cX + 508, cY + 83
+			Click
+			Sleep, 100
+			MouseMove, 785, 570
+			Sleep, 25
+			Click
+		}
+		Sleep, 2000
 	}
-}
+	Return
 
 ; Navigate the crusaders bar to find the desired crusader
 ; c = crusader
@@ -926,7 +924,7 @@ __BotCheckAutoProgress() {
 		Sleep, 100
 		Click
 		Sleep, 500
-		ImageSearch, OutputX2, OutputY2, 417, 203, 543, 242, *150 images/game/options.png
+		ImageSearch, OutputX2, OutputY2, 417, 203, 543, 242, *100 images/game/options.png
 		Sleep, 500
 		; If the big options header is found, it means the options window is open
 		if (ErrorLevel = 0) {
@@ -944,9 +942,9 @@ __BotCheckAutoProgress() {
 					}
 				}
 			}
-			ImageSearch, OutputX, OutputY, 712, 177, 758, 219, *150 images/game/close.png
+			ImageSearch, OutputX, OutputY, 712, 177, 758, 219, *100 images/game/close.png
 			Loop {
-				ImageSearch, OutputX, OutputY, 712, 177, 758, 219, *150 images/game/close.png
+				ImageSearch, OutputX, OutputY, 712, 177, 758, 219, *100 images/game/close.png
 				if (ErrorLevel = 0) {
 					MouseMove, OutputX + 10, OutputY + 10
 					Click
@@ -1008,7 +1006,7 @@ __BotGetIdolsCount() {
 }
 
 _BotGetCurrentLevel:
-	if (botPhase = 2) {
+	if (botPhase = 2 and botRelaunching = false) {
 		botLookingForCursor := true
 		CoordMode, Pixel, Client
 		CoordMode, Mouse, Client
@@ -1067,35 +1065,37 @@ _BotGetCurrentLevel:
 	Return
 
 _BotNextLevel:
-	if (botPhase = 2 and rightKeyInterrupt = false) {
+	if (botPhase = 2 and rightKeyInterrupt = false and botRelaunching = false) {
 		Send, {Right}
 	}
 	Return
 	
 _BotScanForChests:
-	ImageSearch, OutputX, OutputY, 742, 12, 956, 138, *75 images/game/chest1.png
-	if (ErrorLevel = 0) {
-		FileAppend, % __UnixTime(A_Now) . ":S", stats/chests.txt
-		chestsPastDay = 0
-		Loop, read, stats/chests.txt
-		{
-			break := StrSplit(A_LoopReadLine, ":")
-			if (__UnixTime(A_Now) - break[1] <= 86400) {
-				FileAppend, % break[1] . ":" . break[2] . "`n", stats/chests_temp.txt
-				chestsPastDay++
+	if (botRelaunching = false) {
+		ImageSearch, OutputX, OutputY, 742, 12, 956, 138, *75 images/game/chest1.png
+		if (ErrorLevel = 0) {
+			FileAppend, % __UnixTime(A_Now) . ":S", stats/chests.txt
+			chestsPastDay = 0
+			Loop, read, stats/chests.txt
+			{
+				break := StrSplit(A_LoopReadLine, ":")
+				if (__UnixTime(A_Now) - break[1] <= 86400) {
+					FileAppend, % break[1] . ":" . break[2] . "`n", stats/chests_temp.txt
+					chestsPastDay++
+				}
 			}
+			statsChestsThisRun++
+			statsChestsThisSession++
+			FileDelete, stats/chests.txt
+			FileMove, stats/chests_temp.txt, stats/chests.txt
+			IniRead, chestsAllTime, stats/stats.txt, Chests, alltime, 0
+			chestsAllTime += 1
+			IniWrite, % chestsAllTime, stats/stats.txt, Chests, alltime
+			IniWrite, % chestsPastDay, stats/stats.txt, Chests, pastday
+			IniWrite, % statsChestsThisRun, stats/stats.txt, Chests, thisrun
+			IniWrite, % statsChestsThisSession, stats/stats.txt, Chests, thissession
+			Sleep, 9000
 		}
-		statsChestsThisRun++
-		statsChestsThisSession++
-		FileDelete, stats/chests.txt
-		FileMove, stats/chests_temp.txt, stats/chests.txt
-		IniRead, chestsAllTime, stats/stats.txt, Chests, alltime, 0
-		chestsAllTime += 1
-		IniWrite, % chestsAllTime, stats/stats.txt, Chests, alltime
-		IniWrite, % chestsPastDay, stats/stats.txt, Chests, pastday
-		IniWrite, % statsChestsThisRun, stats/stats.txt, Chests, thisrun
-		IniWrite, % statsChestsThisSession, stats/stats.txt, Chests, thissession
-		Sleep, 9000
 	}
 	Return
 
@@ -1110,6 +1110,13 @@ __Log(log) {
 		FormatTime, TimeOutput, A_Now, HH:mm:ss
 		devLogs = %devLogs%`n%TimeOutput%: %log%
 		devLogs := regexreplace(devLogs, "^\s+")
+		GuiControl, BotGUIDev:, guiDevLogs, % devLogs
+		if (!botDevGUIID) {
+			WinGet, botDevGUIID, ID, idolBot Dev ahk_class AutoHotkeyGUI
+		}
+		WM_VSCROLL = 0x115
+		SB_BOTTOM = 7
+		SendMessage, WM_VSCROLL, SB_BOTTOM, 0, Edit1, ahk_id %botDevGUIID%
 	}
 	Return
 }
@@ -1147,6 +1154,7 @@ _BotLoadSettings:
 	IniRead, optRunTime, settings/settings.ini, Settings, runtime, 60
 	IniRead, optResetOnLevel, settings/settings.ini, Settings, resetonlevel, 100
 	IniRead, optRelaunchGame, settings/settings.ini, Settings, relaunchgame, 0
+	IniRead, optRelaunchGameFrequency, settings/settings.ini, Settings, relaunchgamefrequency, 1
 	IniRead, optMoveGameWindow, settings/settings.ini, Settings, movegamewindow, 1
 	IniRead, optAutoProgressCheck, settings/settings.ini, Settings, autoprogresscheck, 0
 	IniRead, optAutoProgressCheckDelay, settings/settings.ini, Settings, autoprogresscheckdelay, 120
@@ -1197,6 +1205,7 @@ _BotLoadSettings:
 	optTempRunTime := optRunTime
 	optTempResetOnLevel := optResetOnLevel
 	optTempRelaunchGame := optRelaunchGame
+	optTempRelaunchGameFrequency := optRelaunchGameFrequency
 	optTempMoveGameWindow := optMoveGameWindow
 	optTempAutoProgressCheck := optAutoProgressCheck
 	optTempAutoProgressCheckDelay := optAutoProgressCheckDelay
@@ -1229,6 +1238,7 @@ _BotRewriteSettings:
 	IniWrite, % optRunTime, settings/settings.ini, Settings, runtime
 	IniWrite, % optResetOnLevel, settings/settings.ini, Settings, resetonlevel
 	IniWrite, % optRelaunchGame, settings/settings.ini, Settings, relaunchgame
+	IniWrite, % optRelaunchGameFrequency, settings/settings.ini, Settings, relaunchgamefrequency
 	IniWrite, % optMoveGameWindow, settings/settings.ini, Settings, movegamewindow
 	IniWrite, % optLootItemsDuration, settings/settings.ini, Settings, lootitemsduration
 	IniWrite, % optAutoProgressCheck, settings/settings.ini, Settings, autoprogresscheck

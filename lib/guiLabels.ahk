@@ -208,6 +208,7 @@ _GUICloseAdvancedOptions:
 		GuiControl, BotGUIAdvancedOptions:, guiRelaunchGameStatusOn, images/gui/bOn_off.png
 		GuiControl, BotGUIAdvancedOptions:, guiRelaunchGameStatusOff, images/gui/bOff_on.png
 	}
+	GuiControl, BotGUIAdvancedOptions: Choose, guiRelaunchGameFrequencyChoice, % optRelaunchGameFrequency
 	GuiControl, BotGUIAdvancedOptions: Choose, guiMoveGameWindowChoice, % optMoveGameWindow
 	if (optAutoProgressCheck = 1) {
 		GuiControl, BotGUIAdvancedOptions:, guiAutoProgressCheckStatusOn, images/gui/bOn_on.png
@@ -289,6 +290,7 @@ _GUIApplyAdvancedOptions:
 	GuiControlGet, optResetOnLevel,, guiResetOnLevel
 	GuiControlGet, optLootItemsDuration,, guiLootItemsDuration
 	optRelaunchGame := optTempRelaunchGame
+	optRelaunchGameFrequency := optTempRelaunchGameFrequency
 	optMoveGameWindow := optTempMoveGameWindow
 	optAutoProgressCheck := optTempAutoProgressCheck
 	GuiControlGet, optAutoProgressCheckDelay,, guiAutoProgressCheckDelay
@@ -365,7 +367,7 @@ _GUICurrentLevel:
 	WinGetPos, X, Y, W, H, Crusaders of The Lost Idols
 	nX := X + W / 2 - winW / 2
 	nY := Y + H / 2 - winH / 2
-	Gui, BotGUICurrentLevel: Show, x%nX% y%nY% w%winW% h%winH%, BotGUICurrentLevel
+	Gui, BotGUICurrentLevel: Show, x%nX% y%nY% w%winW% h%winH%, idolBot Current Level
 	Return
 	
 _GUIOptions:
@@ -523,6 +525,11 @@ _GUISetRelaunchGameOff:
 	optTempRelaunchGame = 0
 	Return	
 
+_GUIChooseRelaunchGameFrequency:
+	Gui, Submit, NoHide
+	optTempRelaunchGameFrequency := guiRelaunchGameFrequencyChoice
+	Return
+	
 _GUIChooseMoveGameWindow:
 	Gui, Submit, NoHide
 	optTempMoveGameWindow := guiMoveGameWindowChoice

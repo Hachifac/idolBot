@@ -51,6 +51,7 @@ if (optRelaunchGame = 1) {
 
 Gui, Add, Picture, x15 y+32 vguiRelaunchGameStatusOn g_GUISetRelaunchGameOn, %relaunchGameStatusOn%
 Gui, Add, Picture, x+2 vguiRelaunchGameStatusOff g_GUISetRelaunchGameOff, %relaunchGameStatusOff%
+Gui, Add, DropDownList, x+5 w100 Choose%optRelaunchGameFrequency% vguiRelaunchGameFrequencyChoice g_GUIChooseRelaunchGameFrequency altSubmit, Every reset|1 hour|2 hours|3 hours|4 hours|5 hours|6 hours|7 hours|8 hours|9 hours|10 hours|11 hours|12 hours
 Gui, Add, Picture, x+148 yp+4 g_GUIHelpAdvanced, images/gui/bHelp.png
 
 Gui, Add, DropDownList, x15 y+32 w120 Choose%optMoveGameWindow% vguiMoveGameWindowChoice g_GUIChooseMoveGameWindow altSubmit, Don't move|Left|Top-Left|Top-Center|Top-Right|Right|Center
