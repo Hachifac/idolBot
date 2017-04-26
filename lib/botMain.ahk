@@ -49,6 +49,7 @@ rightKeyInterrupt := false
 
 SetTimer, _BotGetCurrentLevel, 2000
 SetTimer, _BotNextLevel, 100
+SetTimer, _BotForceFocus, 1000
 
 botPhase = -1 ; -1 = bot not launched, 0 = bot in campaign selection screen, 1 = initial stuff like looking for overlays, waiting for the game to fully load, 2 = maxing the levels/ main dps and upgrades, 3 = reset phase
 botRunLaunchTime := __UnixTime(A_Now)
@@ -67,8 +68,8 @@ optLastoptChatRoom := optChatRoom
 
 global currentCIndex := [1, 1]
 global currentCCoords := [36, 506]
-global crusaderPixels := Object()
-global crusaderPixelsTemp := Object()
+global botCrusaderPixels := Object()
+global botCrusaderPixelsTemp := Object()
 global levelCapPixels := Object()
 
 ; Bot loop
@@ -122,8 +123,6 @@ idolBot:
 					PixelGetColor, Output, 15, 585, RGB
 					if (Output = 0xA07107 or Output = 0xFFB103) {
 						__Log("Campaign loaded.")
-						; Press space bar to close the events/sales tabs
-						Send, {Space}
 						; If the left arrow is gold, it means we're not at the beginning of the characters bar, we're moving back until we detect the gold color
 						if (Output != 0xA07107) {
 							__Log("Moving the characters bar to the beginning.")
@@ -160,6 +159,8 @@ idolBot:
 						if (Output = 0x45D402 or Output = 0x226A01) {
 							botPhase = 2
 						}
+						; Press space bar to close the events/sales tabs
+						Send, {Space}
 						Send, {%optFormationKey%}
 						; Set Chat Room to optChatRoom
 						if (optChatRoom > 0 and (botSession = 0 or botRelaunched = true)) {
@@ -176,6 +177,11 @@ idolBot:
 				if (ErrorLevel = 0) {
 					__Log("Server failed error. Relaunching the game.")
 					Gosub, _BotRelaunch
+				}
+				ImageSearch, OutputX, OutputY, 815, 370, 935, 410, *100 images/game/gimmerubies.png
+				if (ErrorLevel = 0) {
+					MouseMove, OutputX, OutputY
+					Click
 				}
 				; Upgrade all/max all/max main dps. Final phase until reset phase.
 				if (botPhase = 2 or botDelayReset = true) {
@@ -196,27 +202,50 @@ idolBot:
 					}
 					__Log("Get the gold and quest items for " . optLootItemsDuration . " seconds.")
 					now = % __UnixTime(A_Now)
-					if (optClicking = 1) {
-						delay := optClickDelay
-					} else {
-						delay = 20
-					}
-					SendEvent {Click 660, 320, 0}
-					SetDefaultMouseSpeed, 2
+					delay := optClickDelay
+					i = 1
 					while (__UnixTime(A_Now) - now <= optLootItemsDuration) {
-						if (botSkipToReset = true) {
-							Break
+						if (i > 4) {
+							i = 1
 						}
-						SendEvent {Click 910, 320, 0}
-						SendEvent {Click 660, 320, 0}
+						MouseMove, 650 + i * 50, 320
 						if (optClicking = 1) {
-							click
+							Click
 						}
-						Sleep, %delay%
+						Sleep, % delay
+						i++
+						if (i > 4) {
+							MouseMove, 950, 320
+						}
 					}
-					SetDefaultMouseSpeed, 0
-					if (optResetType = 1 or optResetType = 2 or optResetType = 5 or optResetType = 6) {
-						
+					if ((optResetType = 1 or optResetType = 2 or optResetType = 5 or optResetType = 6) and botSkipToReset = false) {
+						if (__UnixTime(A_Now) - botRunLaunchTime > (optMainDPSDelay * 60)) {
+							rightKeyInterrupt := true
+							__Log("Moving to mainDPS.")
+							if (botCrusaderPixels.length() = 0) {
+								__BotMoveToFirstPage()
+								__BotMoveToCrusader(optMainDPS)
+								Sleep, 1000
+								__BotSetCrusadersPixels()
+							} else {
+								if (__BotCompareCrusadersPixels() = false) {
+									__Log("We might have moved from the mainDPS, let's go back.")
+									__BotMoveToFirstPage()
+									Sleep, 500
+									__BotMoveToCrusader(optMainDPS)
+									Sleep, 500
+									__BotSetCrusadersPixels()
+								}
+							}
+							Log("Maxing mainDPS.")
+							MouseMove, currentCCoords[1] + 252, currentCCoords[2] + 18
+							send, {ctrl down}
+							sleep, 100
+							click
+							send, {ctrl up}
+							sleep, 100
+							rightKeyInterrupt := false
+						}
 					}
 					; If the last time we did an auto progress check is >= than autoProgressCheckDelay, we initiate an auto progress check
 					if ((optResetType = 2 or optAutoProgressCheck = 1) and __UnixTime(A_Now) - lastProgressCheck >= optAutoProgressCheckDelay) {
@@ -261,12 +290,10 @@ idolBot:
 							}
 						}
 					}
-					
 					if (optResetType = 5 and __UnixTime(A_Now) - botRunLaunchTime >= (optRunTime * 60)) {
 						botSkipToReset := true
 						botPhase = 3
 					}
-					
 					if (optResetType = 6) {
 						if (botCurrentLevel >= optResetOnLevel) {
 							__Log("Level " . optResetOnLevel . " reached.")
@@ -599,7 +626,6 @@ _BotRelaunch:
 			Click
 		} else {
 			if (seen = 1) {
-				botPhase = 1
 				botRelaunched := true
 				botRelaunching := false
 				botLastRelaunch := __UnixTime(A_Now)
@@ -826,7 +852,7 @@ __BotSetCrusadersPixels() {
 		}
 		i++
 		PixelGetColor, Output, initialX + (i - 1) * 4, 506 + j * 2, RGB
-		crusaderPixels[A_Index] := Output
+		botCrusaderPixels[A_Index] := Output
 	}
 	Return
 }
@@ -842,15 +868,15 @@ __BotCompareCrusadersPixels() {
 		}
 		i++
 		PixelGetColor, Output, initialX + (i - 1) * 4, 506 + j * 2, RGB
-		crusaderPixelsTemp[A_Index] := Output
+		botCrusaderPixelsTemp[A_Index] := Output
 	}
 	j = 0
-	for i, e in crusaderPixelsTemp {
-		if (crusaderPixels[i] = crusaderPixelsTemp[i]) {
+	for i, e in botCrusaderPixelsTemp {
+		if (botCrusaderPixels[i] = botCrusaderPixelsTemp[i]) {
 			j++
 		}
 	}
-	if (j = crusaderPixels.MaxIndex()) {
+	if (j = botCrusaderPixels.MaxIndex()) {
 		Return, true
 	}
 	Return, false
@@ -1099,6 +1125,26 @@ _BotScanForChests:
 	}
 	Return
 
+#IfWinActive Crusaders of The Lost Idols
+_BotClicking:
+	test++
+	MouseGetPos, mX, mY
+	if (mX <= 800) {
+		Click
+	}
+	ToolTip, % test
+	Return
+	
+_BotForceFocus:
+	IfWinExist, Crusaders of The Lost Idols
+	{
+		GuiControlGet, BotStatus, BotGUI:
+		if (BotStatus = images/gui/running.png) {
+			WinActivate, Crusaders of The Lost Idols
+		}
+	}
+	Return
+	
 ; __Log function
 __Log(log) {
 	Global devLogs
