@@ -1124,16 +1124,6 @@ _BotScanForChests:
 		}
 	}
 	Return
-
-#IfWinActive Crusaders of The Lost Idols
-_BotClicking:
-	test++
-	MouseGetPos, mX, mY
-	if (mX <= 800) {
-		Click
-	}
-	ToolTip, % test
-	Return
 	
 _BotForceFocus:
 	IfWinExist, Crusaders of The Lost Idols
