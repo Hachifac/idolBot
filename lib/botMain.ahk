@@ -950,7 +950,7 @@ __BotCheckAutoProgress() {
 		Sleep, 100
 		Click
 		Sleep, 500
-		ImageSearch, OutputX2, OutputY2, 417, 203, 543, 242, *100 images/game/options.png
+		ImageSearch, OutputX2, OutputY2, 395, 180, 543, 242, *100 images/game/options.png
 		Sleep, 500
 		; If the big options header is found, it means the options window is open
 		if (ErrorLevel = 0) {
@@ -968,9 +968,9 @@ __BotCheckAutoProgress() {
 					}
 				}
 			}
-			ImageSearch, OutputX, OutputY, 712, 177, 758, 219, *100 images/game/close.png
+			ImageSearch, OutputX, OutputY, 712, 150, 758, 219, *100 images/game/close.png
 			Loop {
-				ImageSearch, OutputX, OutputY, 712, 177, 758, 219, *100 images/game/close.png
+				ImageSearch, OutputX, OutputY, 712, 150, 758, 219, *100 images/game/close.png
 				if (ErrorLevel = 0) {
 					MouseMove, OutputX + 10, OutputY + 10
 					Click
