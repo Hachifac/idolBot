@@ -1,6 +1,10 @@
 ---
 # http://www.reddit.com/r/cotlibot
 ---
+# 1.3.4
+---
+- Adjusted campaign selection
+---
 # 1.3.3
 ---
 - Changed the loot items phase, use click delay option to slow down or speed up the mouse mouvement (will also speed up the clicking if active)
