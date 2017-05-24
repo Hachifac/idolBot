@@ -1,6 +1,14 @@
 ---
 # http://www.reddit.com/r/cotlibot
 ---
+# 1.3.5
+---
+- Changed auto clicker coordinates
+- Fixed a max levels/upgrade all delay
+- Added a force start hotkey (defaulted at F7)
+- Fixed a stats display issue
+- Added an option to always have auto progress on
+---
 # 1.3.4
 ---
 - Adjusted campaign selection

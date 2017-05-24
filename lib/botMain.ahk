@@ -89,7 +89,7 @@ idolBot:
 		if (botPhase = -1) {
 			__GUIShowPause(true)
 			Loop {
-				if (botPhase = 0) {
+				if (botPhase > -1) {
 					Break
 				}
 			}
@@ -130,7 +130,7 @@ idolBot:
 						}
 						; Open options window to see if auto progress is on
 						__Log("Initial auto progress check...")
-						if (optResetType = 2 or optAutoProgressCheck = 1) {
+						if (optResetType = 2 or optAutoProgressCheck = 1 or optAutoProgress = 2) {
 							_BotSetAutoProgress(true)
 						} else {
 							_BotSetAutoProgress(false)
@@ -192,31 +192,21 @@ idolBot:
 						botRelaunched := false
 						Gosub, _BotSetChatRoom
 					}
-					; Max all levels
-					__BotMaxLevels()
-					botMaxAllCount++
-					; If the bot did optUpgAllUntil max all levels, do one buy all upgrades
-					if (botMaxAllCount >= optUpgAllUntil) {
-						__BotUpgAll()
-						botMaxAllCount = 0
-					}
 					__Log("Get the gold and quest items for " . optLootItemsDuration . " seconds.")
 					now = % __UnixTime(A_Now)
 					delay := optClickDelay
 					i = 1
+					Send, {Space}
 					while (__UnixTime(A_Now) - now <= optLootItemsDuration) {
 						if (i > 4) {
 							i = 1
 						}
-						MouseMove, 650 + i * 50, 320
+						MouseMove, 650 + i * 37, 320
 						if (optClicking = 1) {
 							Click
 						}
-						Sleep, % delay
 						i++
-						if (i > 4) {
-							MouseMove, 950, 320
-						}
+						Sleep, % delay
 					}
 					if ((optResetType = 1 or optResetType = 2 or optResetType = 5 or optResetType = 6) and botSkipToReset = false) {
 						if (__UnixTime(A_Now) - botRunLaunchTime > (optMainDPSDelay * 60)) {
@@ -263,6 +253,15 @@ idolBot:
 								botPhase = 3
 							}
 						}
+					}
+					; Max all levels
+					__BotMaxLevels()
+					Send, {%optFormationKey%}
+					botMaxAllCount++
+					; If the bot did optUpgAllUntil max all levels, do one buy all upgrades
+					if (botMaxAllCount >= optUpgAllUntil) {
+						__BotUpgAll()
+						botMaxAllCount = 0
 					}
 					if (optResetType = 3) {
 						if (levelCapResetCheck = true) {
@@ -311,12 +310,9 @@ idolBot:
 								PixelSearch, OutputX, OutputY, 582, 449, 621, 488, 0x0000FE,, Fast
 								if (ErrorLevel != 0) {
 									Send, {%optStormRiderFormationKey%}
-									Sleep, 1000
+									Sleep, 500
 									__BotMaxLevels()
 									__BotUpgAll()
-									Sleep, 3000
-									Send, {%optStormRiderFormationKey%}
-									Sleep, 3000
 									PixelGetColor, Output, 390, 466, RGB
 									if (Output != 0x3A3A3A) {
 										PixelGetColor, Output, 590, 466, RGB
@@ -328,6 +324,7 @@ idolBot:
 											Sleep, 25
 										}
 									}
+									Send, {%optFormationKey%}
 								}
 							}
 							__BotUseSkill(1)
@@ -524,15 +521,33 @@ _BotPause:
 		} else {
 			__Log("Unpaused.")
 			__GUIShowPause(false)
-			if ((botPhase = 1 or botPhase = 2) and optResetType != 2 and optAutoProgressCheck = 0) {
+			if ((botPhase = 1 or botPhase = 2) and optResetType != 2 and optAutoProgressCheck = 0 and optAutoProgress = 1) {
 				Gosub, _BotCloseWindows
 				_BotSetAutoProgress(false)
+			}
+			if ((botPhase = 1 or botPhase = 2) and optAutoProgress = 2) {
+				Gosub, _BotCloseWindows
+				_BotSetAutoProgress(true)
 			}
 		}
 	}
 	WinActivate, Crusaders of The Lost Idols
 	Return
 
+; Force start key
+_BotForceStart:
+	__Log("Force starting the bot.")
+	Gosub, _BotPause
+	; Open options window to see if auto progress is on
+	__Log("Initial auto progress check...")
+	if (optResetType = 2 or optAutoProgressCheck = 1 or optAutoProgress = 2) {
+		_BotSetAutoProgress(true)
+	} else {
+		_BotSetAutoProgress(false)
+	}
+	botPhase = 2
+	Return
+	
 ; Dev console key = ~
 #IfWinActive Crusaders of The Lost Idols
 SC029::
@@ -547,7 +562,8 @@ SC029::
 		Gui, BotGUIDev: Hide
 	}
 	Return
-	
+#IfWinActive
+
 _BotSetHotkeys:
 	if (optPauseHotkey2) {
 		optPauseHotkey = %optPauseHotkey1% & %optPauseHotkey2%
@@ -567,8 +583,14 @@ _BotSetHotkeys:
 		optExitHotkey := optExitHotkey1
 	}
 	Hotkey, %optExitHotkey%, _BotExit
+	if (optForceStartHotkey2) {
+		optForceStartHotkey = %optForceStartHotkey1% & %optForceStartHotkey2%
+	} else {
+		optForceStartHotkey := optForceStartHotkey1
+	}
+	Hotkey, %optForceStartHotkey%, _BotForceStart
 	Return
-	
+
 ; Self-explanatory
 __GUIShowPause(status) {
 	if (status = false) {
@@ -707,12 +729,16 @@ _BotCampaignStart:
 ; Browse the campaign screen to find the desired one, will scan up and down until the proper campaign image is found
 ; Once the campaign is found, we set the objective by calling the function __BotSetObjective
 _BotSetCampaign:
-	Global listCampaigns
-	if (c = 1) {
+	if (optCampaign = 1) {
 		MouseMove, 535, 195
 		Sleep, 500
 		Click
 		__Log("Starting the event campaign.")
+		MouseMove, cX + 508, cY + 83
+		Sleep, 100
+		MouseMove, 785, 570
+		Sleep, 25
+		Click
 		Return
 	} else {
 		__Log("Setting the campaign.")
@@ -899,7 +925,6 @@ __BotMaxLevels() {
 		}
 		Sleep, 10
 	}
-	Send, {%optFormationKey%}
 	Return
 }
 
@@ -1194,6 +1219,7 @@ _BotLoadSettings:
 	IniRead, optMoveGameWindow, settings/settings.ini, Settings, movegamewindow, 1
 	IniRead, optAutoProgressCheck, settings/settings.ini, Settings, autoprogresscheck, 0
 	IniRead, optAutoProgressCheckDelay, settings/settings.ini, Settings, autoprogresscheckdelay, 120
+	IniRead, optAutoProgress, settings/settings.ini, Settings, autoprogress, 1
 	IniRead, optPromptCurrentLevel, settings/settings.ini, Settings, promptcurrentlevel, 120
 	IniRead, optLootItemsDuration, settings/settings.ini, Settings, lootitemsduration, 30
 	IniRead, optStormRiderFormation, settings/settings.ini, Settings, stormriderformation, 0
@@ -1204,6 +1230,8 @@ _BotLoadSettings:
 	IniRead, optReloadHotkey2, settings/settings.ini, Settings, reloadhotkey2, %A_Space%
 	IniRead, optExitHotkey1, settings/settings.ini, Settings, exithotkey1, F10
 	IniRead, optExitHotkey2, settings/settings.ini, Settings, exithotkey2, %A_Space%
+	IniRead, optForceStartHotkey1, settings/settings.ini, Settings, forcestarthotkey1, F7
+	IniRead, optForceStartHotkey2, settings/settings.ini, Settings, forcestarthotkey2, %A_Space%
 	IniRead, optCalcIdolsCount, settings/settings.ini, Settings, calcidolscount, 1
 	if (optFormation = 1) {
 		optFormationKey = q
@@ -1245,6 +1273,7 @@ _BotLoadSettings:
 	optTempMoveGameWindow := optMoveGameWindow
 	optTempAutoProgressCheck := optAutoProgressCheck
 	optTempAutoProgressCheckDelay := optAutoProgressCheckDelay
+	optTempAutoProgress := optAutoProgress
 	optTempPromptCurrentLevel := optPromptCurrentLevel
 	optTempStormRiderFormation := optStormRiderFormation
 	optTempStormRiderFormationKey := optStormRiderFormationKey
@@ -1255,6 +1284,8 @@ _BotLoadSettings:
 	optTempReloadHotkey2 := optReloadHotkey2
 	optTempExitHotkey1 := optExitHotkey1
 	optTempExitHotkey2 := optExitHotkey2
+	optTempForceStartHotkey1 := optForceStartHotkey1
+	optTempForceStartHotkey2 := optForceStartHotkey2
 	Return
 
 ; Self-explanatory
@@ -1279,6 +1310,7 @@ _BotRewriteSettings:
 	IniWrite, % optLootItemsDuration, settings/settings.ini, Settings, lootitemsduration
 	IniWrite, % optAutoProgressCheck, settings/settings.ini, Settings, autoprogresscheck
 	IniWrite, % optAutoProgressCheckDelay, settings/settings.ini, Settings, autoprogresscheckdelay
+	IniWrite, % optAutoProgress, settings/settings.ini, Settings, autoprogress
 	IniWrite, % optPromptCurrentLevel, settings/settings.ini, Settings, promptcurrentlevel
 	IniWrite, % optStormRiderFormation, settings/settings.ini, Settings, stormriderformation
 	IniWrite, % optStormRiderMagnify, settings/settings.ini, Settings, stormridermagnify
@@ -1288,6 +1320,8 @@ _BotRewriteSettings:
 	IniWrite, % optReloadHotkey2, settings/settings.ini, Settings, reloadhotkey2
 	IniWrite, % optExitHotkey1, settings/settings.ini, Settings, exithotkey1
 	IniWrite, % optExitHotkey2, settings/settings.ini, Settings, exithotkey2
+	IniWrite, % optForceStartHotkey1, settings/settings.ini, Settings, forcestarthotkey1
+	IniWrite, % optForceStartHotkey2, settings/settings.ini, Settings, forcestarthotkey2
 	Return
 	
 _BotLoadStats:
@@ -1295,11 +1329,11 @@ _BotLoadStats:
 	IniRead, statsIdolsAllTime, stats/stats.txt, Idols, alltime, 0
 	IniRead, statsIdolsPastDay, stats/stats.txt, Idols, pastday, 0
 	IniRead, statsIdolsLastRun, stats/stats.txt, Idols, lastrun, 0
-	IniRead, statsIdolsLastRunTime, stats/stats.txt, Idols, runtime, 0
+	IniRead, statsIdolsLastRunTime, stats/stats.txt, Idols, lastruntime, 0
 	IniRead, statsChestsAllTime, stats/stats.txt, Chests, alltime, 0
 	IniRead, statsChestsPastDay, stats/stats.txt, Chests, pastday, 0
 	IniRead, statsChestsLastRun, stats/stats.txt, Chests, lastrun, 0
-	IniRead, statsChestsLastRunTime, stats/stats.txt, Chests, runtime, 0
+	IniRead, statsChestsLastRunTime, stats/stats.txt, Chests, lastruntime, 0
 	Return
 	
 #include lib/guiLabels.ahk

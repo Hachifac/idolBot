@@ -67,11 +67,12 @@ if (optAutoProgressCheck = 1) {
 
 Gui, Add, Picture, x15 y+32 vguiAutoProgressCheckStatusOn g_GUISetAutoProgressCheckOn, %autoProgressCheckStatusOn%
 Gui, Add, Picture, x+2 vguiAutoProgressCheckStatusOff g_GUISetAutoProgressCheckOff, %autoProgressCheckStatusOff%
-Gui, Add, Picture, x+148 yp+4 g_GUIHelpAdvanced, images/gui/bHelp.png
-
-Gui, Add, Edit, x15 y+30 w180
+Gui, Add, Edit, x+45 w73
 Gui, Add, UpDown, vguiAutoProgressCheckDelay Range1-2147483647, %optAutoProgressCheckDelay%
 Gui, Add, Picture, x+30 yp+4 g_GUIHelpAdvanced, images/gui/bHelp.png
+
+Gui, Add, DropDownList, x15 y+32 w120 Choose%optAutoProgress% vguiAutoProgressChoice g_GUIChooseAutoProgress altSubmit, Default|Always on
+Gui, Add, Picture, x+90 yp+4 g_GUIHelpAdvanced, images/gui/bHelp.png
 
 if (optPromptCurrentLevel = 1) {
 	promptCurrentLevelStatusOn := "images/gui/bOn_on.png"
@@ -88,7 +89,12 @@ Gui, Add, Picture, x+148 yp+4 g_GUIHelpAdvanced, images/gui/bHelp.png
 Gui, Tab, 3
 Gui, Add, Picture, x0 y0, images/gui/guiAdvancedOptionsHotkeys_bg.png
 
-Gui, Add, Picture, x15 y99 vguiPauseHotkey1Mask g_GUIPauseHotkey1Unmask, images/gui/guiAdvancedOptionsHotkeysDefault_mask.png
+Gui, Add, Picture, x15 y99 vguiForceStartHotkey1Mask g_GUIForceStartHotkey1Unmask, images/gui/guiAdvancedOptionsHotkeysDefault_mask.png
+Gui, Add, DropDownList, w100 yp+0 vguiForceStartHotkey1Choice g_GUIChooseForceStartHotkey1 +Hidden
+Gui, Add, Picture, x+23 yp+0 vguiForceStartHotkey2Mask g_GUIForceStartHotkey2Unmask, images/gui/guiAdvancedOptionsHotkeysNone_mask.png
+Gui, Add, DropDownList, w100 yp+0 vguiForceStartHotkey2Choice g_GUIChooseForceStartHotkey2 +Hidden
+
+Gui, Add, Picture, x15 y+28 vguiPauseHotkey1Mask g_GUIPauseHotkey1Unmask, images/gui/guiAdvancedOptionsHotkeysDefault_mask.png
 Gui, Add, DropDownList, w100 yp+0 vguiPauseHotkey1Choice g_GUIChoosePauseHotkey1 +Hidden
 Gui, Add, Picture, x+23 yp+0 vguiPauseHotkey2Mask g_GUIPauseHotkey2Unmask, images/gui/guiAdvancedOptionsHotkeysNone_mask.png
 Gui, Add, DropDownList, w100 yp+0 vguiPauseHotkey2Choice g_GUIChoosePauseHotkey2 +Hidden
@@ -111,6 +117,10 @@ Gui, Add, Picture, x227 y0 g_GUICloseAdvancedOptions, images/gui/bClose.png
 Gui, Add, Picture, x95 y432 g_GUIApplyAdvancedOptions, images/gui/bApply.png
 
 GuiControl, ChooseString, guiResetCrusader, %optResetCrusader%
+if (optForceStartHotkey1 != "F7" or (optForceStartHotkey1 = "F7" and optForceStartHotkey2)) {
+	Gosub, _GUIForceStartHotkey1Unmask
+	Gosub, _GUIForceStartHotkey2Unmask
+}
 if (optPauseHotkey1 != "F8" or (optPauseHotkey1 = "F8" and optPauseHotkey2)) {
 	Gosub, _GUIPauseHotkey1Unmask
 	Gosub, _GUIPauseHotkey2Unmask
