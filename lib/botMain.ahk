@@ -161,7 +161,9 @@ idolBot:
 						}
 						; Press space bar to close the events/sales tabs
 						Send, {Space}
+						__BotMaxLevels()
 						Send, {%optFormationKey%}
+						botMaxAllCount++
 						; Set Chat Room to optChatRoom
 						if (optChatRoom > 0 and (botSession = 0 or botRelaunched = true)) {
 							__Log("Setting chat room to " . optChatRoom . ".")
@@ -381,6 +383,82 @@ idolBot:
 						}
 					}
 					if (resetPhase = 1) {
+						if (optUseChests = 1) {
+							__Log("Using chests before reset.")
+							MouseMove, 795, 480
+							Sleep, 25
+							Click
+							Sleep, 500
+							MouseMove, 160, 555
+							Sleep, 25
+							Click
+							chestFound := false
+							Loop, 10 {
+								if (chestFound == true) {
+									Break
+								}
+								Sleep, 1000
+								ImageSearch, OutputX, OutputY, 0, 505, 1000, 675, *100 images/game/chests_reset.png
+								if (ErrorLevel = 0) {
+									__Log("Found the chests.")
+									ImageSearch, OutputX, OutputY, OutputX - 50, OutputY, OutputX, OutputY + 75, *100 images/game/chests_reset_x%optUseChestsAmount%.png
+									if (ErrorLevel = 0) {
+										__Log("Using " . optUseChestsAmount . " chests.")
+										MouseMove, OutputX + 5, OutputY + 5
+										Click
+										Loop {
+											if (chestFound == true) {
+												Break
+											}
+											Sleep, 500
+											ImageSearch, OutputX, OutputY, 345, 345, 495, 385, *100 images/game/chests_reset_yes.png
+											if (ErrorLevel = 0) {
+												MouseMove, OutputX + 5, OutputY + 5
+												Click
+												Loop {
+													if (chestFound == true) {
+														Break
+													}
+													Sleep, 1000
+													ImageSearch, OutputX, OutputY, 885, 5, 930, 45, *100 images/game/close.png
+													if (ErrorLevel = 0) {
+														MouseMove, OutputX + 5, OutputY + 5
+														Click
+														Loop {
+															Sleep, 500
+															ImageSearch, OutputX, OutputY, 905, 605, 985, 650, *100 images/game/chests_reset_close.png
+															if (ErrorLevel = 0) {
+																__Log("Closing the chests window.")
+																MouseMove, OutputX + 5, OutputY + 5
+																Click
+																Sleep, 500
+																MouseMove, 740, 480
+																Click
+																Sleep, 500
+																chestFound := true
+																Break
+															}
+														}
+													}
+												}
+											}
+										}
+									} else {
+										__Log("Cannot open " . optUseChestsAmount . " chests.")
+										Break
+									}
+								}
+							}
+							if (chestFound == false) {
+								__Log("Couln't find the chests.")
+								MouseMove, 940, 630
+								Click
+								Sleep, 500
+								MouseMove, 740, 480
+								Click
+								Sleep, 500
+							}
+						}
 						Loop {
 							MouseMove, resetOutputX + 3, resetOutputY + 3
 							Sleep, 25
@@ -570,25 +648,25 @@ _BotSetHotkeys:
 	} else {
 		optPauseHotkey := optPauseHotkey1
 	}
-	Hotkey, %optPauseHotkey%, _BotPause
+	Hotkey, $%optPauseHotkey%, _BotPause
 	if (optReloadHotkey2) {
 		optReloadHotkey = %optReloadHotkey1% & %optReloadHotkey2%
 	} else {
 		optReloadHotkey := optReloadHotkey1
 	}
-	Hotkey, %optReloadHotkey%, _BotReload
+	Hotkey, $%optReloadHotkey%, _BotReload
 	if (optExitHotkey2) {
 		optExitHotkey = %optExitHotkey1% & %optExitHotkey2%
 	} else {
 		optExitHotkey := optExitHotkey1
 	}
-	Hotkey, %optExitHotkey%, _BotExit
+	Hotkey, $%optExitHotkey%, _BotExit
 	if (optForceStartHotkey2) {
 		optForceStartHotkey = %optForceStartHotkey1% & %optForceStartHotkey2%
 	} else {
 		optForceStartHotkey := optForceStartHotkey1
 	}
-	Hotkey, %optForceStartHotkey%, _BotForceStart
+	Hotkey, $%optForceStartHotkey%, _BotForceStart
 	Return
 
 ; Self-explanatory
@@ -1220,8 +1298,10 @@ _BotLoadSettings:
 	IniRead, optAutoProgressCheck, settings/settings.ini, Settings, autoprogresscheck, 0
 	IniRead, optAutoProgressCheckDelay, settings/settings.ini, Settings, autoprogresscheckdelay, 120
 	IniRead, optAutoProgress, settings/settings.ini, Settings, autoprogress, 1
-	IniRead, optPromptCurrentLevel, settings/settings.ini, Settings, promptcurrentlevel, 120
+	IniRead, optPromptCurrentLevel, settings/settings.ini, Settings, promptcurrentlevel, 1
 	IniRead, optLootItemsDuration, settings/settings.ini, Settings, lootitemsduration, 30
+	IniRead, optUseChests, settings/settings.ini, Settings, usechests, 0
+	IniRead, optUseChestsAmount, settings/settings.ini, Settings, usechestsamount, 5
 	IniRead, optStormRiderFormation, settings/settings.ini, Settings, stormriderformation, 0
 	IniRead, optStormRiderMagnify, settings/settings.ini, Settings, stormridermagnify, 1
 	IniRead, optPauseHotkey1, settings/settings.ini, Settings, pausehotkey1, F8
@@ -1233,6 +1313,9 @@ _BotLoadSettings:
 	IniRead, optForceStartHotkey1, settings/settings.ini, Settings, forcestarthotkey1, F7
 	IniRead, optForceStartHotkey2, settings/settings.ini, Settings, forcestarthotkey2, %A_Space%
 	IniRead, optCalcIdolsCount, settings/settings.ini, Settings, calcidolscount, 1
+	if (optPromptCurrentLevel = 120) {
+		optPromptCurrentLevel = 0
+	}
 	if (optFormation = 1) {
 		optFormationKey = q
 	}
@@ -1278,6 +1361,8 @@ _BotLoadSettings:
 	optTempStormRiderFormation := optStormRiderFormation
 	optTempStormRiderFormationKey := optStormRiderFormationKey
 	optTempStormRiderMagnify := optStormRiderMagnify
+	optTempUseChests := optUseChests
+	optTempUseChestsAmount := optUseChestsAmount
 	optTempPauseHotkey1 := optPauseHotkey1
 	optTempPauseHotkey2 := optPauseHotkey2
 	optTempReloadHotkey1 := optReloadHotkey1
@@ -1312,6 +1397,8 @@ _BotRewriteSettings:
 	IniWrite, % optAutoProgressCheckDelay, settings/settings.ini, Settings, autoprogresscheckdelay
 	IniWrite, % optAutoProgress, settings/settings.ini, Settings, autoprogress
 	IniWrite, % optPromptCurrentLevel, settings/settings.ini, Settings, promptcurrentlevel
+	IniWrite, % optUseChests, settings/settings.ini, Settings, usechests
+	IniWrite, % optUseChestsAmount, settings/settings.ini, Settings, usechestsamount
 	IniWrite, % optStormRiderFormation, settings/settings.ini, Settings, stormriderformation
 	IniWrite, % optStormRiderMagnify, settings/settings.ini, Settings, stormridermagnify
 	IniWrite, % optPauseHotkey1, settings/settings.ini, Settings, pausehotkey1

@@ -3,6 +3,11 @@
 SendMode Input
 SetWorkingDir %A_ScriptDir%
 
+if WinExist("idolBot ahk_class AutoHotkeyGUI") {
+	MsgBox, There seems to be another idolBot version open, please close it first then try again.
+	Goto, _BotExit
+}
+
 OnExit, _BotExit
 
 whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")

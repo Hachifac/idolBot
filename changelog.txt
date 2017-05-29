@@ -1,6 +1,15 @@
 ---
 # http://www.reddit.com/r/cotlibot
 ---
+# 1.3.6
+---
+- Fixed an issue at the start of a run
+- Fixed a prompt current level issue
+- Fixed an issue when hotkeys are set to numbers
+- Added an alert window when multiple bot versions are opened
+- Added new crusaders to the list
+- [Beta] Added the use of chests before reset
+---
 # 1.3.5
 ---
 - Changed auto clicker coordinates

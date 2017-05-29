@@ -227,6 +227,14 @@ _GUICloseAdvancedOptions:
 		GuiControl, BotGUIAdvancedOptions:, guiPromptCurrentLevelStatusOn, images/gui/bOn_off.png
 		GuiControl, BotGUIAdvancedOptions:, guiPromptCurrentLevelStatusOff, images/gui/bOff_on.png
 	}
+	if (optUseChests = 1) {
+		GuiControl, BotGUIAdvancedOptions:, guiUseChestsStatusOn, images/gui/bOn_on.png
+		GuiControl, BotGUIAdvancedOptions:, guiUseChestsStatusOff, images/gui/bOff_off.png
+	} else {
+		GuiControl, BotGUIAdvancedOptions:, guiUseChestsStatusOn, images/gui/bOn_off.png
+		GuiControl, BotGUIAdvancedOptions:, guiUseChestsStatusOff, images/gui/bOff_on.png
+	}
+	GuiControl, BotGUIAdvancedOptions: ChooseString, guiUseChestsAmountChoice, % optUseChestsAmount
 	GuiControl, BotGUIAdvancedOptions: ChooseString, guiForceStartHotkey1Choice, % optForceStartHotkey1
 	GuiControl, BotGUIAdvancedOptions: ChooseString, guiPauseHotkey1Choice, % optPauseHotkey1
 	GuiControl, BotGUIAdvancedOptions: ChooseString, guiReloadHotkey1Choice, % optReloadHotkey1
@@ -318,6 +326,8 @@ _GUIApplyAdvancedOptions:
 		GuiControlGet, optAutoProgressCheckDelay,, guiAutoProgressCheckDelay
 		optAutoProgress := optTempAutoProgress
 		optPromptCurrentLevel := optTempPromptCurrentLevel
+		optUseChests := optTempUseChests
+		optUseChestsAmount := optTempUseChestsAmount
 		optForceStartHotkey1 := optTempForceStartHotkey1
 		optForceStartHotkey2 := optTempForceStartHotkey2
 		optPauseHotkey1 := optTempPauseHotkey1
@@ -402,24 +412,52 @@ _GUIAdvancedOptions:
 _GUIAdvancedOptionsAdvancedTab:
 	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsAdvancedTab, images/gui/guiAdvancedOptionsAdvanced_tab_active.png
 	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsMoreTab, images/gui/guiAdvancedOptionsMore_tab_inactive.png
-	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsHotkeysTab, images/gui/guiAdvancedOptionsHotkeys_tab_inactive.png
+	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsEvenmoreTab, images/gui/guiAdvancedOptionsEvenmore_tab_inactive.png
 	GuiControl, BotGUIAdvancedOptions:Choose, guiAdvancedOptionsTabs, 1
 	Return
 	
 _GUIAdvancedOptionsMoreTab:
 	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsAdvancedTab, images/gui/guiAdvancedOptionsAdvanced_tab_inactive.png
 	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsMoreTab, images/gui/guiAdvancedOptionsMore_tab_active.png
-	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsHotkeysTab, images/gui/guiAdvancedOptionsHotkeys_tab_inactive.png
+	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsEvenmoreTab, images/gui/guiAdvancedOptionsEvenmore_tab_inactive.png
 	GuiControl, BotGUIAdvancedOptions:Choose, guiAdvancedOptionsTabs, 2
 	Return
 	
-_GUIAdvancedOptionsHotkeysTab:
+_GUIAdvancedOptionsEvenmoreTab:
 	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsAdvancedTab, images/gui/guiAdvancedOptionsAdvanced_tab_inactive.png
 	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsMoreTab, images/gui/guiAdvancedOptionsMore_tab_inactive.png
-	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsHotkeysTab, images/gui/guiAdvancedOptionsHotkeys_tab_active.png
+	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsEvenmoreTab, images/gui/guiAdvancedOptionsEvenmore_tab_active.png
 	GuiControl, BotGUIAdvancedOptions:Choose, guiAdvancedOptionsTabs, 3
 	Return
+	
+_GUIAdvancedOptionsHotkeysTab:
+	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsHotkeysTab, images/gui/guiAdvancedOptionsHotkeys_tab_active.png
+	GuiControl, BotGUIAdvancedOptions:Choose, guiAdvancedOptionsTabs, 4
+	Return
 
+_GUIAdvancedOptionsNextRight:
+	GuiControl, Hide, guiAdvancedOptionsAdvancedTab
+	GuiControl, Hide, guiAdvancedOptionsMoreTab
+	GuiControl, Hide, guiAdvancedOptionsEvenMoreTab
+	GuiControl, Hide, guiAdvancedOptionsNextRight
+	GuiControl, Show, guiAdvancedOptionsNextLeft
+	GuiControl, Show, guiAdvancedOptionsHotkeysTab
+	Gosub, _GUIAdvancedOptionsHotkeysTab
+	GuiControl, BotGUIAdvancedOptions:Choose, guiAdvancedOptionsTabs, 4
+	Return
+	
+_GUIAdvancedOptionsNextLeft:
+	GuiControl, Show, guiAdvancedOptionsAdvancedTab
+	GuiControl, Show, guiAdvancedOptionsMoreTab
+	GuiControl, Show, guiAdvancedOptionsEvenMoreTab
+	GuiControl, Show, guiAdvancedOptionsNextRight
+	GuiControl, Hide, guiAdvancedOptionsNextLeft
+	GuiControl, Hide, guiAdvancedOptionsHotkeysTab
+	Gosub, _GUIAdvancedOptionsAdvancedTab
+	GuiControl, BotGUIAdvancedOptions:Choose, guiAdvancedOptionsTabs, 1
+	Return
+	
+	
 _GUIForceStartHotkey1Unmask:
 	GuiControl, Hide, guiForceStartHotkey1Mask
 	guiForceStartHotkey1Show := true
@@ -600,6 +638,23 @@ _GUISetPromptCurrentLevelOff:
 	GuiControl,, guiPromptCurrentLevelStatusOff, images/gui/bOff_on.png
 	optTempPromptCurrentLevel = 0
 	Return	
+
+_GUISetUseChestsOn:
+	GuiControl,, guiUseChestsStatusOn, images/gui/bOn_on.png
+	GuiControl,, guiUseChestsStatusOff, images/gui/bOff_off.png
+	optTempUseChests = 1
+	Return
+	
+_GUISetUseChestsOff:
+	GuiControl,, guiUseChestsStatusOn, images/gui/bOn_off.png
+	GuiControl,, guiUseChestsStatusOff, images/gui/bOff_on.png
+	optTempUseChests = 0
+	Return
+
+_GUIChooseChestsAmount:
+	Gui, Submit, NoHide
+	optTempUseChestsAmount := guiUseChestsAmountChoice
+	Return
 	
 _GUIStats:
 	Gosub, _GUICloseOtherWindows

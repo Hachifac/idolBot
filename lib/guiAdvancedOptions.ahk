@@ -5,7 +5,7 @@ Gui, BotGUIAdvancedOptions: New, -Caption, idolBot Advanced Options
 Gui, Color, 933506
 Gui, Font, s12 norm c000000, Candara
 
-Gui, Add, Tab2, vguiAdvancedOptionsTabs Choose1 w0 h0, 1|2|3
+Gui, Add, Tab2, vguiAdvancedOptionsTabs Choose1 w0 h0, 1|2|3|4
 
 Gui, Tab, 1
 Gui, Add, Picture, x0 y0, images/gui/guiAdvancedOptions_bg.png
@@ -87,6 +87,22 @@ Gui, Add, Picture, x+2 vguiPromptCurrentLevelStatusOff g_GUISetPromptCurrentLeve
 Gui, Add, Picture, x+148 yp+4 g_GUIHelpAdvanced, images/gui/bHelp.png
 
 Gui, Tab, 3
+Gui, Add, Picture, x0 y0, images/gui/guiAdvancedOptionsEvenmore_bg.png
+
+if (optUseChests = 1) {
+	useChestsStatusOn := "images/gui/bOn_on.png"
+	useChestsStatusOff := "images/gui/bOff_off.png"
+} else {
+	useChestsStatusOn := "images/gui/bOn_off.png"
+	useChestsStatusOff := "images/gui/bOff_on.png"
+}
+
+Gui, Add, Picture, x15 y99 vguiUseChestsStatusOn g_GUISetUseChestsOn, %useChestsStatusOn%
+Gui, Add, Picture, x+2 vguiUseChestsStatusOff g_GUISetUseChestsOff, %useChestsStatusOff%
+
+Gui, Add, DropDownList, x+15 w50 vguiUseChestsAmountChoice g_GUIChooseChestsAmount, 5|25|100
+
+Gui, Tab, 4
 Gui, Add, Picture, x0 y0, images/gui/guiAdvancedOptionsHotkeys_bg.png
 
 Gui, Add, Picture, x15 y99 vguiForceStartHotkey1Mask g_GUIForceStartHotkey1Unmask, images/gui/guiAdvancedOptionsHotkeysDefault_mask.png
@@ -112,11 +128,15 @@ Gui, Add, DropDownList, w100 yp+0 vguiExitHotkey2Choice g_GUIChooseExitHotkey2 +
 Gui, Tab
 Gui, Add, Picture, x7 y44 vguiAdvancedOptionsAdvancedTab g_GUIAdvancedOptionsAdvancedTab, images/gui/guiAdvancedOptionsAdvanced_tab_active.png
 Gui, Add, Picture, x+2 vguiAdvancedOptionsMoreTab g_GUIAdvancedOptionsMoreTab, images/gui/guiAdvancedOptionsMore_tab_inactive.png
-Gui, Add, Picture, x+2 vguiAdvancedOptionsHotkeysTab g_GUIAdvancedOptionsHotkeysTab, images/gui/guiAdvancedOptionsHotkeys_tab_inactive.png
+Gui, Add, Picture, x+2 vguiAdvancedOptionsEvenmoreTab g_GUIAdvancedOptionsEvenmoreTab, images/gui/guiAdvancedOptionsEvenmore_tab_inactive.png
+Gui, Add, Picture, x+10 vguiAdvancedOptionsNextRight g_GUIAdvancedOptionsNextRight, images/gui/guiAdvancedOptionsNext.png
+Gui, Add, Picture, x7 y44 vguiAdvancedOptionsNextLeft g_GUIAdvancedOptionsNextLeft +Hidden, images/gui/guiAdvancedOptionsNext.png
+Gui, Add, Picture, x+2 vguiAdvancedOptionsHotkeysTab g_GUIAdvancedOptionsHotkeysTab +Hidden, images/gui/guiAdvancedOptionsHotkeys_tab_active.png
 Gui, Add, Picture, x227 y0 g_GUICloseAdvancedOptions, images/gui/bClose.png
 Gui, Add, Picture, x95 y432 g_GUIApplyAdvancedOptions, images/gui/bApply.png
 
 GuiControl, ChooseString, guiResetCrusader, %optResetCrusader%
+GuiControl, ChooseString, guiUseChestsAmountChoice, %optUseChestsAmount%
 if (optForceStartHotkey1 != "F7" or (optForceStartHotkey1 = "F7" and optForceStartHotkey2)) {
 	Gosub, _GUIForceStartHotkey1Unmask
 	Gosub, _GUIForceStartHotkey2Unmask
