@@ -99,6 +99,18 @@ _GUISetStormRiderMagnifyOff:
 	GuiControl,, guiStormRiderMagnifyStatusOff, images/gui/bOff_on.png
 	optTempStormRiderMagnify = 0
 	Return
+
+_GUISetBuffsSpeedOn:
+	GuiControl,, guiBuffsSpeedStatusOn, images/gui/bOn_on.png
+	GuiControl,, guiBuffsSpeedStatusOff, images/gui/bOff_off.png
+	optTempBuffsSpeed = 1
+	Return
+	
+_GUISetBuffsSpeedOff:
+	GuiControl,, guiBuffsSpeedStatusOn, images/gui/bOn_off.png
+	GuiControl,, guiBuffsSpeedStatusOff, images/gui/bOff_on.png
+	optTempBuffsSpeed = 0
+	Return
 	
 _GUIHelpAdvanced:
 	Loop {
@@ -160,6 +172,21 @@ _GUIHelpStormRider:
 			help = When active, the bot will use Magnify before Storm Rider.`nNote that it requires the Magnify crusader to be in the Storm Rider formation.
 		} else if (OutputVarcontrol = "Static10") {
 			help = The formation in which your Storm Rider crusader is. When set to [D], it will use the main formation set in Options.
+		} else {
+			ToolTip,
+			Break
+		}
+		ToolTip, % help
+		Sleep, 100
+	}
+	Return
+	
+_GUIHelpBuffs:
+	Loop {
+		MouseGetPos,,,, OutputVarControl
+		help := null
+		if (OutputVarControl = "Static5") {
+			help = When active, the bot will use speed buffs.`nIf there's no common buff, it'll use an uncommon one and so forth.`nWhen the interval is set to 0, the bot will only use 1 buff at the start of a run. If set to anything else than 0, the bot will still use one at the start of a run then use another one at every interval.`nThe interval is in minutes.
 		} else {
 			ToolTip,
 			Break
@@ -285,10 +312,24 @@ _GUICloseStormRider:
 	GuiControl, BotGUIStormRider:, guiStormRiderFormationD, % f0
 	Return
 
+_GUICloseBuffs:
+	GuiControl, BotGUI:, buttonBuffs, images/gui/BBuffs.png
+	Gui, BotGUIBuffs: Hide
+	if (optBuffsSpeed = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsSpeedStatusOn, images/gui/bOn_on.png
+		GuiControl, BotGUIBuffs:, guiBuffsSpeedStatusOff, images/gui/bOff_off.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsSpeedStatusOn, images/gui/bOn_off.png
+		GuiControl, BotGUIBuffs:, guiBuffsSpeedStatusOff, images/gui/bOff_on.png
+	}
+	GuiControl, BotGUIBuffs:, guiBuffsSpeedInterval, % optBuffsSpeedInterval
+	Return
+	
 _GUICloseOtherWindows:
 	Gosub, _GUICloseOptions
 	Gosub, _GUICloseAdvancedOptions
 	Gosub, _GUICloseStormRider
+	Gosub, _GUICloseBuffs
 	Gosub, _GUICloseStats
 	Gosub, _GUICloseAbout
 	Return
@@ -367,6 +408,15 @@ _GUIApplyStormRider:
 	Gui, BotGUIStormRider: Hide
 	Return	
 
+_GUIApplyBuffs:
+	Gui, Submit, NoHide
+	optBuffsSpeed := optTempBuffsSpeed
+	GuiControlGet, optBuffsSpeedInterval,, guiBuffsSpeedInterval
+	Gosub, _BotRewriteSettings
+	GuiControl, BotGUI:, buttonBuffs, images/gui/BBuffs.png
+	Gui, BotGUIBuffs: Hide
+	Return	
+	
 _GUIApplyCurrentLevel:
 	GuiControlGet, botCurrentLevel,, guiCurrentLevel
 	Gui, BotGUICurrentLevel: Hide
@@ -721,6 +771,18 @@ _GUIStormRider:
 	nX := Output2X - ((winW - OutputW) / 2)
 	nY := Output2Y - winH
 	Gui, BotGUIStormRider: Show, x%nX% y%nY% w%winW% h%winH%, idolBot Storm Rider
+	Return
+	
+_GUIBuffs:
+	Gosub, _GUICloseOtherWindows
+	GuiControl, BotGUI:, buttonBuffs, images/gui/BBuffs_active.png
+	winW = 242
+	winH = 199
+	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/guiMain_bg.png
+	WinGetPos, Output2X, Output2Y
+	nX := Output2X - ((winW - OutputW) / 2)
+	nY := Output2Y - winH
+	Gui, BotGUIBuffs: Show, x%nX% y%nY% w%winW% h%winH%, idolBot Buffs
 	Return
 	
 _GUIDevLogging:

@@ -1,6 +1,12 @@
 ---
 # http://www.reddit.com/r/cotlibot
 ---
+---
+# 1.3.7
+---
+- Better handling of chests
+- Added the use of speed buffs (for sprint mode)
+---
 # 1.3.6
 ---
 - Fixed an issue at the start of a run

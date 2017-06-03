@@ -62,6 +62,7 @@ now = 0
 botRelaunching := false
 
 botMaxAllCount = 0
+botBuffsSpeedTimer = 0
 
 botSkipToReset := false
 optLastoptChatRoom := optChatRoom
@@ -193,6 +194,29 @@ idolBot:
 					if (optChatRoom > 0 and (optLastoptChatRoom != optChatRoom or botRelaunched = true)) {
 						botRelaunched := false
 						Gosub, _BotSetChatRoom
+					}
+					if (optBuffsSpeed = 1) {
+						if ((__UnixTime(A_Now) - botBuffsSpeedTimer) / 60 >= optBuffsSpeedInterval) {
+							if (botBuffsSpeedTimer > -1) {
+								__Log("Using a speed buff.")
+								MouseMove, 570, 110
+								Sleep, 500
+								ImageSearch, OutputX, OutputY, 610, 145, 695, 180, *100 images/game/buffs_use.png
+								if (ErrorLevel = 0) {
+									MouseMove, OutputX, OutputY
+									Click
+									Sleep, 100
+									MouseMove, 815, 315
+									if (optBuffsSpeedInterval = 0) {
+										botBuffsSpeedTimer = -1
+									} else {
+										botBuffsSpeedTimer := __UnixTime(A_Now)
+									}
+								} else {
+									__Log("Couldn't find a speed buff, trying again next cycle.")
+								}
+							}
+						}
 					}
 					__Log("Get the gold and quest items for " . optLootItemsDuration . " seconds.")
 					now = % __UnixTime(A_Now)
@@ -398,55 +422,65 @@ idolBot:
 									Break
 								}
 								Sleep, 1000
-								ImageSearch, OutputX, OutputY, 0, 505, 1000, 675, *100 images/game/chests_reset.png
-								if (ErrorLevel = 0) {
-									__Log("Found the chests.")
-									ImageSearch, OutputX, OutputY, OutputX - 50, OutputY, OutputX, OutputY + 75, *100 images/game/chests_reset_x%optUseChestsAmount%.png
+								Loop {
+									ImageSearch, OutputX, OutputY, 0, 505, 1000, 675, *100 images/game/chests_reset.png
 									if (ErrorLevel = 0) {
-										__Log("Using " . optUseChestsAmount . " chests.")
-										MouseMove, OutputX + 5, OutputY + 5
-										Click
-										Loop {
-											if (chestFound == true) {
+										ImageSearch, OutputX2, OutputY2, 0, 505, 1000, 675, *100 images/game/chests_reset.png
+										if (ErrorLevel = 0) {
+											if (OutputX2 = OutputX and OutputY2 = OutputY) {
 												Break
 											}
-											Sleep, 500
-											ImageSearch, OutputX, OutputY, 345, 345, 495, 385, *100 images/game/chests_reset_yes.png
-											if (ErrorLevel = 0) {
-												MouseMove, OutputX + 5, OutputY + 5
-												Click
-												Loop {
-													if (chestFound == true) {
-														Break
-													}
-													Sleep, 1000
-													ImageSearch, OutputX, OutputY, 885, 5, 930, 45, *100 images/game/close.png
-													if (ErrorLevel = 0) {
-														MouseMove, OutputX + 5, OutputY + 5
-														Click
-														Loop {
+										}
+									}
+									Sleep, 500
+								}
+								__Log("Found the chests.")
+								ImageSearch, OutputX, OutputY, OutputX - 50, OutputY, OutputX, OutputY + 75, *100 images/game/chests_reset_x%optUseChestsAmount%.png
+								if (ErrorLevel = 0) {
+									__Log("Using " . optUseChestsAmount . " chests.")
+									MouseMove, OutputX + 5, OutputY + 5
+									Click
+									Loop {
+										if (chestFound == true) {
+											Break
+										}
+										Sleep, 500
+										ImageSearch, OutputX, OutputY, 345, 345, 495, 385, *100 images/game/chests_reset_yes.png
+										if (ErrorLevel = 0) {
+											MouseMove, OutputX + 5, OutputY + 5
+											Click
+											Loop {
+												if (chestFound == true) {
+													Break
+												}
+												Sleep, 1000
+												ImageSearch, OutputX, OutputY, 885, 5, 930, 45, *100 images/game/close.png
+												if (ErrorLevel = 0) {
+													MouseMove, OutputX + 5, OutputY + 5
+													Click
+													Loop {
+														Sleep, 500
+														ImageSearch, OutputX, OutputY, 905, 605, 985, 650, *100 images/game/chests_reset_close.png
+														if (ErrorLevel = 0) {
+															__Log("Closing the chests window.")
+															MouseMove, OutputX + 5, OutputY + 5
+															Click
 															Sleep, 500
-															ImageSearch, OutputX, OutputY, 905, 605, 985, 650, *100 images/game/chests_reset_close.png
-															if (ErrorLevel = 0) {
-																__Log("Closing the chests window.")
-																MouseMove, OutputX + 5, OutputY + 5
-																Click
-																Sleep, 500
-																MouseMove, 740, 480
-																Click
-																Sleep, 500
-																chestFound := true
-																Break
-															}
+															MouseMove, 740, 480
+															Click
+															Sleep, 500
+															chestFound := true
+															__BotMaxLevels()
+															Break
 														}
 													}
 												}
 											}
 										}
-									} else {
-										__Log("Cannot open " . optUseChestsAmount . " chests.")
-										Break
 									}
+								} else {
+									__Log("Cannot open " . optUseChestsAmount . " chests.")
+									Break
 								}
 							}
 							if (chestFound == false) {
@@ -528,6 +562,7 @@ idolBot:
 								botLevelCurrentCursor = 0
 								botLevelPreviousCursor = 0
 								botCurrentLevel = 0
+								botBuffsSpeedTimer = 0
 								
 								MouseMove, 507, 550
 								Sleep, 500
@@ -569,8 +604,8 @@ _GUIPos:
 			oldY := Y
 			nY := A_ScreenHeight - (A_ScreenHeight - Y) + H - 2
 			nW := W
-			nX := X + W / 2 - 225 / 2 + 2
-			Gui, BotGUI: Show, x%nX% y%nY% w227 h35 NoActivate, idolBot
+			nX := X + W / 2 - 255 / 2 + 2
+			Gui, BotGUI: Show, x%nX% y%nY% w257 h35 NoActivate, idolBot
 		}
 	}
 	Return
@@ -859,6 +894,7 @@ _BotSetCampaign:
 		if (ErrorLevel = 0) {
 			__Log("Found the campaign, starting the free play.")
 			MouseMove, cX + 508, cY + 83
+			Sleep, 100
 			Click
 			Sleep, 100
 			MouseMove, 785, 570
@@ -1304,6 +1340,8 @@ _BotLoadSettings:
 	IniRead, optUseChestsAmount, settings/settings.ini, Settings, usechestsamount, 5
 	IniRead, optStormRiderFormation, settings/settings.ini, Settings, stormriderformation, 0
 	IniRead, optStormRiderMagnify, settings/settings.ini, Settings, stormridermagnify, 1
+	IniRead, optBuffsSpeed, settings/settings.ini, Settings, buffsspeed, 0
+	IniRead, optBuffsSpeedInterval, settings/settings.ini, Settings, buffsspeedinterval, 0
 	IniRead, optPauseHotkey1, settings/settings.ini, Settings, pausehotkey1, F8
 	IniRead, optPauseHotkey2, settings/settings.ini, Settings, pausehotkey2, %A_Space%
 	IniRead, optReloadHotkey1, settings/settings.ini, Settings, reloadhotkey1, F9
@@ -1361,6 +1399,8 @@ _BotLoadSettings:
 	optTempStormRiderFormation := optStormRiderFormation
 	optTempStormRiderFormationKey := optStormRiderFormationKey
 	optTempStormRiderMagnify := optStormRiderMagnify
+	optTempBuffsSpeed := optBuffsSpeed
+	optTempBuffsSpeedInterval := optBuffsSpeedInterval
 	optTempUseChests := optUseChests
 	optTempUseChestsAmount := optUseChestsAmount
 	optTempPauseHotkey1 := optPauseHotkey1
@@ -1401,6 +1441,8 @@ _BotRewriteSettings:
 	IniWrite, % optUseChestsAmount, settings/settings.ini, Settings, usechestsamount
 	IniWrite, % optStormRiderFormation, settings/settings.ini, Settings, stormriderformation
 	IniWrite, % optStormRiderMagnify, settings/settings.ini, Settings, stormridermagnify
+	IniWrite, % optBuffsSpeed, settings/settings.ini, Settings, buffsspeed
+	IniWrite, % optBuffsSpeedInterval, settings/settings.ini, Settings, buffsspeedinterval
 	IniWrite, % optPauseHotkey1, settings/settings.ini, Settings, pausehotkey1
 	IniWrite, % optPauseHotkey2, settings/settings.ini, Settings, pausehotkey2
 	IniWrite, % optReloadHotkey1, settings/settings.ini, Settings, reloadhotkey1
