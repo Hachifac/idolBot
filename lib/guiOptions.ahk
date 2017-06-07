@@ -36,7 +36,7 @@ Gui, Add, Picture, x+5 vguiFormationE g_GUISetFormationE, %f3%
 
 Gui, Add, DropDownList, x15 y+32 w100 vguiMainDPSChoice g_GUIChooseMainDPS, Alan|Arachnobuddy|Bat|Baenarall|Bernard|Billy|Boggins|Brogon|Broot|Bubba|Bush|Cindy|Dark Helper|Danni|Draco|Drizzle|Eiralon|Emo|Exterminator|Foresight|Fright-o-Tron|Frosty|Gloria|Graham|Grandmora|Greyskull|Groklok|Gryphon|Half-Blood Elf|Henry|Hermit|Ilsa|Jack|Jason|Jim|Kaine|Karen|Karl|Katie|Khouri|Kizlblyp|Kyle|Larry|Leerion|Lion|Littlefoot|Merci|Mindy|Momma|Monkey|Montana|Natalie|Nate|Pam|Panda|Paul|Pete|Petra|Phoenix|Polly|Princess|Rayna|Reginald|Robbie|Roborabbit|Roboturkey|Rocky|Rudolph|Sal|Sally|Santa|Sarah|Sasha|Shadow Queen|Siri|Sisaron|Snickette|Soldierette|Spaceking|Squiggles|Thalia|Val|Veronica|Warwick|Wendy
 
-Gui, Add, DropDownList, y+31 w190 Choose%optResetType% vguiResetChoice g_GUIChooseReset altSubmit, No reset|Max progress|Level cap - Beta|Fast - Coming soon|Timed run|On level
+Gui, Add, DropDownList, y+31 w190 Choose%optResetType% vguiResetChoice g_GUIChooseReset altSubmit, No reset|Max progress|Level cap - NOT WORKING|Fast - NOT WORKING|Timed run|On level
 Gui, Add, Picture, x+20 yp+4 g_GUIHelpOptions, images/gui/bHelp.png
 
 Gui, Add, Picture, x15 y+35 vguiClickingStatusOn g_GUISetClickingOn, %clickingStatusOn%

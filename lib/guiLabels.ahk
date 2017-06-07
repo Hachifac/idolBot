@@ -100,16 +100,268 @@ _GUISetStormRiderMagnifyOff:
 	optTempStormRiderMagnify = 0
 	Return
 
-_GUISetBuffsSpeedOn:
-	GuiControl,, guiBuffsSpeedStatusOn, images/gui/bOn_on.png
-	GuiControl,, guiBuffsSpeedStatusOff, images/gui/bOff_off.png
-	optTempBuffsSpeed = 1
+_GUISetBuffsGoldCOn:
+	status = off
+	if (optTempBuffsGoldC = 1) {
+		optTempBuffsGoldC = 0
+	} else {
+		optTempBuffsGoldC = 1
+		status = on
+	}
+	GuiControl,, guiBuffsGoldCStatus, images/gui/bUse_%status%.png
+	Return
+
+_GUISetBuffsGoldUOn:
+	status = off
+	if (optTempBuffsGoldU = 1) {
+		optTempBuffsGoldU = 0
+	} else {
+		optTempBuffsGoldU = 1
+		status = on
+	}
+	GuiControl,, guiBuffsGoldUStatus, images/gui/bUse_%status%.png
 	Return
 	
-_GUISetBuffsSpeedOff:
-	GuiControl,, guiBuffsSpeedStatusOn, images/gui/bOn_off.png
-	GuiControl,, guiBuffsSpeedStatusOff, images/gui/bOff_on.png
-	optTempBuffsSpeed = 0
+_GUISetBuffsGoldROn:
+	status = off
+	if (optTempBuffsGoldR = 1) {
+		optTempBuffsGoldR = 0
+	} else {
+		optTempBuffsGoldR = 1
+		status = on
+	}
+	GuiControl,, guiBuffsGoldRStatus, images/gui/bUse_%status%.png
+	Return
+
+_GUISetBuffsGoldEOn:
+	status = off
+	if (optTempBuffsGoldE = 1) {
+		optTempBuffsGoldE = 0
+	} else {
+		optTempBuffsGoldE = 1
+		status = on
+	}
+	GuiControl,, guiBuffsGoldEStatus, images/gui/bUse_%status%.png
+	Return
+
+_GUISetBuffsPowerCOn:
+	status = off
+	if (optTempBuffsPowerC = 1) {
+		optTempBuffsPowerC = 0
+	} else {
+		optTempBuffsPowerC = 1
+		status = on
+	}
+	GuiControl,, guiBuffsPowerCStatus, images/gui/bUse_%status%.png
+	Return
+
+_GUISetBuffsPowerUOn:
+	status = off
+	if (optTempBuffsPowerU = 1) {
+		optTempBuffsPowerU = 0
+	} else {
+		optTempBuffsPowerU = 1
+		status = on
+	}
+	GuiControl,, guiBuffsPowerUStatus, images/gui/bUse_%status%.png
+	Return
+	
+_GUISetBuffsPowerROn:
+	status = off
+	if (optTempBuffsPowerR = 1) {
+		optTempBuffsPowerR = 0
+	} else {
+		optTempBuffsPowerR = 1
+		status = on
+	}
+	GuiControl,, guiBuffsPowerRStatus, images/gui/bUse_%status%.png
+	Return
+
+_GUISetBuffsPowerEOn:
+	status = off
+	if (optTempBuffsPowerE = 1) {
+		optTempBuffsPowerE = 0
+	} else {
+		optTempBuffsPowerE = 1
+		status = on
+	}
+	GuiControl,, guiBuffsPowerEStatus, images/gui/bUse_%status%.png
+	Return
+	
+_GUISetBuffsSpeedCOn:
+	status = off
+	if (optTempBuffsSpeedC = 1) {
+		optTempBuffsSpeedC = 0
+	} else {
+		optTempBuffsSpeedC = 1
+		status = on
+	}
+	GuiControl,, guiBuffsSpeedCStatus, images/gui/bUse_%status%.png
+	Return
+
+_GUISetBuffsSpeedUOn:
+	status = off
+	if (optTempBuffsSpeedU = 1) {
+		optTempBuffsSpeedU = 0
+	} else {
+		optTempBuffsSpeedU = 1
+		status = on
+	}
+	GuiControl,, guiBuffsSpeedUStatus, images/gui/bUse_%status%.png
+	Return
+	
+_GUISetBuffsSpeedROn:
+	status = off
+	if (optTempBuffsSpeedR = 1) {
+		optTempBuffsSpeedR = 0
+	} else {
+		optTempBuffsSpeedR = 1
+		status = on
+	}
+	GuiControl,, guiBuffsSpeedRStatus, images/gui/bUse_%status%.png
+	Return
+
+_GUISetBuffsSpeedEOn:
+	status = off
+	if (optTempBuffsSpeedE = 1) {
+		optTempBuffsSpeedE = 0
+	} else {
+		optTempBuffsSpeedE = 1
+		status = on
+	}
+	GuiControl,, guiBuffsSpeedEStatus, images/gui/bUse_%status%.png
+	Return
+	
+_GUISetBuffsCritCOn:
+	status = off
+	if (optTempBuffsCritC = 1) {
+		optTempBuffsCritC = 0
+	} else {
+		optTempBuffsCritC = 1
+		status = on
+	}
+	GuiControl,, guiBuffsCritCStatus, images/gui/bUse_%status%.png
+	Return
+
+_GUISetBuffsCritUOn:
+	status = off
+	if (optTempBuffsCritU = 1) {
+		optTempBuffsCritU = 0
+	} else {
+		optTempBuffsCritU = 1
+		status = on
+	}
+	GuiControl,, guiBuffsCritUStatus, images/gui/bUse_%status%.png
+	Return
+	
+_GUISetBuffsCritROn:
+	status = off
+	if (optTempBuffsCritR = 1) {
+		optTempBuffsCritR = 0
+	} else {
+		optTempBuffsCritR = 1
+		status = on
+	}
+	GuiControl,, guiBuffsCritRStatus, images/gui/bUse_%status%.png
+	Return
+
+_GUISetBuffsCritEOn:
+	status = off
+	if (optTempBuffsCritE = 1) {
+		optTempBuffsCritE = 0
+	} else {
+		optTempBuffsCritE = 1
+		status = on
+	}
+	GuiControl,, guiBuffsCritEStatus, images/gui/bUse_%status%.png
+	Return
+	
+_GUISetBuffsClickCOn:
+	status = off
+	if (optTempBuffsClickC = 1) {
+		optTempBuffsClickC = 0
+	} else {
+		optTempBuffsClickC = 1
+		status = on
+	}
+	GuiControl,, guiBuffsClickCStatus, images/gui/bUse_%status%.png
+	Return
+
+_GUISetBuffsClickUOn:
+	status = off
+	if (optTempBuffsClickU = 1) {
+		optTempBuffsClickU = 0
+	} else {
+		optTempBuffsClickU = 1
+		status = on
+	}
+	GuiControl,, guiBuffsClickUStatus, images/gui/bUse_%status%.png
+	Return
+	
+_GUISetBuffsClickROn:
+	status = off
+	if (optTempBuffsClickR = 1) {
+		optTempBuffsClickR = 0
+	} else {
+		optTempBuffsClickR = 1
+		status = on
+	}
+	GuiControl,, guiBuffsClickRStatus, images/gui/bUse_%status%.png
+	Return
+
+_GUISetBuffsClickEOn:
+	status = off
+	if (optTempBuffsClickE = 1) {
+		optTempBuffsClickE = 0
+	} else {
+		optTempBuffsClickE = 1
+		status = on
+	}
+	GuiControl,, guiBuffsClickEStatus, images/gui/bUse_%status%.png
+	Return
+	
+_GUISetBuffsSplashCOn:
+	status = off
+	if (optTempBuffsSplashC = 1) {
+		optTempBuffsSplashC = 0
+	} else {
+		optTempBuffsSplashC = 1
+		status = on
+	}
+	GuiControl,, guiBuffsSplashCStatus, images/gui/bUse_%status%.png
+	Return
+
+_GUISetBuffsSplashUOn:
+	status = off
+	if (optTempBuffsSplashU = 1) {
+		optTempBuffsSplashU = 0
+	} else {
+		optTempBuffsSplashU = 1
+		status = on
+	}
+	GuiControl,, guiBuffsSplashUStatus, images/gui/bUse_%status%.png
+	Return
+	
+_GUISetBuffsSplashROn:
+	status = off
+	if (optTempBuffsSplashR = 1) {
+		optTempBuffsSplashR = 0
+	} else {
+		optTempBuffsSplashR = 1
+		status = on
+	}
+	GuiControl,, guiBuffsSplashRStatus, images/gui/bUse_%status%.png
+	Return
+
+_GUISetBuffsSplashEOn:
+	status = off
+	if (optTempBuffsSplashE = 1) {
+		optTempBuffsSplashE = 0
+	} else {
+		optTempBuffsSplashE = 1
+		status = on
+	}
+	GuiControl,, guiBuffsSplashEStatus, images/gui/bUse_%status%.png
 	Return
 	
 _GUIHelpAdvanced:
@@ -185,8 +437,8 @@ _GUIHelpBuffs:
 	Loop {
 		MouseGetPos,,,, OutputVarControl
 		help := null
-		if (OutputVarControl = "Static5") {
-			help = When active, the bot will use speed buffs.`nIf there's no common buff, it'll use an uncommon one and so forth.`nWhen the interval is set to 0, the bot will only use 1 buff at the start of a run. If set to anything else than 0, the bot will still use one at the start of a run then use another one at every interval.`nThe interval is in minutes.
+		if (OutputVarControl = "Static37") {
+			help = When a buff is set to Use, the bot will... use the buff.`nWhen the interval is set to 0, the bot will only use 1 buff at the start of a run. If set to anything else than 0, the bot will still use one at the start of a run then use another one at every interval.`nThe interval is in minutes.
 		} else {
 			ToolTip,
 			Break
@@ -262,6 +514,13 @@ _GUICloseAdvancedOptions:
 		GuiControl, BotGUIAdvancedOptions:, guiUseChestsStatusOff, images/gui/bOff_on.png
 	}
 	GuiControl, BotGUIAdvancedOptions: ChooseString, guiUseChestsAmountChoice, % optUseChestsAmount
+	if (optSkillsRoyalCommand = 1) {
+		GuiControl, BotGUIAdvancedOptions:, guiUseSkillsRoyalCommandStatusOn, images/gui/bOn_on.png
+		GuiControl, BotGUIAdvancedOptions:, guiUseSkillsRoyalCommandStatusOff, images/gui/bOff_off.png
+	} else {
+		GuiControl, BotGUIAdvancedOptions:, guiUseSkillsRoyalCommandStatusOn, images/gui/bOn_off.png
+		GuiControl, BotGUIAdvancedOptions:, guiUseSkillsRoyalCommandStatusOff, images/gui/bOff_on.png
+	}
 	GuiControl, BotGUIAdvancedOptions: ChooseString, guiForceStartHotkey1Choice, % optForceStartHotkey1
 	GuiControl, BotGUIAdvancedOptions: ChooseString, guiPauseHotkey1Choice, % optPauseHotkey1
 	GuiControl, BotGUIAdvancedOptions: ChooseString, guiReloadHotkey1Choice, % optReloadHotkey1
@@ -315,14 +574,174 @@ _GUICloseStormRider:
 _GUICloseBuffs:
 	GuiControl, BotGUI:, buttonBuffs, images/gui/BBuffs.png
 	Gui, BotGUIBuffs: Hide
-	if (optBuffsSpeed = 1) {
-		GuiControl, BotGUIBuffs:, guiBuffsSpeedStatusOn, images/gui/bOn_on.png
-		GuiControl, BotGUIBuffs:, guiBuffsSpeedStatusOff, images/gui/bOff_off.png
+	if (optBuffsGoldC = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsGoldCStatus, images/gui/bUse_on.png
 	} else {
-		GuiControl, BotGUIBuffs:, guiBuffsSpeedStatusOn, images/gui/bOn_off.png
-		GuiControl, BotGUIBuffs:, guiBuffsSpeedStatusOff, images/gui/bOff_on.png
+		GuiControl, BotGUIBuffs:, guiBuffsGoldCStatus, images/gui/bUse_off.png
 	}
-	GuiControl, BotGUIBuffs:, guiBuffsSpeedInterval, % optBuffsSpeedInterval
+	if (optBuffsGoldU = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsGoldUStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsGoldUStatus, images/gui/bUse_off.png
+	}
+	if (optBuffsGoldR = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsGoldRStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsGoldRStatus, images/gui/bUse_off.png
+	}
+	if (optBuffsGoldE = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsGoldEStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsGoldEStatus, images/gui/bUse_off.png
+	}
+	optTempBuffsGoldC := optBuffsGoldC
+	optTempBuffsGoldU := optBuffsGoldU
+	optTempBuffsGoldR := optBuffsGoldR
+	optTempBuffsGoldE := optBuffsGoldE
+	GuiControl, BotGUIBuffs:, guiBuffsGoldCInterval, % optBuffsGoldCInterval
+	GuiControl, BotGUIBuffs:, guiBuffsGoldUInterval, % optBuffsGoldUInterval
+	GuiControl, BotGUIBuffs:, guiBuffsGoldRInterval, % optBuffsGoldRInterval
+	GuiControl, BotGUIBuffs:, guiBuffsGoldEInterval, % optBuffsGoldEInterval
+	if (optBuffsPowerC = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsPowerCStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsPowerCStatus, images/gui/bUse_off.png
+	}
+	if (optBuffsPowerU = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsPowerUStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsPowerUStatus, images/gui/bUse_off.png
+	}
+	if (optBuffsPowerR = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsPowerRStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsPowerRStatus, images/gui/bUse_off.png
+	}
+	if (optBuffsPowerE = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsPowerEStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsPowerEStatus, images/gui/bUse_off.png
+	}
+	optTempBuffsPowerC := optBuffsPowerC
+	optTempBuffsPowerU := optBuffsPowerU
+	optTempBuffsPowerR := optBuffsPowerR
+	optTempBuffsPowerE := optBuffsPowerE
+	GuiControl, BotGUIBuffs:, guiBuffsPowerCInterval, % optBuffsPowerCInterval
+	GuiControl, BotGUIBuffs:, guiBuffsPowerUInterval, % optBuffsPowerUInterval
+	GuiControl, BotGUIBuffs:, guiBuffsPowerRInterval, % optBuffsPowerRInterval
+	GuiControl, BotGUIBuffs:, guiBuffsPowerEInterval, % optBuffsPowerEInterval
+	if (optBuffsSpeedC = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsSpeedCStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsSpeedCStatus, images/gui/bUse_off.png
+	}
+	if (optBuffsSpeedU = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsSpeedUStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsSpeedUStatus, images/gui/bUse_off.png
+	}
+	if (optBuffsSpeedR = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsSpeedRStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsSpeedRStatus, images/gui/bUse_off.png
+	}
+	if (optBuffsSpeedE = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsSpeedEStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsSpeedEStatus, images/gui/bUse_off.png
+	}
+	optTempBuffsSpeedC := optBuffsSpeedC
+	optTempBuffsSpeedU := optBuffsSpeedU
+	optTempBuffsSpeedR := optBuffsSpeedR
+	optTempBuffsSpeedE := optBuffsSpeedE
+	GuiControl, BotGUIBuffs:, guiBuffsSpeedCInterval, % optBuffsSpeedCInterval
+	GuiControl, BotGUIBuffs:, guiBuffsSpeedUInterval, % optBuffsSpeedUInterval
+	GuiControl, BotGUIBuffs:, guiBuffsSpeedRInterval, % optBuffsSpeedRInterval
+	GuiControl, BotGUIBuffs:, guiBuffsSpeedEInterval, % optBuffsSpeedEInterval
+	if (optBuffsCritC = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsCritCStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsCritCStatus, images/gui/bUse_off.png
+	}
+	if (optBuffsCritU = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsCritUStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsCritUStatus, images/gui/bUse_off.png
+	}
+	if (optBuffsCritR = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsCritRStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsCritRStatus, images/gui/bUse_off.png
+	}
+	if (optBuffsCritE = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsCritEStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsCritEStatus, images/gui/bUse_off.png
+	}
+	optTempBuffsCritC := optBuffsCritC
+	optTempBuffsCritU := optBuffsCritU
+	optTempBuffsCritR := optBuffsCritR
+	optTempBuffsCritE := optBuffsCritE
+	GuiControl, BotGUIBuffs:, guiBuffsCritCInterval, % optBuffsCritCInterval
+	GuiControl, BotGUIBuffs:, guiBuffsCritUInterval, % optBuffsCritUInterval
+	GuiControl, BotGUIBuffs:, guiBuffsCritRInterval, % optBuffsCritRInterval
+	GuiControl, BotGUIBuffs:, guiBuffsCritEInterval, % optBuffsCritEInterval
+	if (optBuffsClickC = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsClickCStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsClickCStatus, images/gui/bUse_off.png
+	}
+	if (optBuffsClickU = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsClickUStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsClickUStatus, images/gui/bUse_off.png
+	}
+	if (optBuffsClickR = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsClickRStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsClickRStatus, images/gui/bUse_off.png
+	}
+	if (optBuffsClickE = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsClickEStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsClickEStatus, images/gui/bUse_off.png
+	}
+	optTempBuffsClickC := optBuffsClickC
+	optTempBuffsClickU := optBuffsClickU
+	optTempBuffsClickR := optBuffsClickR
+	optTempBuffsClickE := optBuffsClickE
+	GuiControl, BotGUIBuffs:, guiBuffsClickCInterval, % optBuffsClickCInterval
+	GuiControl, BotGUIBuffs:, guiBuffsClickUInterval, % optBuffsClickUInterval
+	GuiControl, BotGUIBuffs:, guiBuffsClickRInterval, % optBuffsClickRInterval
+	GuiControl, BotGUIBuffs:, guiBuffsClickEInterval, % optBuffsClickEInterval
+	if (optBuffsSplashC = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsSplashCStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsSplashCStatus, images/gui/bUse_off.png
+	}
+	if (optBuffsSplashU = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsSplashUStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsSplashUStatus, images/gui/bUse_off.png
+	}
+	if (optBuffsSplashR = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsSplashRStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsSplashRStatus, images/gui/bUse_off.png
+	}
+	if (optBuffsSplashE = 1) {
+		GuiControl, BotGUIBuffs:, guiBuffsSplashEStatus, images/gui/bUse_on.png
+	} else {
+		GuiControl, BotGUIBuffs:, guiBuffsSplashEStatus, images/gui/bUse_off.png
+	}
+	optTempBuffsSplashC := optBuffsSplashC
+	optTempBuffsSplashU := optBuffsSplashU
+	optTempBuffsSplashR := optBuffsSplashR
+	optTempBuffsSplashE := optBuffsSplashE
+	GuiControl, BotGUIBuffs:, guiBuffsSplashCInterval, % optBuffsSplashCInterval
+	GuiControl, BotGUIBuffs:, guiBuffsSplashUInterval, % optBuffsSplashUInterval
+	GuiControl, BotGUIBuffs:, guiBuffsSplashRInterval, % optBuffsSplashRInterval
+	GuiControl, BotGUIBuffs:, guiBuffsSplashEInterval, % optBuffsSplashEInterval
 	Return
 	
 _GUICloseOtherWindows:
@@ -369,6 +788,7 @@ _GUIApplyAdvancedOptions:
 		optPromptCurrentLevel := optTempPromptCurrentLevel
 		optUseChests := optTempUseChests
 		optUseChestsAmount := optTempUseChestsAmount
+		optSkillsRoyalCommand := optTempSkillsRoyalCommand
 		optForceStartHotkey1 := optTempForceStartHotkey1
 		optForceStartHotkey2 := optTempForceStartHotkey2
 		optPauseHotkey1 := optTempPauseHotkey1
@@ -410,8 +830,54 @@ _GUIApplyStormRider:
 
 _GUIApplyBuffs:
 	Gui, Submit, NoHide
-	optBuffsSpeed := optTempBuffsSpeed
-	GuiControlGet, optBuffsSpeedInterval,, guiBuffsSpeedInterval
+	optBuffsGoldC := optTempBuffsGoldC
+	GuiControlGet, optBuffsGoldCInterval,, guiBuffsGoldCInterval
+	optBuffsGoldU := optTempBuffsGoldU
+	GuiControlGet, optBuffsGoldUInterval,, guiBuffsGoldUInterval
+	optBuffsGoldR := optTempBuffsGoldR
+	GuiControlGet, optBuffsGoldRInterval,, guiBuffsGoldRInterval
+	optBuffsGoldE := optTempBuffsGoldE
+	GuiControlGet, optBuffsGoldEInterval,, guiBuffsGoldEInterval
+	optBuffsPowerC := optTempBuffsPowerC
+	GuiControlGet, optBuffsPowerCInterval,, guiBuffsPowerCInterval
+	optBuffsPowerU := optTempBuffsPowerU
+	GuiControlGet, optBuffsPowerUInterval,, guiBuffsPowerUInterval
+	optBuffsPowerR := optTempBuffsPowerR
+	GuiControlGet, optBuffsPowerRInterval,, guiBuffsPowerRInterval
+	optBuffsPowerE := optTempBuffsPowerE
+	GuiControlGet, optBuffsPowerEInterval,, guiBuffsPowerEInterval
+	optBuffsSpeedC := optTempBuffsSpeedC
+	GuiControlGet, optBuffsSpeedCInterval,, guiBuffsSpeedCInterval
+	optBuffsSpeedU := optTempBuffsSpeedU
+	GuiControlGet, optBuffsSpeedUInterval,, guiBuffsSpeedUInterval
+	optBuffsSpeedR := optTempBuffsSpeedR
+	GuiControlGet, optBuffsSpeedRInterval,, guiBuffsSpeedRInterval
+	optBuffsSpeedE := optTempBuffsSpeedE
+	GuiControlGet, optBuffsSpeedEInterval,, guiBuffsSpeedEInterval
+	optBuffsCritC := optTempBuffsCritC
+	GuiControlGet, optBuffsCritCInterval,, guiBuffsCritCInterval
+	optBuffsCritU := optTempBuffsCritU
+	GuiControlGet, optBuffsCritUInterval,, guiBuffsCritUInterval
+	optBuffsCritR := optTempBuffsCritR
+	GuiControlGet, optBuffsCritRInterval,, guiBuffsCritRInterval
+	optBuffsCritE := optTempBuffsCritE
+	GuiControlGet, optBuffsCritEInterval,, guiBuffsCritEInterval
+	optBuffsClickC := optTempBuffsClickC
+	GuiControlGet, optBuffsClickCInterval,, guiBuffsClickCInterval
+	optBuffsClickU := optTempBuffsClickU
+	GuiControlGet, optBuffsClickUInterval,, guiBuffsClickUInterval
+	optBuffsClickR := optTempBuffsClickR
+	GuiControlGet, optBuffsClickRInterval,, guiBuffsClickRInterval
+	optBuffsClickE := optTempBuffsClickE
+	GuiControlGet, optBuffsClickEInterval,, guiBuffsClickEInterval
+	optBuffsSplashC := optTempBuffsSplashC
+	GuiControlGet, optBuffsSplashCInterval,, guiBuffsSplashCInterval
+	optBuffsSplashU := optTempBuffsSplashU
+	GuiControlGet, optBuffsSplashUInterval,, guiBuffsSplashUInterval
+	optBuffsSplashR := optTempBuffsSplashR
+	GuiControlGet, optBuffsSplashRInterval,, guiBuffsSplashRInterval
+	optBuffsSplashE := optTempBuffsSplashE
+	GuiControlGet, optBuffsSplashEInterval,, guiBuffsSplashEInterval
 	Gosub, _BotRewriteSettings
 	GuiControl, BotGUI:, buttonBuffs, images/gui/BBuffs.png
 	Gui, BotGUIBuffs: Hide
@@ -507,6 +973,65 @@ _GUIAdvancedOptionsNextLeft:
 	GuiControl, BotGUIAdvancedOptions:Choose, guiAdvancedOptionsTabs, 1
 	Return
 	
+_GUIBuffsGoldTab:
+	GuiControl, Hide, guiBuffsGoldTab
+	GuiControl, Show, guiBuffsPowerTab
+	GuiControl, Show, guiBuffsSpeedTab
+	GuiControl, Show, guiBuffsCritTab
+	GuiControl, Show, guiBuffsClickTab
+	GuiControl, Show, guiBuffsSplashTab
+	GuiControl, BotGUIBuffs:Choose, guiBuffsTabs, 1
+	Return
+
+_GUIBuffsPowerTab:
+	GuiControl, Show, guiBuffsGoldTab
+	GuiControl, Hide, guiBuffsPowerTab
+	GuiControl, Show, guiBuffsSpeedTab
+	GuiControl, Show, guiBuffsCritTab
+	GuiControl, Show, guiBuffsClickTab
+	GuiControl, Show, guiBuffsSplashTab
+	GuiControl, BotGUIBuffs:Choose, guiBuffsTabs, 2
+	Return
+
+_GUIBuffsSpeedTab:
+	GuiControl, Show, guiBuffsGoldTab
+	GuiControl, Show, guiBuffsPowerTab
+	GuiControl, Hide, guiBuffsSpeedTab
+	GuiControl, Show, guiBuffsCritTab
+	GuiControl, Show, guiBuffsClickTab
+	GuiControl, Show, guiBuffsSplashTab
+	GuiControl, BotGUIBuffs:Choose, guiBuffsTabs, 3
+	Return
+
+_GUIBuffsCritTab:
+	GuiControl, Show, guiBuffsGoldTab
+	GuiControl, Show, guiBuffsPowerTab
+	GuiControl, Show, guiBuffsSpeedTab
+	GuiControl, Hide, guiBuffsCritTab
+	GuiControl, Show, guiBuffsClickTab
+	GuiControl, Show, guiBuffsSplashTab
+	GuiControl, BotGUIBuffs:Choose, guiBuffsTabs, 4
+	Return
+
+_GUIBuffsClickTab:
+	GuiControl, Show, guiBuffsGoldTab
+	GuiControl, Show, guiBuffsPowerTab
+	GuiControl, Show, guiBuffsSpeedTab
+	GuiControl, Show, guiBuffsCritTab
+	GuiControl, Hide, guiBuffsClickTab
+	GuiControl, Show, guiBuffsSplashTab
+	GuiControl, BotGUIBuffs:Choose, guiBuffsTabs, 5
+	Return
+
+_GUIBuffsSplashTab:
+	GuiControl, Show, guiBuffsGoldTab
+	GuiControl, Show, guiBuffsPowerTab
+	GuiControl, Show, guiBuffsSpeedTab
+	GuiControl, Show, guiBuffsCritTab
+	GuiControl, Show, guiBuffsClickTab
+	GuiControl, Hide, guiBuffsSplashTab
+	GuiControl, BotGUIBuffs:Choose, guiBuffsTabs, 6
+	Return
 	
 _GUIForceStartHotkey1Unmask:
 	GuiControl, Hide, guiForceStartHotkey1Mask
@@ -701,6 +1226,18 @@ _GUISetUseChestsOff:
 	optTempUseChests = 0
 	Return
 
+_GUISetUseSkillsRoyalCommandOn:
+	GuiControl,, guiUseSkillsRoyalCommandStatusOn, images/gui/bOn_on.png
+	GuiControl,, guiUseSkillsRoyalCommandStatusOff, images/gui/bOff_off.png
+	optTempSkillsRoyalCommand = 1
+	Return
+	
+_GUISetUseSkillsRoyalCommandOff:
+	GuiControl,, guiUseSkillsRoyalCommandStatusOn, images/gui/bOn_off.png
+	GuiControl,, guiUseSkillsRoyalCommandStatusOff, images/gui/bOff_on.png
+	optTempSkillsRoyalCommand = 0
+	Return
+	
 _GUIChooseChestsAmount:
 	Gui, Submit, NoHide
 	optTempUseChestsAmount := guiUseChestsAmountChoice
@@ -776,8 +1313,8 @@ _GUIStormRider:
 _GUIBuffs:
 	Gosub, _GUICloseOtherWindows
 	GuiControl, BotGUI:, buttonBuffs, images/gui/BBuffs_active.png
-	winW = 242
-	winH = 199
+	winW = 256
+	winH = 274
 	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/guiMain_bg.png
 	WinGetPos, Output2X, Output2Y
 	nX := Output2X - ((winW - OutputW) / 2)

@@ -44,6 +44,15 @@ botLevelCursorCoords[5] := [912, 10, 949, 127]
 botLevelCurrentCursor = 0
 botLevelPreviousCursor = 0
 botCurrentLevel = 0
+botBuffsRarity := ["C", "U", "R", "E"]
+botBuffs := ["Gold", "Power", "Speed", "Crit", "Click", "Splash"]
+botBuffsCoords := [494, 110]
+botBuffsGoldCTimer := botBuffsGoldUTimer := botBuffsGoldRTimer := botBuffsGoldETimer := 0
+botBuffsPowerCTimer := botBuffsPowerUTimer := botBuffsPowerRTimer := botBuffsPowerETimer := 0
+botBuffsSpeedCTimer := botBuffsSpeedUTimer := botBuffsSpeedRTimer := botBuffsSpeedETimer := 0
+botBuffsCritCTimer := botBuffsCritUTimer := botBuffsCritRTimer := botBuffsCritETimer := 0
+botBuffsClickCTimer := botBuffsClickUTimer := botBuffsClickRTimer := botBuffsClickETimer := 0
+botBuffsSplashCTimer := botBuffsSplashUTimer := botBuffsSplashRTimer := botBuffsSplashETimer := 0
 
 rightKeyInterrupt := false
 
@@ -116,6 +125,8 @@ idolBot:
 					if (attempt > 5) {
 						attempt = 0
 						Gosub, _BotCampaignStart
+						MouseMove, 740, 480
+						Click
 					}
 					botRelaunching := false
 					MouseMove, 550, 50
@@ -191,33 +202,49 @@ idolBot:
 					if (botSession = 0) {
 						botSession = 1
 					}
+					
 					if (optChatRoom > 0 and (optLastoptChatRoom != optChatRoom or botRelaunched = true)) {
 						botRelaunched := false
 						Gosub, _BotSetChatRoom
 					}
-					if (optBuffsSpeed = 1) {
-						if ((__UnixTime(A_Now) - botBuffsSpeedTimer) / 60 >= optBuffsSpeedInterval) {
-							if (botBuffsSpeedTimer > -1) {
-								__Log("Using a speed buff.")
-								MouseMove, 570, 110
-								Sleep, 500
-								ImageSearch, OutputX, OutputY, 610, 145, 695, 180, *100 images/game/buffs_use.png
-								if (ErrorLevel = 0) {
-									MouseMove, OutputX, OutputY
-									Click
-									Sleep, 100
-									MouseMove, 815, 315
-									if (optBuffsSpeedInterval = 0) {
-										botBuffsSpeedTimer = -1
-									} else {
-										botBuffsSpeedTimer := __UnixTime(A_Now)
+					
+					; Buffs stuff
+					bI = 1
+					now := __UnixTime(A_Now)
+					Loop, % botBuffs.length() {
+						moved := true
+						Loop, % botBuffsRarity.length() {
+							bB := botBuffs[bI]
+							bR := botBuffsRarity[A_Index]
+							if (optBuffs%bB%%bR% = 1) {
+								if ((now - botBuffs%bB%%bR%Timer) / 60 >= optBuffs%bB%%bR%Interval) {
+									if (botBuffs%bB%%bR%Timer > -1) {
+										__Log("Using a " . bB . " [" . bR . "] buff.")
+										bX := botBuffsCoords[1] + (40 * (bI - 1))
+										bY := botBuffsCoords[2]
+										if (moved = true) {
+											MouseMove, bX, bY
+											Sleep, 1000
+											Click
+											moved := false
+										}
+										bX2 := bX + 95
+										bY2 := bY + 53 + (36 * (A_Index - 1))
+										MouseMove, bX2, bY2
+										Sleep, 500
+										Click
+										if (optBuffs%bB%%bR%Interval = 0) {
+											botBuffs%bB%%bR%Timer = -1
+										} else {
+											botBuffs%bB%%bR%Timer := now
+										}
 									}
-								} else {
-									__Log("Couldn't find a speed buff, trying again next cycle.")
 								}
 							}
 						}
+						bI++
 					}
+					
 					__Log("Get the gold and quest items for " . optLootItemsDuration . " seconds.")
 					now = % __UnixTime(A_Now)
 					delay := optClickDelay
@@ -234,6 +261,7 @@ idolBot:
 						i++
 						Sleep, % delay
 					}
+					
 					if ((optResetType = 1 or optResetType = 2 or optResetType = 5 or optResetType = 6) and botSkipToReset = false) {
 						if (__UnixTime(A_Now) - botRunLaunchTime > (optMainDPSDelay * 60)) {
 							rightKeyInterrupt := true
@@ -263,6 +291,7 @@ idolBot:
 							rightKeyInterrupt := false
 						}
 					}
+					
 					; If the last time we did an auto progress check is >= than autoProgressCheckDelay, we initiate an auto progress check
 					if ((optResetType = 2 or optAutoProgressCheck = 1) and __UnixTime(A_Now) - lastProgressCheck >= optAutoProgressCheckDelay) {
 						; Every autoProgressCheckDelay seconds we take a look if Auto Progress is still activated, if it's not it means we died so achieved the highest zone we could, we have to reset
@@ -280,15 +309,30 @@ idolBot:
 							}
 						}
 					}
+					
 					; Max all levels
 					__BotMaxLevels()
 					Send, {%optFormationKey%}
 					botMaxAllCount++
 					; If the bot did optUpgAllUntil max all levels, do one buy all upgrades
 					if (botMaxAllCount >= optUpgAllUntil) {
+						__Log("Get the gold and quest items for 1 second.")
+						now = % __UnixTime(A_Now)
+						delay := optClickDelay
+						i = 1
+						Send, {Space}
+						while (__UnixTime(A_Now) - now <= 1) {
+							if (i > 4) {
+								i = 1
+							}
+							MouseMove, 650 + i * 37, 320
+							i++
+							Sleep, % delay
+						}
 						__BotUpgAll()
 						botMaxAllCount = 0
 					}
+					
 					if (optResetType = 3) {
 						if (levelCapResetCheck = true) {
 							__BotMoveToLastPage()
@@ -315,10 +359,12 @@ idolBot:
 							}
 						}
 					}
+					
 					if (optResetType = 5 and __UnixTime(A_Now) - botRunLaunchTime >= (optRunTime * 60)) {
 						botSkipToReset := true
 						botPhase = 3
 					}
+					
 					if (optResetType = 6) {
 						if (botCurrentLevel >= optResetOnLevel) {
 							__Log("Level " . optResetOnLevel . " reached.")
@@ -326,6 +372,7 @@ idolBot:
 							botPhase = 3
 						}
 					}
+					
 					if (botSkipToReset = false) {
 						if (optStormRiderMagnify = 0) {
 							__Log("Using all skills.")
@@ -357,11 +404,14 @@ idolBot:
 							__BotUseSkill(3)
 							__BotUseSkill(4)
 							__BotUseSkill(5)
-							__BotUseSkill(6)
+							if (optSkillsRoyalCommand = 1) {
+								__BotUseSkill(6)
+							}
 							__BotUseSkill(8)
 						}
 					}
 				}
+				
 				; If optRunTime time elapsed or phase is set at 3, we reset
 				if (botPhase = 3 and optResetType > 1) {
 					botDelayReset := false
@@ -417,7 +467,7 @@ idolBot:
 							Sleep, 25
 							Click
 							chestFound := false
-							Loop, 10 {
+							Loop {
 								if (chestFound == true) {
 									Break
 								}
@@ -425,62 +475,93 @@ idolBot:
 								Loop {
 									ImageSearch, OutputX, OutputY, 0, 505, 1000, 675, *100 images/game/chests_reset.png
 									if (ErrorLevel = 0) {
+										Sleep, 100
 										ImageSearch, OutputX2, OutputY2, 0, 505, 1000, 675, *100 images/game/chests_reset.png
 										if (ErrorLevel = 0) {
 											if (OutputX2 = OutputX and OutputY2 = OutputY) {
+												__Log("Found the chests.")
+												Break
+											} else {
+												if (A_Index > 9) {
+													__Log("Cannot find the chests. It seems unstable.")
+													Break
+												}
+											}
+										}
+									} else {
+										if (A_Index > 9) {
+											__Log("Cannot find the chests.")
+											Break
+										}
+									}
+									Sleep, 1000
+								}
+								Loop {
+									ImageSearch, OutputX, OutputY, OutputX - 50, OutputY, OutputX, OutputY + 75, *100 images/game/chests_reset_x%optUseChestsAmount%.png
+									if (ErrorLevel = 0) {
+										__Log("Using " . optUseChestsAmount . " chests.")
+										MouseMove, OutputX + 5, OutputY + 5
+										Click
+										Break
+									} else {
+										__Log("Cannot open " . optUseChestsAmount . " chests.")
+										Break
+									}
+								}
+								Loop {
+									Sleep, 1000
+									ImageSearch, OutputX, OutputY, 345, 345, 495, 385, *100 images/game/chests_reset_yes.png
+									if (ErrorLevel = 0) {
+										__Log("Yes button found.")
+										MouseMove, OutputX + 5, OutputY + 5
+										Click
+										Break
+									} else {
+										if (A_Index > 9) {
+											__Log("Cannot find the yes button.")
+											Break
+										}
+									}
+								}
+								Loop {
+									Sleep, 500
+									ImageSearch, OutputX, OutputY, 415, 20, 505, 55, *100 images/game/chest_loot.png
+									if (ErrorLevel = 0) {
+										__Log("Chests opening window.")
+										Loop {
+											if (chestFound == true) {
+												Break
+											}
+											Sleep, 500
+											ImageSearch, OutputX, OutputY, 885, 5, 930, 45, *100 images/game/close.png
+											if (ErrorLevel = 0) {
+												MouseMove, OutputX + 5, OutputY + 5
+												Click
+												Loop {
+													Sleep, 500
+													ImageSearch, OutputX, OutputY, 905, 605, 985, 650, *100 images/game/chests_reset_close.png
+													if (ErrorLevel = 0) {
+														__Log("Closing the chests window.")
+														MouseMove, OutputX + 5, OutputY + 5
+														Click
+														Sleep, 500
+														MouseMove, 740, 480
+														Click
+														Sleep, 500
+														chestFound := true
+														__BotMaxLevels()
+														Break
+													}
+												}
 												Break
 											}
 										}
-									}
-									Sleep, 500
-								}
-								__Log("Found the chests.")
-								ImageSearch, OutputX, OutputY, OutputX - 50, OutputY, OutputX, OutputY + 75, *100 images/game/chests_reset_x%optUseChestsAmount%.png
-								if (ErrorLevel = 0) {
-									__Log("Using " . optUseChestsAmount . " chests.")
-									MouseMove, OutputX + 5, OutputY + 5
-									Click
-									Loop {
-										if (chestFound == true) {
+									} else {
+										if (A_Index > 9) {
+											__Log("Couldn't find the opening window.")
 											Break
 										}
-										Sleep, 500
-										ImageSearch, OutputX, OutputY, 345, 345, 495, 385, *100 images/game/chests_reset_yes.png
-										if (ErrorLevel = 0) {
-											MouseMove, OutputX + 5, OutputY + 5
-											Click
-											Loop {
-												if (chestFound == true) {
-													Break
-												}
-												Sleep, 1000
-												ImageSearch, OutputX, OutputY, 885, 5, 930, 45, *100 images/game/close.png
-												if (ErrorLevel = 0) {
-													MouseMove, OutputX + 5, OutputY + 5
-													Click
-													Loop {
-														Sleep, 500
-														ImageSearch, OutputX, OutputY, 905, 605, 985, 650, *100 images/game/chests_reset_close.png
-														if (ErrorLevel = 0) {
-															__Log("Closing the chests window.")
-															MouseMove, OutputX + 5, OutputY + 5
-															Click
-															Sleep, 500
-															MouseMove, 740, 480
-															Click
-															Sleep, 500
-															chestFound := true
-															__BotMaxLevels()
-															Break
-														}
-													}
-												}
-											}
-										}
 									}
-								} else {
-									__Log("Cannot open " . optUseChestsAmount . " chests.")
-									Break
 								}
 							}
 							if (chestFound == false) {
@@ -562,7 +643,16 @@ idolBot:
 								botLevelCurrentCursor = 0
 								botLevelPreviousCursor = 0
 								botCurrentLevel = 0
-								botBuffsSpeedTimer = 0
+								
+								bI = 1
+								Loop, % botBuffs.length() {
+									Loop, % botBuffsRarity.length() {
+										bB := botBuffs[bI]
+										bR := botBuffsRarity[A_Index]
+										botBuffs%bB%%bR%Timer := 0
+									}
+									bI++
+								}
 								
 								MouseMove, 507, 550
 								Sleep, 500
@@ -1060,9 +1150,16 @@ __BotUpgAll() {
 
 ; Use a skill, 0 to use all skills
 __BotUseSkill(s) {
+	Global optSkillsRoyalCommand
 	if (s = 0) {
 		Loop, 8 {
-			Send, %A_Index%
+			if (A_Index = 6) {
+				if (optSkillsRoyalCommand = 1) {
+					Send, %A_Index%
+				}
+			} else {
+				Send, %A_Index%
+			}
 			Sleep, 25
 		}
 	} else {
@@ -1267,8 +1364,7 @@ _BotScanForChests:
 _BotForceFocus:
 	IfWinExist, Crusaders of The Lost Idols
 	{
-		GuiControlGet, BotStatus, BotGUI:
-		if (BotStatus = images/gui/running.png) {
+		if (botPhase > -1) {
 			WinActivate, Crusaders of The Lost Idols
 		}
 	}
@@ -1340,8 +1436,62 @@ _BotLoadSettings:
 	IniRead, optUseChestsAmount, settings/settings.ini, Settings, usechestsamount, 5
 	IniRead, optStormRiderFormation, settings/settings.ini, Settings, stormriderformation, 0
 	IniRead, optStormRiderMagnify, settings/settings.ini, Settings, stormridermagnify, 1
-	IniRead, optBuffsSpeed, settings/settings.ini, Settings, buffsspeed, 0
-	IniRead, optBuffsSpeedInterval, settings/settings.ini, Settings, buffsspeedinterval, 0
+	IniRead, optSkillsRoyalCommand, settings/settings.ini, Settings, skillsroyalcommand, 0
+	
+	IniRead, optBuffsGoldC, settings/settings.ini, Settings, buffsgoldc, 0
+	IniRead, optBuffsGoldCInterval, settings/settings.ini, Settings, buffsgoldcinterval, 0
+	IniRead, optBuffsGoldU, settings/settings.ini, Settings, buffsgoldu, 0
+	IniRead, optBuffsGoldUInterval, settings/settings.ini, Settings, buffsgolduinterval, 0
+	IniRead, optBuffsGoldR, settings/settings.ini, Settings, buffsgoldr, 0
+	IniRead, optBuffsGoldRInterval, settings/settings.ini, Settings, buffsgoldrinterval, 0
+	IniRead, optBuffsGoldE, settings/settings.ini, Settings, buffsgolde, 0
+	IniRead, optBuffsGoldEInterval, settings/settings.ini, Settings, buffsgoldeinterval, 0
+	
+	IniRead, optBuffsPowerC, settings/settings.ini, Settings, buffspowerc, 0
+	IniRead, optBuffsPowerCInterval, settings/settings.ini, Settings, buffspowercinterval, 0
+	IniRead, optBuffsPowerU, settings/settings.ini, Settings, buffspoweru, 0
+	IniRead, optBuffsPowerUInterval, settings/settings.ini, Settings, buffspoweruinterval, 0
+	IniRead, optBuffsPowerR, settings/settings.ini, Settings, buffspowerr, 0
+	IniRead, optBuffsPowerRInterval, settings/settings.ini, Settings, buffspowerrinterval, 0
+	IniRead, optBuffsPowerE, settings/settings.ini, Settings, buffspowere, 0
+	IniRead, optBuffsPowerEInterval, settings/settings.ini, Settings, buffspowereinterval, 0
+	
+	IniRead, optBuffsSpeedC, settings/settings.ini, Settings, buffsspeedc, 0
+	IniRead, optBuffsSpeedCInterval, settings/settings.ini, Settings, buffsspeedcinterval, 0
+	IniRead, optBuffsSpeedU, settings/settings.ini, Settings, buffsspeedu, 0
+	IniRead, optBuffsSpeedUInterval, settings/settings.ini, Settings, buffsspeeduinterval, 0
+	IniRead, optBuffsSpeedR, settings/settings.ini, Settings, buffsspeedr, 0
+	IniRead, optBuffsSpeedRInterval, settings/settings.ini, Settings, buffsspeedrinterval, 0
+	IniRead, optBuffsSpeedE, settings/settings.ini, Settings, buffsspeede, 0
+	IniRead, optBuffsSpeedEInterval, settings/settings.ini, Settings, buffsspeedeinterval, 0
+	
+	IniRead, optBuffsCritC, settings/settings.ini, Settings, buffscritc, 0
+	IniRead, optBuffsCritCInterval, settings/settings.ini, Settings, buffscritcinterval, 0
+	IniRead, optBuffsCritU, settings/settings.ini, Settings, buffscritu, 0
+	IniRead, optBuffsCritUInterval, settings/settings.ini, Settings, buffscrituinterval, 0
+	IniRead, optBuffsCritR, settings/settings.ini, Settings, buffscritr, 0
+	IniRead, optBuffsCritRInterval, settings/settings.ini, Settings, buffscritrinterval, 0
+	IniRead, optBuffsCritE, settings/settings.ini, Settings, buffscrite, 0
+	IniRead, optBuffsCritEInterval, settings/settings.ini, Settings, buffscriteinterval, 0
+	
+	IniRead, optBuffsClickC, settings/settings.ini, Settings, buffsclickc, 0
+	IniRead, optBuffsClickCInterval, settings/settings.ini, Settings, buffsclickcinterval, 0
+	IniRead, optBuffsClickU, settings/settings.ini, Settings, buffsclicku, 0
+	IniRead, optBuffsClickUInterval, settings/settings.ini, Settings, buffsclickuinterval, 0
+	IniRead, optBuffsClickR, settings/settings.ini, Settings, buffsclickr, 0
+	IniRead, optBuffsClickRInterval, settings/settings.ini, Settings, buffsclickrinterval, 0
+	IniRead, optBuffsClickE, settings/settings.ini, Settings, buffsclicke, 0
+	IniRead, optBuffsClickEInterval, settings/settings.ini, Settings, buffsclickeinterval, 0
+	
+	IniRead, optBuffsSplashC, settings/settings.ini, Settings, buffssplashc, 0
+	IniRead, optBuffsSplashCInterval, settings/settings.ini, Settings, buffssplashcinterval, 0
+	IniRead, optBuffsSplashU, settings/settings.ini, Settings, buffssplashu, 0
+	IniRead, optBuffsSplashUInterval, settings/settings.ini, Settings, buffssplashuinterval, 0
+	IniRead, optBuffsSplashR, settings/settings.ini, Settings, buffssplashr, 0
+	IniRead, optBuffsSplashRInterval, settings/settings.ini, Settings, buffssplashrinterval, 0
+	IniRead, optBuffsSplashE, settings/settings.ini, Settings, buffssplashe, 0
+	IniRead, optBuffsSplashEInterval, settings/settings.ini, Settings, buffssplasheinterval, 0
+	
 	IniRead, optPauseHotkey1, settings/settings.ini, Settings, pausehotkey1, F8
 	IniRead, optPauseHotkey2, settings/settings.ini, Settings, pausehotkey2, %A_Space%
 	IniRead, optReloadHotkey1, settings/settings.ini, Settings, reloadhotkey1, F9
@@ -1399,8 +1549,62 @@ _BotLoadSettings:
 	optTempStormRiderFormation := optStormRiderFormation
 	optTempStormRiderFormationKey := optStormRiderFormationKey
 	optTempStormRiderMagnify := optStormRiderMagnify
-	optTempBuffsSpeed := optBuffsSpeed
-	optTempBuffsSpeedInterval := optBuffsSpeedInterval
+	optTempSkillsRoyalCommand := optSkillsRoyalCommand
+	
+	optTempBuffsGoldC := optBuffsGoldC
+	optTempBuffsGoldCInterval := optBuffsGoldCInterval
+	optTempBuffsGoldU := optBuffsGoldU
+	optTempBuffsGoldUInterval := optBuffsGoldUInterval
+	optTempBuffsGoldR := optBuffsGoldR
+	optTempBuffsGoldRInterval := optBuffsGoldRInterval
+	optTempBuffsGoldE := optBuffsGoldE
+	optTempBuffsGoldEInterval := optBuffsGoldEInterval
+	
+	optTempBuffsPowerC := optBuffsPowerC
+	optTempBuffsPowerCInterval := optBuffsPowerCInterval
+	optTempBuffsPowerU := optBuffsPowerU
+	optTempBuffsPowerUInterval := optBuffsPowerUInterval
+	optTempBuffsPowerR := optBuffsPowerR
+	optTempBuffsPowerRInterval := optBuffsPowerRInterval
+	optTempBuffsPowerE := optBuffsPowerE
+	optTempBuffsPowerEInterval := optBuffsPowerEInterval
+	
+	optTempBuffsSpeedC := optBuffsSpeedC
+	optTempBuffsSpeedCInterval := optBuffsSpeedCInterval
+	optTempBuffsSpeedU := optBuffsSpeedU
+	optTempBuffsSpeedUInterval := optBuffsSpeedUInterval
+	optTempBuffsSpeedR := optBuffsSpeedR
+	optTempBuffsSpeedRInterval := optBuffsSpeedRInterval
+	optTempBuffsSpeedE := optBuffsSpeedE
+	optTempBuffsSpeedEInterval := optBuffsSpeedEInterval
+	
+	optTempBuffsCritC := optBuffsCritC
+	optTempBuffsCritCInterval := optBuffsCritCInterval
+	optTempBuffsCritU := optBuffsCritU
+	optTempBuffsCritUInterval := optBuffsCritUInterval
+	optTempBuffsCritR := optBuffsCritR
+	optTempBuffsCritRInterval := optBuffsCritRInterval
+	optTempBuffsCritE := optBuffsCritE
+	optTempBuffsCritEInterval := optBuffsCritEInterval
+	
+	optTempBuffsClickC := optBuffsClickC
+	optTempBuffsClickCInterval := optBuffsClickCInterval
+	optTempBuffsClickU := optBuffsClickU
+	optTempBuffsClickUInterval := optBuffsClickUInterval
+	optTempBuffsClickR := optBuffsClickR
+	optTempBuffsClickRInterval := optBuffsClickRInterval
+	optTempBuffsClickE := optBuffsClickE
+	optTempBuffsClickEInterval := optBuffsClickEInterval
+	
+	optTempBuffsSplashC := optBuffsSplashC
+	optTempBuffsSplashCInterval := optBuffsSplashCInterval
+	optTempBuffsSplashU := optBuffsSplashU
+	optTempBuffsSplashUInterval := optBuffsSplashUInterval
+	optTempBuffsSplashR := optBuffsSplashR
+	optTempBuffsSplashRInterval := optBuffsSplashRInterval
+	optTempBuffsSplashE := optBuffsSplashE
+	optTempBuffsSplashEInterval := optBuffsSplashEInterval
+	
 	optTempUseChests := optUseChests
 	optTempUseChestsAmount := optUseChestsAmount
 	optTempPauseHotkey1 := optPauseHotkey1
@@ -1441,8 +1645,62 @@ _BotRewriteSettings:
 	IniWrite, % optUseChestsAmount, settings/settings.ini, Settings, usechestsamount
 	IniWrite, % optStormRiderFormation, settings/settings.ini, Settings, stormriderformation
 	IniWrite, % optStormRiderMagnify, settings/settings.ini, Settings, stormridermagnify
-	IniWrite, % optBuffsSpeed, settings/settings.ini, Settings, buffsspeed
-	IniWrite, % optBuffsSpeedInterval, settings/settings.ini, Settings, buffsspeedinterval
+	IniWrite, % optSkillsRoyalCommand, settings/settings.ini, Settings, skillsroyalcommand
+	
+	IniWrite, % optBuffsGoldC, settings/settings.ini, Settings, buffsgoldc
+	IniWrite, % optBuffsGoldCInterval, settings/settings.ini, Settings, buffsgoldcinterval
+	IniWrite, % optBuffsGoldU, settings/settings.ini, Settings, buffsgoldu
+	IniWrite, % optBuffsGoldUInterval, settings/settings.ini, Settings, buffsgolduinterval
+	IniWrite, % optBuffsGoldR, settings/settings.ini, Settings, buffsgoldr
+	IniWrite, % optBuffsGoldRInterval, settings/settings.ini, Settings, buffsgoldrinterval
+	IniWrite, % optBuffsGoldE, settings/settings.ini, Settings, buffsgolde
+	IniWrite, % optBuffsGoldEInterval, settings/settings.ini, Settings, buffsgoldeinterval
+	
+	IniWrite, % optBuffsPowerC, settings/settings.ini, Settings, buffspowerc
+	IniWrite, % optBuffsPowerCInterval, settings/settings.ini, Settings, buffspowercinterval
+	IniWrite, % optBuffsPowerU, settings/settings.ini, Settings, buffspoweru
+	IniWrite, % optBuffsPowerUInterval, settings/settings.ini, Settings, buffspoweruinterval
+	IniWrite, % optBuffsPowerR, settings/settings.ini, Settings, buffspowerr
+	IniWrite, % optBuffsPowerRInterval, settings/settings.ini, Settings, buffspowerrinterval
+	IniWrite, % optBuffsPowerE, settings/settings.ini, Settings, buffspowere
+	IniWrite, % optBuffsPowerEInterval, settings/settings.ini, Settings, buffspowereinterval
+	
+	IniWrite, % optBuffsSpeedC, settings/settings.ini, Settings, buffsspeedc
+	IniWrite, % optBuffsSpeedCInterval, settings/settings.ini, Settings, buffsspeedcinterval
+	IniWrite, % optBuffsSpeedU, settings/settings.ini, Settings, buffsspeedu
+	IniWrite, % optBuffsSpeedUInterval, settings/settings.ini, Settings, buffsspeeduinterval
+	IniWrite, % optBuffsSpeedR, settings/settings.ini, Settings, buffsspeedr
+	IniWrite, % optBuffsSpeedRInterval, settings/settings.ini, Settings, buffsspeedrinterval
+	IniWrite, % optBuffsSpeedE, settings/settings.ini, Settings, buffsspeede
+	IniWrite, % optBuffsSpeedEInterval, settings/settings.ini, Settings, buffsspeedeinterval
+	
+	IniWrite, % optBuffsCritC, settings/settings.ini, Settings, buffscritc
+	IniWrite, % optBuffsCritCInterval, settings/settings.ini, Settings, buffscritcinterval
+	IniWrite, % optBuffsCritU, settings/settings.ini, Settings, buffscritu
+	IniWrite, % optBuffsCritUInterval, settings/settings.ini, Settings, buffscrituinterval
+	IniWrite, % optBuffsCritR, settings/settings.ini, Settings, buffscritr
+	IniWrite, % optBuffsCritRInterval, settings/settings.ini, Settings, buffscritrinterval
+	IniWrite, % optBuffsCritE, settings/settings.ini, Settings, buffscrite
+	IniWrite, % optBuffsCritEInterval, settings/settings.ini, Settings, buffscriteinterval
+	
+	IniWrite, % optBuffsClickC, settings/settings.ini, Settings, buffsclickc
+	IniWrite, % optBuffsClickCInterval, settings/settings.ini, Settings, buffsclickcinterval
+	IniWrite, % optBuffsClickU, settings/settings.ini, Settings, buffsclicku
+	IniWrite, % optBuffsClickUInterval, settings/settings.ini, Settings, buffsclickuinterval
+	IniWrite, % optBuffsClickR, settings/settings.ini, Settings, buffsclickr
+	IniWrite, % optBuffsClickRInterval, settings/settings.ini, Settings, buffsclickrinterval
+	IniWrite, % optBuffsClickE, settings/settings.ini, Settings, buffsclicke
+	IniWrite, % optBuffsClickEInterval, settings/settings.ini, Settings, buffsclickeinterval
+	
+	IniWrite, % optBuffsSplashC, settings/settings.ini, Settings, buffssplashc
+	IniWrite, % optBuffsSplashCInterval, settings/settings.ini, Settings, buffssplashcinterval
+	IniWrite, % optBuffsSplashU, settings/settings.ini, Settings, buffssplashu
+	IniWrite, % optBuffsSplashUInterval, settings/settings.ini, Settings, buffssplashuinterval
+	IniWrite, % optBuffsSplashR, settings/settings.ini, Settings, buffssplashr
+	IniWrite, % optBuffsSplashRInterval, settings/settings.ini, Settings, buffssplashrinterval
+	IniWrite, % optBuffsSplashE, settings/settings.ini, Settings, buffssplashe
+	IniWrite, % optBuffsSplashEInterval, settings/settings.ini, Settings, buffssplasheinterval
+	
 	IniWrite, % optPauseHotkey1, settings/settings.ini, Settings, pausehotkey1
 	IniWrite, % optPauseHotkey2, settings/settings.ini, Settings, pausehotkey2
 	IniWrite, % optReloadHotkey1, settings/settings.ini, Settings, reloadhotkey1

@@ -99,8 +99,18 @@ if (optUseChests = 1) {
 
 Gui, Add, Picture, x15 y99 vguiUseChestsStatusOn g_GUISetUseChestsOn, %useChestsStatusOn%
 Gui, Add, Picture, x+2 vguiUseChestsStatusOff g_GUISetUseChestsOff, %useChestsStatusOff%
-
 Gui, Add, DropDownList, x+15 w50 vguiUseChestsAmountChoice g_GUIChooseChestsAmount, 5|25|100
+
+if (optSkillsRoyalCommand = 1) {
+	useSkillsRoyalCommandStatusOn := "images/gui/bOn_on.png"
+	useSkillsRoyalCommandStatusOff := "images/gui/bOff_off.png"
+} else {
+	useSkillsRoyalCommandStatusOn := "images/gui/bOn_off.png"
+	useSkillsRoyalCommandStatusOff := "images/gui/bOff_on.png"
+}
+
+Gui, Add, Picture, x15 y+27 vguiUseSkillsRoyalCommandStatusOn g_GUISetUseSkillsRoyalCommandOn, %useSkillsRoyalCommandStatusOn%
+Gui, Add, Picture, x+2 vguiUseSkillsRoyalCommandStatusOff g_GUISetUseSkillsRoyalCommandOff, %useSkillsRoyalCommandStatusOff%
 
 Gui, Tab, 4
 Gui, Add, Picture, x0 y0, images/gui/guiAdvancedOptionsHotkeys_bg.png

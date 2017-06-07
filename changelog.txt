@@ -1,6 +1,13 @@
 ---
 # http://www.reddit.com/r/cotlibot
 ---
+# 1.3.8
+---
+- [BETA] Added support for all buffs
+- Fixed a potential issue with focusing the game
+- Added a 1 second gold pick up before buying all upgrades
+- Reworked the whole chests before reset phase
+- Added a disable Royal Command option (in advanced options, Even more tab)
 ---
 # 1.3.7
 ---
