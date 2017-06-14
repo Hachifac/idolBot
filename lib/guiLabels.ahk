@@ -392,6 +392,12 @@ _GUIHelpAdvanced:
 			help = When set to Always on, the bot will make sure auto progress is active at all time.`nKeep in mind that it can mess with the On level reset, which I would strongly suggest to turn on Prompt on current level after pause.`nThe Max progress reset is excluded from this setting, it will always make sure auto progress is active.
 		} else if (OutputVarControl = "Static20") {
 			help = Due to some limitations, if you proceed to pause the bot then manually play for a while, the bot could lose the current level.`nExample: You set reset to level 750 and you pause the bot on level 500 and unpause it on level 700, the bot still thinks it's on level 500 and won't reset until the game reaches the level 950.`nTurning this on will prompt you with a popup to set the current level every time you unpause.
+		} else if (OutputVarControl = "Static38") {
+			help = When turning this option on, the bot will take longer to refresh some GUI elements and will turn off chests stats.`nTurn on if you experience lag with the bot.
+		} else if (OutputVarControl = "Static39") {
+			help = The higher the value, the slower the bot "thinks".`nChange it to a higher value if the game runs slower on your computer.
+		} else if (OutputVarControl = "Static42") {
+			help = IMPORTANT: THE BOT MUST RUN AS ADMINISTRATOR FOR THIS FEATURE TO WORK.`n`nWhen turning this option on, the bot will make use of Cheat Engine.`nHave the desired speed already preset in Cheat Engine and have speedhack turned off.
 		} else {
 			ToolTip,
 			Break
@@ -544,6 +550,21 @@ _GUICloseAdvancedOptions:
 		GuiControl, BotGUIAdvancedOptions: ChooseString, guiExitHotkey2Choice, % optExitHotkey2
 	} else {
 		GuiControl, BotGUIAdvancedOptions: Choose, guiExitHotkey2Choice, 1
+	}
+	if (optBotLighter = 1) {
+		GuiControl, BotGUIAdvancedOptions:, guiUseLightVersionStatusOn, images/gui/bOn_on.png
+		GuiControl, BotGUIAdvancedOptions:, guiUseLightVersionStatusOff, images/gui/bOff_off.png
+	} else {
+		GuiControl, BotGUIAdvancedOptions:, guiUseLightVersionStatusOn, images/gui/bOn_off.png
+		GuiControl, BotGUIAdvancedOptions:, guiUseLightVersionStatusOff, images/gui/bOff_on.png
+	}
+	GuiControl, BotGUIAdvancedOptions:, guiBotClockSpeed, % optBotClockSpeed
+	if (optCheatEngine = 1) {
+		GuiControl, BotGUIAdvancedOptions:, guiUseCheatEngineStatusOn, images/gui/bOn_on.png
+		GuiControl, BotGUIAdvancedOptions:, guiUseCheatEngineStatusOff, images/gui/bOff_off.png
+	} else {
+		GuiControl, BotGUIAdvancedOptions:, guiUseCheatEngineStatusOn, images/gui/bOn_off.png
+		GuiControl, BotGUIAdvancedOptions:, guiUseCheatEngineStatusOff, images/gui/bOff_on.png
 	}
 	Return	
 
@@ -797,6 +818,9 @@ _GUIApplyAdvancedOptions:
 		optReloadHotkey2 := optTempReloadHotkey2
 		optExitHotkey1 := optTempExitHotkey1
 		optExitHotkey2 := optTempExitHotkey2
+		optBotLighter := optTempBotLighter
+		GuiControlGet, optBotClockSpeed,, guiBotClockSpeed
+		optCheatEngine := optTempCheatEngine
 		Gosub, _BotRewriteSettings
 		Gosub, _BotSetHotkeys
 		Gui, BotGUIAdvancedOptions: Hide
@@ -948,7 +972,14 @@ _GUIAdvancedOptionsEvenmoreTab:
 	
 _GUIAdvancedOptionsHotkeysTab:
 	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsHotkeysTab, images/gui/guiAdvancedOptionsHotkeys_tab_active.png
+	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsBotTab, images/gui/guiAdvancedOptionsBot_tab_inactive.png
 	GuiControl, BotGUIAdvancedOptions:Choose, guiAdvancedOptionsTabs, 4
+	Return
+	
+_GUIAdvancedOptionsBotTab:
+	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsHotkeysTab, images/gui/guiAdvancedOptionsHotkeys_tab_inactive.png
+	GuiControl, BotGUIAdvancedOptions:, guiAdvancedOptionsBotTab, images/gui/guiAdvancedOptionsBot_tab_active.png
+	GuiControl, BotGUIAdvancedOptions:Choose, guiAdvancedOptionsTabs, 5
 	Return
 
 _GUIAdvancedOptionsNextRight:
@@ -958,6 +989,7 @@ _GUIAdvancedOptionsNextRight:
 	GuiControl, Hide, guiAdvancedOptionsNextRight
 	GuiControl, Show, guiAdvancedOptionsNextLeft
 	GuiControl, Show, guiAdvancedOptionsHotkeysTab
+	GuiControl, Show, guiAdvancedOptionsBotTab
 	Gosub, _GUIAdvancedOptionsHotkeysTab
 	GuiControl, BotGUIAdvancedOptions:Choose, guiAdvancedOptionsTabs, 4
 	Return
@@ -969,6 +1001,7 @@ _GUIAdvancedOptionsNextLeft:
 	GuiControl, Show, guiAdvancedOptionsNextRight
 	GuiControl, Hide, guiAdvancedOptionsNextLeft
 	GuiControl, Hide, guiAdvancedOptionsHotkeysTab
+	GuiControl, Hide, guiAdvancedOptionsBotTab
 	Gosub, _GUIAdvancedOptionsAdvancedTab
 	GuiControl, BotGUIAdvancedOptions:Choose, guiAdvancedOptionsTabs, 1
 	Return
@@ -1236,6 +1269,30 @@ _GUISetUseSkillsRoyalCommandOff:
 	GuiControl,, guiUseSkillsRoyalCommandStatusOn, images/gui/bOn_off.png
 	GuiControl,, guiUseSkillsRoyalCommandStatusOff, images/gui/bOff_on.png
 	optTempSkillsRoyalCommand = 0
+	Return
+
+_GUISetUseLightVersionOn:
+	GuiControl,, guiUseLightVersionStatusOn, images/gui/bOn_on.png
+	GuiControl,, guiUseLightVersionStatusOff, images/gui/bOff_off.png
+	optTempBotLighter = 1
+	Return
+
+_GUISetUseLightVersionOff:
+	GuiControl,, guiUseLightVersionStatusOn, images/gui/bOn_off.png
+	GuiControl,, guiUseLightVersionStatusOff, images/gui/bOff_on.png
+	optTempBotLighter = 0
+	Return
+
+_GUISetUseCheatEngineOn:
+	GuiControl,, guiUseCheatEngineStatusOn, images/gui/bOn_on.png
+	GuiControl,, guiUseCheatEngineStatusOff, images/gui/bOff_off.png
+	optTempCheatEngine = 1
+	Return
+
+_GUISetUseCheatEngineOff:
+	GuiControl,, guiUseCheatEngineStatusOn, images/gui/bOn_off.png
+	GuiControl,, guiUseCheatEngineStatusOff, images/gui/bOff_on.png
+	optTempCheatEngine = 0
 	Return
 	
 _GUIChooseChestsAmount:

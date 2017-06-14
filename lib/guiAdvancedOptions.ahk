@@ -5,7 +5,7 @@ Gui, BotGUIAdvancedOptions: New, -Caption, idolBot Advanced Options
 Gui, Color, 933506
 Gui, Font, s12 norm c000000, Candara
 
-Gui, Add, Tab2, vguiAdvancedOptionsTabs Choose1 w0 h0, 1|2|3|4
+Gui, Add, Tab2, vguiAdvancedOptionsTabs Choose1 w0 h0, 1|2|3|4|5
 
 Gui, Tab, 1
 Gui, Add, Picture, x0 y0, images/gui/guiAdvancedOptions_bg.png
@@ -84,7 +84,7 @@ if (optPromptCurrentLevel = 1) {
 
 Gui, Add, Picture, x15 y+32 vguiPromptCurrentLevelStatusOn g_GUISetPromptCurrentLevelOn, %promptCurrentLevelStatusOn%
 Gui, Add, Picture, x+2 vguiPromptCurrentLevelStatusOff g_GUISetPromptCurrentLevelOff, %promptCurrentLevelStatusOff%
-Gui, Add, Picture, x+148 yp+4 g_GUIHelpAdvanced, images/gui/bHelp.png
+Gui, Add, Picture, x+148 yp+3 g_GUIHelpAdvanced, images/gui/bHelp.png
 
 Gui, Tab, 3
 Gui, Add, Picture, x0 y0, images/gui/guiAdvancedOptionsEvenmore_bg.png
@@ -135,6 +135,37 @@ Gui, Add, DropDownList, w100 yp+0 vguiExitHotkey1Choice g_GUIChooseExitHotkey1 +
 Gui, Add, Picture, x+23 yp+0 vguiExitHotkey2Mask g_GUIExitHotkey2Unmask, images/gui/guiAdvancedOptionsHotkeysNone_mask.png
 Gui, Add, DropDownList, w100 yp+0 vguiExitHotkey2Choice g_GUIChooseExitHotkey2 +Hidden
 
+Gui, Tab, 5
+Gui, Add, Picture, x0 y0, images/gui/guiAdvancedOptionsBot_bg.png
+
+if (optBotLighter = 1) {
+	useLightVersionStatusOn := "images/gui/bOn_on.png"
+	useLightVersionStatusOff := "images/gui/bOff_off.png"
+} else {
+	useLightVersionStatusOn := "images/gui/bOn_off.png"
+	useLightVersionStatusOff := "images/gui/bOff_on.png"
+}
+
+Gui, Add, Picture, x15 y102 vguiUseLightVersionStatusOn g_GUISetUseLightVersionOn, %useLightVersionStatusOn%
+Gui, Add, Picture, x+2 vguiUseLightVersionStatusOff g_GUISetUseLightVersionOff, %useLightVersionStatusOff%
+Gui, Add, Picture, x+148 yp+3 g_GUIHelpAdvanced, images/gui/bHelp.png
+
+Gui, Add, Edit, x15 y+30 w180
+Gui, Add, UpDown, vguiBotClockSpeed Range0-2147483647, %optBotClockSpeed%
+Gui, Add, Picture, x+30 yp+4 g_GUIHelpAdvanced, images/gui/bHelp.png
+
+if (optCheatEngine = 1) {
+	useCheatEngineStatusOn := "images/gui/bOn_on.png"
+	useCheatEngineStatusOff := "images/gui/bOff_off.png"
+} else {
+	useCheatEngineStatusOn := "images/gui/bOn_off.png"
+	useCheatEngineStatusOff := "images/gui/bOff_on.png"
+}
+
+Gui, Add, Picture, x15 y+32 vguiUseCheatEngineStatusOn g_GUISetUseCheatEngineOn, %useCheatEngineStatusOn%
+Gui, Add, Picture, x+2 vguiUseCheatEngineStatusOff g_GUISetUseCheatEngineOff, %useCheatEngineStatusOff%
+Gui, Add, Picture, x+148 yp+3 g_GUIHelpAdvanced, images/gui/bHelp.png
+
 Gui, Tab
 Gui, Add, Picture, x7 y44 vguiAdvancedOptionsAdvancedTab g_GUIAdvancedOptionsAdvancedTab, images/gui/guiAdvancedOptionsAdvanced_tab_active.png
 Gui, Add, Picture, x+2 vguiAdvancedOptionsMoreTab g_GUIAdvancedOptionsMoreTab, images/gui/guiAdvancedOptionsMore_tab_inactive.png
@@ -142,6 +173,7 @@ Gui, Add, Picture, x+2 vguiAdvancedOptionsEvenmoreTab g_GUIAdvancedOptionsEvenmo
 Gui, Add, Picture, x+10 vguiAdvancedOptionsNextRight g_GUIAdvancedOptionsNextRight, images/gui/guiAdvancedOptionsNext.png
 Gui, Add, Picture, x7 y44 vguiAdvancedOptionsNextLeft g_GUIAdvancedOptionsNextLeft +Hidden, images/gui/guiAdvancedOptionsNext.png
 Gui, Add, Picture, x+2 vguiAdvancedOptionsHotkeysTab g_GUIAdvancedOptionsHotkeysTab +Hidden, images/gui/guiAdvancedOptionsHotkeys_tab_active.png
+Gui, Add, Picture, x+2 vguiAdvancedOptionsBotTab g_GUIAdvancedOptionsBotTab +Hidden, images/gui/guiAdvancedOptionsBot_tab_active.png
 Gui, Add, Picture, x227 y0 g_GUICloseAdvancedOptions, images/gui/bClose.png
 Gui, Add, Picture, x95 y432 g_GUIApplyAdvancedOptions, images/gui/bApply.png
 

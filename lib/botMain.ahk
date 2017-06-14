@@ -31,9 +31,6 @@ CoordMode, Mouse, Client
 
 lastProgressCheck = 0
 
-SetTimer, _GUIPos, 100 ; Every 100ms we position the GUI below the game
-SetTimer, _BotScanForChests, 1000
-
 botLookingForCursor := false ; Quite important little bool, set to true when the _BotGetCurrentLevel timer occurs, it pauses the loot items phase because threads gets messy
 botLevelCursorCoords := [1, 2, 3, 4, 5]
 botLevelCursorCoords[1] := [744, 10, 781, 127]
@@ -56,9 +53,7 @@ botBuffsSplashCTimer := botBuffsSplashUTimer := botBuffsSplashRTimer := botBuffs
 
 rightKeyInterrupt := false
 
-SetTimer, _BotGetCurrentLevel, 2000
-SetTimer, _BotNextLevel, 100
-SetTimer, _BotForceFocus, 1000
+Gosub, _BotTimers
 
 botPhase = -1 ; -1 = bot not launched, 0 = bot in campaign selection screen, 1 = initial stuff like looking for overlays, waiting for the game to fully load, 2 = maxing the levels/ main dps and upgrades, 3 = reset phase
 botRunLaunchTime := __UnixTime(A_Now)
@@ -66,6 +61,7 @@ botLastRelaunch := __UnixTime(A_Now)
 botLaunchTime := __UnixTime(A_Now)
 botSession = 0
 botRelaunched := false
+botAutoProgressCheck := false
 
 now = 0
 botRelaunching := false
@@ -122,6 +118,13 @@ idolBot:
 				}
 				if (botPhase = 1) {
 					attempt++
+					if (attempt > 2 and optCampaign = 1) {
+						attempt = 0
+						__Log("Event FP not available.  Trying RP2.")
+						optCampaign = 7
+						Gosub, _BotCampaignStart
+						optCampaign = 1
+					}
 					if (attempt > 5) {
 						attempt = 0
 						Gosub, _BotCampaignStart
@@ -139,6 +142,42 @@ idolBot:
 						if (Output != 0xA07107) {
 							__Log("Moving the characters bar to the beginning.")
 							__BotMoveToFirstPage()
+						}
+						; Buffs stuff
+						bI = 1
+						now := __UnixTime(A_Now)
+						Loop, % botBuffs.length() {
+							moved := true
+							Loop, % botBuffsRarity.length() {
+								bB := botBuffs[bI]
+								bR := botBuffsRarity[A_Index]
+								if (optBuffs%bB%%bR% = 1) {
+									if ((now - botBuffs%bB%%bR%Timer) / 60 >= optBuffs%bB%%bR%Interval) {
+										if (botBuffs%bB%%bR%Timer > -1) {
+											__Log("Using a " . bB . " [" . bR . "] buff.")
+											bX := botBuffsCoords[1] + (40 * (bI - 1))
+											bY := botBuffsCoords[2]
+											if (moved = true) {
+												MouseMove, bX, bY
+												Sleep, 1000 * optBotClockSpeed
+												Click
+												moved := false
+											}
+											bX2 := bX + 95
+											bY2 := bY + 53 + (36 * (A_Index - 1))
+											MouseMove, bX2, bY2
+											Sleep, 500 * optBotClockSpeed
+											Click
+											if (optBuffs%bB%%bR%Interval = 0) {
+												botBuffs%bB%%bR%Timer = -1
+											} else {
+												botBuffs%bB%%bR%Timer := now
+											}
+										}
+									}
+								}
+							}
+							bI++
 						}
 						; Open options window to see if auto progress is on
 						__Log("Initial auto progress check...")
@@ -176,14 +215,19 @@ idolBot:
 						__BotMaxLevels()
 						Send, {%optFormationKey%}
 						botMaxAllCount++
+						botFirstCycle := true
 						; Set Chat Room to optChatRoom
 						if (optChatRoom > 0 and (botSession = 0 or botRelaunched = true)) {
 							__Log("Setting chat room to " . optChatRoom . ".")
 							botRelaunched := false
 							Gosub, _BotSetChatRoom
 						}
+						if (optCheatEngine = 1) {
+							Gosub, __BotCEOn
+						}
+						botPhase = 3
 					} else {
-						Sleep, 1000
+						Sleep, 1000 * optBotClockSpeed
 					}
 				}
 				; Sometimes we get a server failed error, shit happens. We search for it and if it pops up, we relaunch the game.
@@ -191,6 +235,9 @@ idolBot:
 				if (ErrorLevel = 0) {
 					__Log("Server failed error. Relaunching the game.")
 					Gosub, _BotRelaunch
+					if (optCheatEngine = 1) {
+						Gosub, __BotCEOn
+					}
 				}
 				ImageSearch, OutputX, OutputY, 815, 370, 935, 410, *100 images/game/gimmerubies.png
 				if (ErrorLevel = 0) {
@@ -202,224 +249,345 @@ idolBot:
 					if (botSession = 0) {
 						botSession = 1
 					}
-					
 					if (optChatRoom > 0 and (optLastoptChatRoom != optChatRoom or botRelaunched = true)) {
 						botRelaunched := false
 						Gosub, _BotSetChatRoom
 					}
-					
-					; Buffs stuff
-					bI = 1
-					now := __UnixTime(A_Now)
-					Loop, % botBuffs.length() {
-						moved := true
-						Loop, % botBuffsRarity.length() {
-							bB := botBuffs[bI]
-							bR := botBuffsRarity[A_Index]
-							if (optBuffs%bB%%bR% = 1) {
-								if ((now - botBuffs%bB%%bR%Timer) / 60 >= optBuffs%bB%%bR%Interval) {
-									if (botBuffs%bB%%bR%Timer > -1) {
-										__Log("Using a " . bB . " [" . bR . "] buff.")
-										bX := botBuffsCoords[1] + (40 * (bI - 1))
-										bY := botBuffsCoords[2]
-										if (moved = true) {
-											MouseMove, bX, bY
-											Sleep, 1000
+					MouseMove, 740, 480
+					Sleep, 100 * optBotClockSpeed
+					Click
+					if (botFirstCycle = true) {
+						; Yes, this part is disgusting
+						; Yes, I'll clean it soon
+						; The reason why I'm not doing it now is quite simple; I don't wish to break stuff by turning all of these in functions when I'm just about to release a new version!
+						__Log("First cycle sequence.")
+						__Log("Get the gold and quest items for " . optLootItemsDuration . " seconds.")
+						now = % __UnixTime(A_Now)
+						i = 1
+						Send, {Space}
+						max = 8
+						if (optClicking = 1) {
+							max = 4
+						}
+						while (__UnixTime(A_Now) - now <= optLootItemsDuration) {
+							if (i > max) {
+								i = 1
+							}
+							MouseMove, 650 + i * 37, 320
+							if (optClicking = 1) {
+								Click
+							}
+							i++
+							Sleep, % optClickDelay
+						}
+						__BotMaxLevels()
+						Sleep, 100 * optBotClockSpeed
+						Send, {%optFormationKey%}
+						__Log("Get the gold and quest items for 1 second.")
+						now = % __UnixTime(A_Now)
+						i = 1
+						Send, {Space}
+						max = 8
+						if (optClicking = 1) {
+							max = 4
+						}
+						while (__UnixTime(A_Now) - now <= 1) {
+							if (i > max) {
+								i = 1
+							}
+							MouseMove, 650 + i * 37, 320
+							if (optClicking = 1) {
+								Click
+							}
+							i++
+							Sleep, % optClickDelay
+						}
+						__BotUpgAll()
+						Sleep, 100 * optBotClockSpeed
+						__Log("Get the gold and quest items for 1 second.")
+						now = % __UnixTime(A_Now)
+						i = 1
+						Send, {Space}
+						max = 8
+						if (optClicking = 1) {
+							max = 4
+						}
+						while (__UnixTime(A_Now) - now <= 1) {
+							if (i > max) {
+								i = 1
+							}
+							MouseMove, 650 + i * 37, 320
+							if (optClicking = 1) {
+								Click
+							}
+							i++
+							Sleep, % optClickDelay
+						}
+						__BotUpgAll()
+						Sleep, 100 * optBotClockSpeed
+						__Log("Get the gold and quest items for 1 second.")
+						now = % __UnixTime(A_Now)
+						i = 1
+						Send, {Space}
+						max = 8
+						if (optClicking = 1) {
+							max = 4
+						}
+						while (__UnixTime(A_Now) - now <= 1) {
+							if (i > max) {
+								i = 1
+							}
+							MouseMove, 650 + i * 37, 320
+							if (optClicking = 1) {
+								Click
+							}
+							i++
+							Sleep, % optClickDelay
+						}
+						__BotMaxLevels()
+						Sleep, 100 * optBotClockSpeed
+						Send, {%optFormationKey%}
+						__Log("Get the gold and quest items for 1 second.")
+						now = % __UnixTime(A_Now)
+						i = 1
+						Send, {Space}
+						max = 8
+						if (optClicking = 1) {
+							max = 4
+						}
+						while (__UnixTime(A_Now) - now <= 1) {
+							if (i > max) {
+								i = 1
+							}
+							MouseMove, 650 + i * 37, 320
+							if (optClicking = 1) {
+								Click
+							}
+							i++
+							Sleep, % optClickDelay
+						}
+						__BotUpgAll()
+						botFirstCycle := false
+						__Log("End of first cycle.")
+					} else {
+						; Buffs stuff
+						bI = 1
+						now := __UnixTime(A_Now)
+						Loop, % botBuffs.length() {
+							moved := true
+							Loop, % botBuffsRarity.length() {
+								bB := botBuffs[bI]
+								bR := botBuffsRarity[A_Index]
+								if (optBuffs%bB%%bR% = 1) {
+									if ((now - botBuffs%bB%%bR%Timer) / 60 >= optBuffs%bB%%bR%Interval) {
+										if (botBuffs%bB%%bR%Timer > -1) {
+											__Log("Using a " . bB . " [" . bR . "] buff.")
+											bX := botBuffsCoords[1] + (40 * (bI - 1))
+											bY := botBuffsCoords[2]
+											if (moved = true) {
+												MouseMove, bX, bY
+												Sleep, 1000 * optBotClockSpeed
+												Click
+												moved := false
+											}
+											bX2 := bX + 95
+											bY2 := bY + 53 + (36 * (A_Index - 1))
+											MouseMove, bX2, bY2
+											Sleep, 500 * optBotClockSpeed
 											Click
-											moved := false
-										}
-										bX2 := bX + 95
-										bY2 := bY + 53 + (36 * (A_Index - 1))
-										MouseMove, bX2, bY2
-										Sleep, 500
-										Click
-										if (optBuffs%bB%%bR%Interval = 0) {
-											botBuffs%bB%%bR%Timer = -1
-										} else {
-											botBuffs%bB%%bR%Timer := now
+											if (optBuffs%bB%%bR%Interval = 0) {
+												botBuffs%bB%%bR%Timer = -1
+											} else {
+												botBuffs%bB%%bR%Timer := now
+											}
 										}
 									}
 								}
 							}
+							bI++
 						}
-						bI++
-					}
-					
-					__Log("Get the gold and quest items for " . optLootItemsDuration . " seconds.")
-					now = % __UnixTime(A_Now)
-					delay := optClickDelay
-					i = 1
-					Send, {Space}
-					while (__UnixTime(A_Now) - now <= optLootItemsDuration) {
-						if (i > 4) {
-							i = 1
-						}
-						MouseMove, 650 + i * 37, 320
-						if (optClicking = 1) {
-							Click
-						}
-						i++
-						Sleep, % delay
-					}
-					
-					if ((optResetType = 1 or optResetType = 2 or optResetType = 5 or optResetType = 6) and botSkipToReset = false) {
-						if (__UnixTime(A_Now) - botRunLaunchTime > (optMainDPSDelay * 60)) {
-							rightKeyInterrupt := true
-							__Log("Moving to mainDPS.")
-							if (botCrusaderPixels.length() = 0) {
-								__BotMoveToFirstPage()
-								__BotMoveToCrusader(optMainDPS)
-								Sleep, 1000
-								__BotSetCrusadersPixels()
-							} else {
-								if (__BotCompareCrusadersPixels() = false) {
-									__Log("We might have moved from the mainDPS, let's go back.")
-									__BotMoveToFirstPage()
-									Sleep, 500
-									__BotMoveToCrusader(optMainDPS)
-									Sleep, 500
-									__BotSetCrusadersPixels()
-								}
-							}
-							Log("Maxing mainDPS.")
-							MouseMove, currentCCoords[1] + 252, currentCCoords[2] + 18
-							send, {ctrl down}
-							sleep, 100
-							click
-							send, {ctrl up}
-							sleep, 100
-							rightKeyInterrupt := false
-						}
-					}
-					
-					; If the last time we did an auto progress check is >= than autoProgressCheckDelay, we initiate an auto progress check
-					if ((optResetType = 2 or optAutoProgressCheck = 1) and __UnixTime(A_Now) - lastProgressCheck >= optAutoProgressCheckDelay) {
-						; Every autoProgressCheckDelay seconds we take a look if Auto Progress is still activated, if it's not it means we died so achieved the highest zone we could, we have to reset
-						lastProgressCheck = % __UnixTime(A_Now)
-						Log("Auto progress check for max progress.")
-						if (__BotCheckAutoProgress() = false) {
-							if (__UnixTime(A_Now) - botRunLaunchTime < 60) {
-								; Stuck at beginning, might be the formation not active
-								Log("Might be stuck at the beginning.")
-								send, {%optFormationKey%}
-								Sleep, 100
-								Send, {g}
-							} else {
-								botPhase = 3
-							}
-						}
-					}
-					
-					; Max all levels
-					__BotMaxLevels()
-					Send, {%optFormationKey%}
-					botMaxAllCount++
-					; If the bot did optUpgAllUntil max all levels, do one buy all upgrades
-					if (botMaxAllCount >= optUpgAllUntil) {
-						__Log("Get the gold and quest items for 1 second.")
+						
+						__Log("Get the gold and quest items for " . optLootItemsDuration . " seconds.")
 						now = % __UnixTime(A_Now)
-						delay := optClickDelay
 						i = 1
 						Send, {Space}
-						while (__UnixTime(A_Now) - now <= 1) {
-							if (i > 4) {
+						max = 8
+						if (optClicking = 1) {
+							max = 4
+						}
+						while (__UnixTime(A_Now) - now <= optLootItemsDuration) {
+							if (i > max) {
 								i = 1
 							}
 							MouseMove, 650 + i * 37, 320
+							if (optClicking = 1) {
+								Click
+							}
 							i++
-							Sleep, % delay
+							Sleep, % optClickDelay
 						}
-						__BotUpgAll()
-						botMaxAllCount = 0
-					}
-					
-					if (optResetType = 3) {
-						if (levelCapResetCheck = true) {
-							__BotMoveToLastPage()
-							Sleep, 500
-							PixelGetColor, Output, 872, 594, RGB
-							if (Output = 0x7D2E0C) {
-								PixelGetColor, Output, 872, 508, RGB
-								if (Output = 0x979797) {
+						
+						if ((optResetType = 1 or optResetType = 2 or optResetType = 5 or optResetType = 6) and botSkipToReset = false) {
+							if (__UnixTime(A_Now) - botRunLaunchTime > (optMainDPSDelay * 60)) {
+								rightKeyInterrupt := true
+								__Log("Moving to mainDPS.")
+								if (botCrusaderPixels.length() = 0) {
+									__BotMoveToFirstPage()
+									__BotMoveToCrusader(optMainDPS)
+									Sleep, 1000 * optBotClockSpeed
+									__BotSetCrusadersPixels()
+								} else {
+									if (__BotCompareCrusadersPixels() = false) {
+										__Log("We might have moved from the mainDPS, let's go back.")
+										__BotMoveToFirstPage()
+										Sleep, 500 * optBotClockSpeed
+										__BotMoveToCrusader(optMainDPS)
+										Sleep, 500 * optBotClockSpeed
+										__BotSetCrusadersPixels()
+									}
+								}
+								Log("Maxing mainDPS.")
+								MouseMove, currentCCoords[1] + 252, currentCCoords[2] + 18
+								send, {ctrl down}
+								sleep, 100 * optBotClockSpeed
+								click
+								send, {ctrl up}
+								sleep, 100 * optBotClockSpeed
+								rightKeyInterrupt := false
+							}
+						}
+						
+						; If the last time we did an auto progress check is >= than autoProgressCheckDelay, we initiate an auto progress check
+						if ((optResetType = 2 or optAutoProgressCheck = 1) and __UnixTime(A_Now) - lastProgressCheck >= optAutoProgressCheckDelay) {
+							; Every autoProgressCheckDelay seconds we take a look if Auto Progress is still activated, if it's not it means we died so achieved the highest zone we could, we have to reset
+							lastProgressCheck = % __UnixTime(A_Now)
+							Log("Auto progress check for max progress.")
+							if (__BotCheckAutoProgress() = false) {
+								if (__UnixTime(A_Now) - botRunLaunchTime < 60) {
+									; Stuck at beginning, might be the formation not active
+									Log("Might be stuck at the beginning.")
+									Send, {%optFormationKey%}
+									Sleep, 100 * optBotClockSpeed
+									Send, {g}
+								} else {
+									botPhase = 3
+								}
+							}
+						}
+						
+						; Max all levels
+						__BotMaxLevels()
+						Send, {%optFormationKey%}
+						botMaxAllCount++
+						; If the bot did optUpgAllUntil max all levels, do one buy all upgrades
+						if (botMaxAllCount >= optUpgAllUntil) {
+							__Log("Get the gold and quest items for 1 second.")
+							now = % __UnixTime(A_Now)
+							delay := optClickDelay
+							i = 1
+							while (__UnixTime(A_Now) - now <= 1) {
+								if (i > 8) {
+									i = 1
+								}
+								MouseMove, 650 + i * 37, 320
+								i++
+								Sleep, % delay
+							}
+							__BotUpgAll()
+							botMaxAllCount = 0
+						}
+						
+						if (optResetType = 3) {
+							if (levelCapResetCheck = true) {
+								__BotMoveToLastPage()
+								Sleep, 500 * optBotClockSpeed
+								PixelGetColor, Output, 872, 594, RGB
+								if (Output = 0x7D2E0C) {
+									PixelGetColor, Output, 872, 508, RGB
+									if (Output = 0x979797) {
+										__Log("Level cap reached.")
+										botPhase = 3
+										botSkipToReset := true
+									}
+								} else if (Output = 0x979797) {
 									__Log("Level cap reached.")
 									botPhase = 3
 									botSkipToReset := true
 								}
-							} else if (Output = 0x979797) {
-								__Log("Level cap reached.")
-								botPhase = 3
-								botSkipToReset := true
-							}
-						} else {
-							__BotMoveToFirstPage()
-							PixelGetColor, Output, 242, 508, RGB
-							if (Output = 0x979797) {
-								__Log("Bush is maxed.")
-								levelCapResetCheck := true
+							} else {
+								__BotMoveToFirstPage()
+								PixelGetColor, Output, 242, 508, RGB
+								if (Output = 0x979797) {
+									__Log("Bush is maxed.")
+									levelCapResetCheck := true
+								}
 							}
 						}
-					}
-					
-					if (optResetType = 5 and __UnixTime(A_Now) - botRunLaunchTime >= (optRunTime * 60)) {
-						botSkipToReset := true
-						botPhase = 3
-					}
-					
-					if (optResetType = 6) {
-						if (botCurrentLevel >= optResetOnLevel) {
-							__Log("Level " . optResetOnLevel . " reached.")
+						
+						if (optResetType = 5 and __UnixTime(A_Now) - botRunLaunchTime >= (optRunTime * 60)) {
 							botSkipToReset := true
 							botPhase = 3
 						}
-					}
-					
-					if (botSkipToReset = false) {
-						if (optStormRiderMagnify = 0) {
-							__Log("Using all skills.")
-							__BotUseSkill(0)
-						} else {
-							PixelSearch, OutputX, OutputY, 382, 449, 421, 488, 0x0000FE,, Fast
-							if (ErrorLevel != 0) {
-								PixelSearch, OutputX, OutputY, 582, 449, 621, 488, 0x0000FE,, Fast
+						
+						if (optResetType = 6) {
+							if (botCurrentLevel >= optResetOnLevel) {
+								__Log("Level " . optResetOnLevel . " reached.")
+								botSkipToReset := true
+								botPhase = 3
+							}
+						}
+						
+						if (botSkipToReset = false) {
+							if (optStormRiderMagnify = 0) {
+								__Log("Using all skills.")
+								__BotUseSkill(0)
+							} else {
+								PixelSearch, OutputX, OutputY, 382, 449, 421, 488, 0x0000FE,, Fast
 								if (ErrorLevel != 0) {
-									Send, {%optStormRiderFormationKey%}
-									Sleep, 500
-									__BotMaxLevels()
-									__BotUpgAll()
-									PixelGetColor, Output, 390, 466, RGB
-									if (Output != 0x3A3A3A) {
-										PixelGetColor, Output, 590, 466, RGB
+									PixelSearch, OutputX, OutputY, 582, 449, 621, 488, 0x0000FE,, Fast
+									if (ErrorLevel != 0) {
+										Send, {%optStormRiderFormationKey%}
+										Sleep, 500 * optBotClockSpeed
+										__BotMaxLevels()
+										__BotUpgAll()
+										PixelGetColor, Output, 390, 466, RGB
 										if (Output != 0x3A3A3A) {
-											__Log("Using Storm Rider.")
-											Send, 2
-											Sleep, 25
-											Send, 7
-											Sleep, 25
+											PixelGetColor, Output, 590, 466, RGB
+											if (Output != 0x3A3A3A) {
+												__Log("Using Storm Rider.")
+												Send, 2
+												Sleep, 25 * optBotClockSpeed
+												Send, 7
+												Sleep, 25 * optBotClockSpeed
+											}
 										}
+										Send, {%optFormationKey%}
 									}
-									Send, {%optFormationKey%}
 								}
+								__BotUseSkill(1)
+								__BotUseSkill(3)
+								__BotUseSkill(4)
+								__BotUseSkill(5)
+								if (optSkillsRoyalCommand = 1) {
+									__BotUseSkill(6)
+								}
+								__BotUseSkill(8)
 							}
-							__BotUseSkill(1)
-							__BotUseSkill(3)
-							__BotUseSkill(4)
-							__BotUseSkill(5)
-							if (optSkillsRoyalCommand = 1) {
-								__BotUseSkill(6)
-							}
-							__BotUseSkill(8)
 						}
 					}
 				}
 				
 				; If optRunTime time elapsed or phase is set at 3, we reset
 				if (botPhase = 3 and optResetType > 1) {
+					if (optCheatEngine = 1) {
+						Gosub, __BotCEOff
+					}
 					botDelayReset := false
 					resetPhase = 0
 					__Log("Cannot progress further, time to reset.")
 					MouseMove, 985, 630
 					Click
-					Sleep, 500
+					Sleep, 500 * optBotClockSpeed
 					; Move to reset crusader
 					if (resetPhase = 0) {
 						resetAttempt = 0
@@ -427,9 +595,9 @@ idolBot:
 							Click
 							__Log("Moving to reset crusader.")
 							__BotMoveToFirstPage()
-							Sleep, 500
+							Sleep, 500 * optBotClockSpeed
 							__BotMoveToCrusader("nate")
-							Sleep, 2000
+							Sleep, 2000 * optBotClockSpeed
 							; Get pixel color on optResetCrusader skills to know where the reset button is
 							__Log("Searching for that reset skill.")
 							ImageSearch, resetOutputX, resetOutputY, 657, 631, 869, 665, *100 images/game/nateReset.png
@@ -460,22 +628,22 @@ idolBot:
 						if (optUseChests = 1) {
 							__Log("Using chests before reset.")
 							MouseMove, 795, 480
-							Sleep, 25
+							Sleep, 25 * optBotClockSpeed
 							Click
-							Sleep, 500
+							Sleep, 500 * optBotClockSpeed
 							MouseMove, 160, 555
-							Sleep, 25
+							Sleep, 25 * optBotClockSpeed
 							Click
 							chestFound := false
 							Loop {
 								if (chestFound == true) {
 									Break
 								}
-								Sleep, 1000
+								Sleep, 1000 * optBotClockSpeed
 								Loop {
 									ImageSearch, OutputX, OutputY, 0, 505, 1000, 675, *100 images/game/chests_reset.png
 									if (ErrorLevel = 0) {
-										Sleep, 100
+										Sleep, 100 * optBotClockSpeed
 										ImageSearch, OutputX2, OutputY2, 0, 505, 1000, 675, *100 images/game/chests_reset.png
 										if (ErrorLevel = 0) {
 											if (OutputX2 = OutputX and OutputY2 = OutputY) {
@@ -494,13 +662,14 @@ idolBot:
 											Break
 										}
 									}
-									Sleep, 1000
+									Sleep, 1000 * optBotClockSpeed
 								}
 								Loop {
 									ImageSearch, OutputX, OutputY, OutputX - 50, OutputY, OutputX, OutputY + 75, *100 images/game/chests_reset_x%optUseChestsAmount%.png
 									if (ErrorLevel = 0) {
 										__Log("Using " . optUseChestsAmount . " chests.")
 										MouseMove, OutputX + 5, OutputY + 5
+										Sleep, 100 * optBotClockSpeed
 										Click
 										Break
 									} else {
@@ -509,13 +678,17 @@ idolBot:
 									}
 								}
 								Loop {
-									Sleep, 1000
+									Sleep, 1000 * optBotClockSpeed
 									ImageSearch, OutputX, OutputY, 345, 345, 495, 385, *100 images/game/chests_reset_yes.png
 									if (ErrorLevel = 0) {
-										__Log("Yes button found.")
-										MouseMove, OutputX + 5, OutputY + 5
-										Click
-										Break
+										ImageSearch, OutputX, OutputY, 345, 345, 495, 385, *100 images/game/chests_reset_yes.png
+										if (ErrorLevel = 0) {
+											__Log("Yes button found.")
+											MouseMove, OutputX + 5, OutputY + 5
+											Sleep, 100 * optBotClockSpeed
+											Click
+											Break
+										}
 									} else {
 										if (A_Index > 9) {
 											__Log("Cannot find the yes button.")
@@ -524,7 +697,7 @@ idolBot:
 									}
 								}
 								Loop {
-									Sleep, 500
+									Sleep, 500 * optBotClockSpeed
 									ImageSearch, OutputX, OutputY, 415, 20, 505, 55, *100 images/game/chest_loot.png
 									if (ErrorLevel = 0) {
 										__Log("Chests opening window.")
@@ -532,33 +705,56 @@ idolBot:
 											if (chestFound == true) {
 												Break
 											}
-											Sleep, 500
+											MouseMove, 135, 40
+											Sleep, 500 * optBotClockSpeed
 											ImageSearch, OutputX, OutputY, 885, 5, 930, 45, *100 images/game/close.png
 											if (ErrorLevel = 0) {
 												MouseMove, OutputX + 5, OutputY + 5
+												Sleep, 100 * optBotClockSpeed
 												Click
 												Loop {
-													Sleep, 500
+													Sleep, 500 * optBotClockSpeed
 													ImageSearch, OutputX, OutputY, 905, 605, 985, 650, *100 images/game/chests_reset_close.png
 													if (ErrorLevel = 0) {
-														__Log("Closing the chests window.")
-														MouseMove, OutputX + 5, OutputY + 5
-														Click
-														Sleep, 500
-														MouseMove, 740, 480
-														Click
-														Sleep, 500
-														chestFound := true
-														__BotMaxLevels()
-														Break
+														Sleep, 500 * optBotClockSpeed
+														ImageSearch, OutputX, OutputY, 905, 605, 985, 650, *100 images/game/chests_reset_close.png
+														if (ErrorLevel = 0) {
+															__Log("Closing the chests window.")
+															MouseMove, OutputX + 5, OutputY + 5
+															Sleep, 100 * optBotClockSpeed
+															Click
+															Sleep, 1000 * optBotClockSpeed
+															ImageSearch, OutputX, OutputY, 298, 90, 340, 130, *150 images/game/cog.png
+															if (ErrorLevel = 0) {
+																MouseMove, 740, 480
+																Sleep, 100 * optBotClockSpeed
+																Click
+																Sleep, 500 * optBotClockSpeed
+																chestFound := true
+																__BotMaxLevels()
+																Break
+															} else {
+																__Log("Still in the chests window.")
+															}
+														} else {
+															if (A_Index > 9) {
+																__Log("Cannot find the close button.")
+																Break
+															}
+														}
+													} else {
+														if (A_Index > 9) {
+															__Log("Cannot find the close button.")
+															Break
+														}
 													}
+													Break
 												}
-												Break
 											}
 										}
 									} else {
 										if (A_Index > 9) {
-											__Log("Couldn't find the opening window.")
+											__Log("Couldn't find the chests window.")
 											Break
 										}
 									}
@@ -568,17 +764,17 @@ idolBot:
 								__Log("Couln't find the chests.")
 								MouseMove, 940, 630
 								Click
-								Sleep, 500
+								Sleep, 500 * optBotClockSpeed
 								MouseMove, 740, 480
 								Click
-								Sleep, 500
+								Sleep, 500 * optBotClockSpeed
 							}
 						}
 						Loop {
 							MouseMove, resetOutputX + 3, resetOutputY + 3
-							Sleep, 25
+							Sleep, 25 * optBotClockSpeed
 							Click
-							Sleep, 1000
+							Sleep, 1000 * optBotClockSpeed
 							__Log("Reset warning window.")
 							ImageSearch, OutputX, OutputY, 281, 116, 717, 235, *150 images/game/resetwarning.png
 							if (ErrorLevel = 0) {
@@ -593,18 +789,18 @@ idolBot:
 						Loop {
 							; Reset button
 							MouseMove, 407, 516
-							Sleep, 500
+							Sleep, 500 * optBotClockSpeed
 							Click
-							Sleep, 500
+							Sleep, 500 * optBotClockSpeed
 							; Big red button
 							__Log("Searching for the big red button.")
 							ImageSearch, OutputX, OutputY, 439, 479, 671, 601, *150 images/game/redbutton.png
 							if (ErrorLevel = 0) {
 								__Log("Clicking the red button.")
 								MouseMove, 509, 546
-								Sleep, 500
+								Sleep, 500 * optBotClockSpeed
 								Click
-								Sleep, 500
+								Sleep, 500 * optBotClockSpeed
 							}
 							; Idols screen
 							__Log("Waiting for the idols screen.")
@@ -655,9 +851,9 @@ idolBot:
 								}
 								
 								MouseMove, 507, 550
-								Sleep, 500
+								Sleep, 500 * optBotClockSpeed
 								Click
-								Sleep, 500
+								Sleep, 500 * optBotClockSpeed
 								Break
 							}
 						}
@@ -666,13 +862,16 @@ idolBot:
 						botPhase = 1
 						__Log("Start a new campaign.")
 						Gosub, _BotCampaignStart
-						Sleep, 100
+						Sleep, 100 * optBotClockSpeed
 					}
 				}
 				if (optRelaunchGame = 1 and optRelaunchGameFrequency > 1) {
 					if ((__UnixTime(A_Now) - botLastRelaunch) / 60 >= (optRelaunchGameFrequency - 1) * 60) {
 						__Log((optRelaunchGameFrequency - 1) * 60 . " minutes elapsed. Time to reset.")
 						Gosub, _BotRelaunch
+						if (optCheatEngine = 1) {
+							Gosub, __BotCEOn
+						}
 					}
 				}
 			}
@@ -684,6 +883,23 @@ idolBot:
 	}
 	Return
 
+_BotTimers:
+	if (optBotLighter = 1) {
+		Gosub, _GUIPos
+		SetTimer, _GUIPos, 10000
+		SetTimer, _BotScanForChests, Off
+		SetTimer, _BotNextLevel, 500
+		SetTimer, _BotCloseWindows, 10000
+	} else {
+		SetTimer, _GUIPos, 100
+		SetTimer, _BotScanForChests, 1000
+		SetTimer, _BotNextLevel, 100
+		SetTimer, _BotCloseWindows, 1000
+	}
+	SetTimer, _BotGetCurrentLevel, 2000
+	SetTimer, _BotForceFocus, 1000
+	Return
+	
 ; Set the GUI below the game
 _GUIPos:
 	IfWinExist, Crusaders of The Lost Idols
@@ -696,6 +912,22 @@ _GUIPos:
 			nW := W
 			nX := X + W / 2 - 255 / 2 + 2
 			Gui, BotGUI: Show, x%nX% y%nY% w257 h35 NoActivate, idolBot
+		}
+		if (botPhase = 2) {
+			if (optResetType = 5) {
+				timeLeft := Round(((optRunTime * 60) - (__UnixTime(A_Now) - botRunLaunchTime)) / 60)
+				minutesSTR = minute
+				if (timeLeft > 1) {
+					minutesSTR := minutesSTR . "s"
+				}
+				GuiControl, BotGUI:, guiMainTimeLeft, Time left: %timeLeft% %minutesSTR%
+				GuiControl, BotGUI:Choose, guiMainTabs, 2
+			}
+			if (optResetType = 6) {
+				levelsLeft := optResetOnLevel - botCurrentLevel
+				GuiControl, BotGUI:, guiMainTimeLeft, Levels left: %levelsLeft%
+				GuiControl, BotGUI:Choose, guiMainTabs, 2
+			}
 		}
 	}
 	Return
@@ -748,6 +980,10 @@ _BotForceStart:
 	} else {
 		_BotSetAutoProgress(false)
 	}
+	optCheatEngine = 1
+	if (optCheatEngine = 1) {
+		Gosub, __BotCEOn
+	}
 	botPhase = 2
 	Return
 	
@@ -796,24 +1032,28 @@ _BotSetHotkeys:
 
 ; Self-explanatory
 __GUIShowPause(status) {
+	Global optResetType
 	if (status = false) {
 		GuiControl, BotGUI:, BotStatus, images/gui/running.png
 	} else {
 		GuiControl, BotGUI:, BotStatus, images/gui/paused.png
+		GuiControl, BotGUI:Choose, guiMainTabs, 1
 	}
 	Return
 }
 
 _BotCloseWindows:
-	PixelGetColor, Output, 15, 585, RGB
-	if (Output = 0x503803) {
-		__Log("Found an overlay.")
-		ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/close.png
-		if (ErrorLevel = 0) {
-			__Log("Overlay closed.")
-			MouseMove, OutputX + 10, OutputY + 10
-			Sleep, 100
-			Click
+	if (botAutoProgressCheck = false and botPhase = 2) {
+		PixelGetColor, Output, 15, 585, RGB
+		if (Output = 0x503803) {
+			__Log("Found an overlay.")
+			ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/close.png
+			if (ErrorLevel = 0) {
+				__Log("Overlay closed.")
+				MouseMove, OutputX + 10, OutputY + 10
+				Sleep, 100 * optBotClockSpeed
+				Click
+			}
 		}
 	}
 	Return
@@ -832,7 +1072,7 @@ _BotRelaunch:
 		} else {
 			Break
 		}
-		Sleep, 500
+		Sleep, 500 * optBotClockSpeed
 	}
 	__Log("Game closed. Relaunching.")
 	Run, steam://Rungameid/402840,,UseErrorLevel
@@ -847,7 +1087,7 @@ _BotRelaunch:
 		if (ErrorLevel = 0) {
 			seen = 1
 			MouseMove, 498, 540
-			Sleep, 500
+			Sleep, 500 * optBotClockSpeed
 			Click
 		} else {
 			if (seen = 1) {
@@ -860,7 +1100,7 @@ _BotRelaunch:
 				Break
 			}
 		}
-		Sleep, 1000
+		Sleep, 1000 * optBotClockSpeed
 	}
 	Return
 
@@ -920,7 +1160,7 @@ _BotCampaignStart:
 					ImageSearch, OutputX, OutputY, 358, 512, 640, 560, *150 images/game/start.png
 					if (ErrorLevel = 0) {
 						MouseMove, 498, 540
-						Sleep, 500
+						Sleep, 500 * optBotClockSpeed
 						Click
 					}
 				}
@@ -934,13 +1174,13 @@ _BotCampaignStart:
 _BotSetCampaign:
 	if (optCampaign = 1) {
 		MouseMove, 535, 195
-		Sleep, 500
+		Sleep, 500 * optBotClockSpeed
 		Click
 		__Log("Starting the event campaign.")
 		MouseMove, cX + 508, cY + 83
-		Sleep, 100
+		Sleep, 100 * optBotClockSpeed
 		MouseMove, 785, 570
-		Sleep, 25
+		Sleep, 25 * optBotClockSpeed
 		Click
 		Return
 	} else {
@@ -971,30 +1211,72 @@ _BotSetCampaign:
 		}
 		Loop, 10 {
 			Click
-			Sleep, 25
+			Sleep, 25 * optBotClockSpeed
 		}
 		MouseMove, 585, 605
 		Loop, % listCampaigns[optCampaign][down] {
 			Click
-			Sleep, 250
+			Sleep, 250 * optBotClockSpeed
 		}
-		Sleep, 500
+		Sleep, 500 * optBotClockSpeed
 		__Log("Searching for the campaign.")
 		ImageSearch, cX, cY, 30, 150, 184, 620, *100 images/game/c%optCampaign%.png
 		if (ErrorLevel = 0) {
 			__Log("Found the campaign, starting the free play.")
 			MouseMove, cX + 508, cY + 83
-			Sleep, 100
+			Sleep, 100 * optBotClockSpeed
 			Click
-			Sleep, 100
+			Sleep, 100 * optBotClockSpeed
 			MouseMove, 785, 570
-			Sleep, 25
+			Sleep, 25 * optBotClockSpeed
 			Click
 		}
 		Sleep, 2000
 	}
 	Return
 
+__BotCEOn:
+	IfWinExist, Cheat Engine
+	{
+		rightKeyInterrupt := true
+		__Log("Turning Cheat Engine on.")
+		WinActivate, Cheat Engine
+		SetControlDelay -1
+		__Log("Opening the processes.")
+		ControlClick, Window9, Cheat Engine
+		Sleep, 1000 * optBotClockSpeed
+		SetControlDelay -1
+		__Log("Opening the process.")
+		ControlClick, Button4, Process List
+		Sleep, 1000 * optBotClockSpeed
+		WinActivate, Cheat Engine
+		SetControlDelay -1
+		__Log("Enabling speedhack.")
+		ControlClick, Enable Speedhack, Cheat Engine
+		Sleep, 500 * optBotClockSpeed
+		SetControlDelay -1
+		__Log("Applying speedhack.")
+		ControlClick, Apply, Cheat Engine
+		Sleep, 500 * optBotClockSpeed
+		WinSet,Bottom,, Cheat Engine
+		WinActivate, Crusaders of The Lost Idols
+		rightKeyInterrupt := false
+	}
+	Return
+	
+__BotCEOff:
+	IfWinExist, Cheat Engine
+	{
+		__Log("Turning Cheat Engine off.")
+		WinActivate, Cheat Engine
+		Sleep, 500 * optBotClockSpeed
+		SetControlDelay -1
+		ControlClick, Enable Speedhack, Cheat Engine
+		Sleep, 500 * optBotClockSpeed
+		WinActivate, Crusaders of The Lost Idols
+	}
+	Return
+	
 ; Navigate the crusaders bar to find the desired crusader
 ; c = crusader
 __BotMoveToCrusader(c) {
@@ -1032,7 +1314,7 @@ __BotMoveToFirstPage() {
 		}
 		MouseMove, 15, 585
 		Click
-		Sleep, 50
+		Sleep, 50 * optBotClockSpeed
 	}
 	Return
 }
@@ -1045,7 +1327,7 @@ __BotMoveToLastPage() {
 		}
 		MouseMove, 985, 585
 		Click
-		Sleep, 50
+		Sleep, 50 * optBotClockSpeed
 	}
 	Return
 }
@@ -1065,13 +1347,13 @@ __BotMoveToPage(p) {
 		if (Output != 0x000000) {
 			Click
 		}
-		Sleep, 200
+		Sleep, 200 * optBotClockSpeed
 	}
 	Return
 }
 
 __BotSetCrusadersPixels() {
-	Sleep, 1000
+	Sleep, 1000 * optBotClockSpeed
 	initialX = 42
 	i = 0
 	j = 0
@@ -1120,14 +1402,14 @@ __BotMaxLevels() {
 	__Log("Max all levels.")
 	MouseMove, 985, 630
 	Click
-	Sleep, 100
+	Sleep, 100 * optBotClockSpeed
 	i = 0
 	Loop {
 		PixelGetColor, Output, 985, 610, RGB
 		if (Output != 0x226501) {
 			Break
 		}
-		Sleep, 10
+		Sleep, 10 * optBotClockSpeed
 	}
 	Return
 }
@@ -1137,13 +1419,13 @@ __BotUpgAll() {
 	__Log("Buy all upgrades.")
 	MouseMove, 985, 540
 	Click
-	Sleep, 100
+	Sleep, 100 * optBotClockSpeed
 	Loop {
 		PixelGetColor, Output, 985, 515, RGB
 		if (Output != 0x194D80) {
 			Break
 		}
-		Sleep, 10
+		Sleep, 10 * optBotClockSpeed
 	}
 	Return
 }
@@ -1160,7 +1442,7 @@ __BotUseSkill(s) {
 			} else {
 				Send, %A_Index%
 			}
-			Sleep, 25
+			Sleep, 25 * optBotClockSpeed
 		}
 	} else {
 		Send, %s%
@@ -1181,13 +1463,16 @@ _BotSetAutoProgress(s) {
 
 ; Check if the auto progress is set to true or false
 __BotCheckAutoProgress() {
+	Global optBotClockSpeed
+	Global botAutoProgressCheck
+	botAutoProgressCheck := true
 	Loop {
 		MouseMove, 317, 111
-		Sleep, 100
+		Sleep, 100 * optBotClockSpeed
 		Click
-		Sleep, 500
+		Sleep, 500 * optBotClockSpeed
 		ImageSearch, OutputX2, OutputY2, 395, 180, 543, 242, *100 images/game/options.png
-		Sleep, 500
+		Sleep, 500 * optBotClockSpeed
 		; If the big options header is found, it means the options window is open
 		if (ErrorLevel = 0) {
 			c = 0
@@ -1204,13 +1489,20 @@ __BotCheckAutoProgress() {
 					}
 				}
 			}
-			ImageSearch, OutputX, OutputY, 712, 150, 758, 219, *100 images/game/close.png
 			Loop {
 				ImageSearch, OutputX, OutputY, 712, 150, 758, 219, *100 images/game/close.png
 				if (ErrorLevel = 0) {
-					MouseMove, OutputX + 10, OutputY + 10
-					Click
-					Sleep, 50
+					Loop {
+						MouseMove, OutputX + 10, OutputY + 10
+						Click
+						Sleep, 50 * optBotClockSpeed
+						PixelGetColor, Output, 15, 585, RGB
+						if (Output = 0xA07107) {
+							Break
+						} else {
+							__Log("Waiting for the options window to close...")
+						}
+					}
 					Break
 				}
 			}
@@ -1222,19 +1514,20 @@ __BotCheckAutoProgress() {
 			}
 		}
 	}
+	botAutoProgressCheck := false
 	__Log("Auto progress check returned true.")
 	Return, true
 }
 
 _BotSetChatRoom:
 	MouseMove, 1135, 10
-	Sleep, 100
+	Sleep, 100 * optBotClockSpeed
 	Click
 	if (optChatRoom > 10) {
 		optChatRoom = 10
 	}
 	MouseMove, 1135, 18 + (21 * optChatRoom)
-	Sleep, 100
+	Sleep, 100 * optBotClockSpeed
 	Click
 	optLastoptChatRoom := optChatRoom
 	Return
@@ -1291,7 +1584,7 @@ _BotGetCurrentLevel:
 				} else {
 					i++
 				}
-				Sleep, 25
+				Sleep, 25 * optBotClockSpeed
 			} else {
 				Break
 			}
@@ -1437,6 +1730,7 @@ _BotLoadSettings:
 	IniRead, optStormRiderFormation, settings/settings.ini, Settings, stormriderformation, 0
 	IniRead, optStormRiderMagnify, settings/settings.ini, Settings, stormridermagnify, 1
 	IniRead, optSkillsRoyalCommand, settings/settings.ini, Settings, skillsroyalcommand, 0
+	IniRead, optCheatEngine, settings/settings.ini, Settings, cheatengine, 0
 	
 	IniRead, optBuffsGoldC, settings/settings.ini, Settings, buffsgoldc, 0
 	IniRead, optBuffsGoldCInterval, settings/settings.ini, Settings, buffsgoldcinterval, 0
@@ -1501,6 +1795,11 @@ _BotLoadSettings:
 	IniRead, optForceStartHotkey1, settings/settings.ini, Settings, forcestarthotkey1, F7
 	IniRead, optForceStartHotkey2, settings/settings.ini, Settings, forcestarthotkey2, %A_Space%
 	IniRead, optCalcIdolsCount, settings/settings.ini, Settings, calcidolscount, 1
+	
+	IniRead, optBotLighter, settings/settings.ini, Settings, botlighter, 0
+	IniRead, optBotClockSpeed, settings/settings.ini, Settings, botclockspeed, 1
+	IniRead, optCheatEngine, settings/settings.ini, Settings, cheatengine, 0
+	
 	if (optPromptCurrentLevel = 120) {
 		optPromptCurrentLevel = 0
 	}
@@ -1550,6 +1849,9 @@ _BotLoadSettings:
 	optTempStormRiderFormationKey := optStormRiderFormationKey
 	optTempStormRiderMagnify := optStormRiderMagnify
 	optTempSkillsRoyalCommand := optSkillsRoyalCommand
+	optTempBotLighter := optBotLighter
+	optTempBotClockSpeed := optBotClockSpeed
+	optTempCheatEngine := optCheatEngine
 	
 	optTempBuffsGoldC := optBuffsGoldC
 	optTempBuffsGoldCInterval := optBuffsGoldCInterval
@@ -1646,6 +1948,10 @@ _BotRewriteSettings:
 	IniWrite, % optStormRiderFormation, settings/settings.ini, Settings, stormriderformation
 	IniWrite, % optStormRiderMagnify, settings/settings.ini, Settings, stormridermagnify
 	IniWrite, % optSkillsRoyalCommand, settings/settings.ini, Settings, skillsroyalcommand
+	IniWrite, % optBotLighter, settings/settings.ini, Settings, botlighter
+	IniWrite, % optBotClockSpeed, settings/settings.ini, Settings, botclockspeed
+	IniWrite, % optCheatEngine, settings/settings.ini, Settings, cheatengine
+	
 	
 	IniWrite, % optBuffsGoldC, settings/settings.ini, Settings, buffsgoldc
 	IniWrite, % optBuffsGoldCInterval, settings/settings.ini, Settings, buffsgoldcinterval
@@ -1709,6 +2015,9 @@ _BotRewriteSettings:
 	IniWrite, % optExitHotkey2, settings/settings.ini, Settings, exithotkey2
 	IniWrite, % optForceStartHotkey1, settings/settings.ini, Settings, forcestarthotkey1
 	IniWrite, % optForceStartHotkey2, settings/settings.ini, Settings, forcestarthotkey2
+	
+	Gosub, _BotTimers
+	
 	Return
 	
 _BotLoadStats:
