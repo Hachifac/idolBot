@@ -1496,7 +1496,7 @@ __BotCheckAutoProgress() {
 						Click
 						Sleep, 50 * optBotClockSpeed
 						PixelGetColor, Output, 15, 585, RGB
-						if (Output = 0xA07107) {
+						if (Output = 0xA07107 or Output = 0xFFB103) {
 							Break
 						} else {
 							__Log("Waiting for the options window to close...")
