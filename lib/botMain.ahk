@@ -225,7 +225,6 @@ idolBot:
 						if (optCheatEngine = 1) {
 							Gosub, __BotCEOn
 						}
-						botPhase = 3
 					} else {
 						Sleep, 1000 * optBotClockSpeed
 					}
