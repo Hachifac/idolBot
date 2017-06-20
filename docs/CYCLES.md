@@ -38,8 +38,8 @@ duration: **X**
 **Note:** duration prevails over loop, if *duration* elapsed, regardless of the loops remaining, the bot will proceed to the next cycle.  
 
 cycle: {  
-    **COMMANDS**
-}  
+    **COMMANDS**  
+	}  
 
 Commands must be entered in the cycle parameter.  
 - PickGold
