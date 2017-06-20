@@ -146,8 +146,6 @@ A proper way to do the cycles would be to make sure the last cycle is the final 
 Example:  
 
 ```
-; Documentation: https://github.com/Hachifac/idolBot/blob/master/docs/CYCLES.md
-
 [1:
 	loop: 1
 	cycle: {
@@ -189,7 +187,6 @@ Example:
 		SetFormation
 	}
 ]
-	
 ```  
 
 With these cycles, the bot will do one pass of the first cycle, then 10 minutes of the second cycle and spend the rest of the run on the third cycle.
