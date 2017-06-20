@@ -119,6 +119,7 @@ Set the crusaders formation to the *Formation* in the bot options.
 
 **Wait(*WAIT TIME*)**  
 *TIME* is the time in **seconds** in which the bot will wait before proceeding further down in the cycle.  
+This is *Bot clock speed* dependent. If the clock speed is set at 2, the wait will be twice as long.
 
 **UseSkill(*SKILL KEY NUMBER*)**  
 Use *SKILL KEY NUMBER* skill.  
