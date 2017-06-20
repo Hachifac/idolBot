@@ -135,6 +135,11 @@ Gui, Add, DropDownList, w100 yp+0 vguiExitHotkey1Choice g_GUIChooseExitHotkey1 +
 Gui, Add, Picture, x+23 yp+0 vguiExitHotkey2Mask g_GUIExitHotkey2Unmask, images/gui/guiAdvancedOptionsHotkeysNone_mask.png
 Gui, Add, DropDownList, w100 yp+0 vguiExitHotkey2Choice g_GUIChooseExitHotkey2 +Hidden
 
+Gui, Add, Picture, x15 y+28 vguiForceResetHotkey1Mask g_GUIForceResetHotkey1Unmask, images/gui/guiAdvancedOptionsHotkeysDefault_mask.png
+Gui, Add, DropDownList, w100 yp+0 vguiForceResetHotkey1Choice g_GUIChooseForceResetHotkey1 +Hidden
+Gui, Add, Picture, x+23 yp+0 vguiForceResetHotkey2Mask g_GUIForceResetHotkey2Unmask, images/gui/guiAdvancedOptionsHotkeysNone_mask.png
+Gui, Add, DropDownList, w100 yp+0 vguiForceResetHotkey2Choice g_GUIChooseForceResetHotkey2 +Hidden
+
 Gui, Tab, 5
 Gui, Add, Picture, x0 y0, images/gui/guiAdvancedOptionsBot_bg.png
 
@@ -194,4 +199,8 @@ if (optReloadHotkey1 != "F9" or (optReloadHotkey1 = "F9" and optReloadHotkey2)) 
 if (optExitHotkey1 != "F10" or (optExitHotkey1 = "F10" and optExitHotkey2)) {
 	Gosub, _GUIExitHotkey1Unmask
 	Gosub, _GUIExitHotkey2Unmask
+}
+if (optForceResetHotkey1 != "F11" or (optForceResetHotkey1 = "F11" and optForceResetHotkey2)) {
+	Gosub, _GUIForceResetHotkey1Unmask
+	Gosub, _GUIForceResetHotkey2Unmask
 }

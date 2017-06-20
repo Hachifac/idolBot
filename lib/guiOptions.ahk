@@ -12,9 +12,13 @@ Gui, Add, Picture, x227 y0 g_GUICloseOptions, images/gui/bClose.png
 f1 := "images/gui/bF1_off.png"
 f2 := "images/gui/bF2_off.png"
 f3 := "images/gui/bF3_off.png"
+fOff := "images/gui/bFOff_off.png"
 
-f%optFormation% := "images/gui/bF" . optFormation . "_on.png"
-
+if (optFormation > 0) {
+	f%optFormation% := "images/gui/bF" . optFormation . "_on.png"
+} else {
+	fOff := "images/gui/bFOff_on.png"
+}
 if (optClicking = 1) {
 	clickingStatusOn := "images/gui/bOn_on.png"
 	clickingStatusOff := "images/gui/bOff_off.png"
@@ -33,8 +37,9 @@ Gui, Add, DropDownList, x15 y71 w190 Choose%optCampaign% vguiCampaignChoice g_GU
 Gui, Add, Picture, y+30 vguiFormationQ g_GUISetFormationQ, %f1%
 Gui, Add, Picture, x+5 vguiFormationW g_GUISetFormationW, %f2%
 Gui, Add, Picture, x+5 vguiFormationE g_GUISetFormationE, %f3%
+Gui, Add, Picture, x+5 vguiFormationOff g_GUISetFormationOff, %fOff%
 
-Gui, Add, DropDownList, x15 y+32 w100 vguiMainDPSChoice g_GUIChooseMainDPS, Alan|Arachnobuddy|Bat|Baenarall|Bernard|Billy|Boggins|Brogon|Broot|Bubba|Bush|Cindy|Dark Helper|Danni|Draco|Drizzle|Eiralon|Emo|Exterminator|Foresight|Fright-o-Tron|Frosty|Gloria|Graham|Grandmora|Greyskull|Groklok|Gryphon|Half-Blood Elf|Henry|Hermit|Ilsa|Jack|Jason|Jim|Kaine|Karen|Karl|Katie|Khouri|Kizlblyp|Kyle|Larry|Leerion|Lion|Littlefoot|Merci|Mindy|Momma|Monkey|Montana|Natalie|Nate|Pam|Panda|Paul|Pete|Petra|Phoenix|Polly|Princess|Rayna|Reginald|Robbie|Roborabbit|Roboturkey|Rocky|Rudolph|Sal|Sally|Santa|Sarah|Sasha|Shadow Queen|Siri|Sisaron|Snickette|Soldierette|Spaceking|Squiggles|Thalia|Val|Veronica|Warwick|Wendy
+Gui, Add, DropDownList, x15 y+32 w100 vguiMainDPSChoice g_GUIChooseMainDPS, None|Alan|Arachnobuddy|Bat|Baenarall|Bernard|Billy|Boggins|Brogon|Broot|Bubba|Bush|Cindy|Dark Helper|Danni|Draco|Drizzle|Eiralon|Emo|Exterminator|Foresight|Fright-o-Tron|Frosty|Gloria|Graham|Grandmora|Greyskull|Groklok|Gryphon|Half-Blood Elf|Henry|Hermit|Ilsa|Jack|Jason|Jim|Kaine|Karen|Karl|Katie|Khouri|Kizlblyp|Kyle|Larry|Leerion|Lion|Littlefoot|Merci|Mindy|Momma|Monkey|Montana|Natalie|Nate|Pam|Panda|Paul|Pete|Petra|Phoenix|Polly|Princess|Rayna|Reginald|Robbie|Roborabbit|Roboturkey|Rocky|Rudolph|Sal|Sally|Santa|Sarah|Sasha|Shadow Queen|Siri|Sisaron|Sjin|Snickette|Soldierette|Spaceking|Squiggles|Thalia|Turps|Val|Veronica|Warwick|Wendy
 
 Gui, Add, DropDownList, y+31 w190 Choose%optResetType% vguiResetChoice g_GUIChooseReset altSubmit, No reset|Max progress|Level cap - NOT WORKING|Fast - NOT WORKING|Timed run|On level
 Gui, Add, Picture, x+20 yp+4 g_GUIHelpOptions, images/gui/bHelp.png

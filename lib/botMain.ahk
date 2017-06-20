@@ -10,7 +10,7 @@ FileCreateDir, settings
 FileCreateDir, stats
 
 Gosub, _BotLoadSettings
-
+Gosub, _BotLoadCycles
 Gosub, _BotSetHotkeys
 
 statsChestsThisRun = 0
@@ -41,6 +41,7 @@ botLevelCursorCoords[5] := [912, 10, 949, 127]
 botLevelCurrentCursor = 0
 botLevelPreviousCursor = 0
 botCurrentLevel = 0
+botGetCurrentLevelMute := 0
 botBuffsRarity := ["C", "U", "R", "E"]
 botBuffs := ["Gold", "Power", "Speed", "Crit", "Click", "Splash"]
 botBuffsCoords := [494, 110]
@@ -56,12 +57,14 @@ rightKeyInterrupt := false
 Gosub, _BotTimers
 
 botPhase = -1 ; -1 = bot not launched, 0 = bot in campaign selection screen, 1 = initial stuff like looking for overlays, waiting for the game to fully load, 2 = maxing the levels/ main dps and upgrades, 3 = reset phase
-botRunLaunchTime := __UnixTime(A_Now)
-botLastRelaunch := __UnixTime(A_Now)
-botLaunchTime := __UnixTime(A_Now)
+botRunLaunchTime := 0
+botLastRelaunch := 0
+botLaunchTime := 0
 botSession = 0
 botRelaunched := false
 botAutoProgressCheck := false
+botResets = 0
+idolsCount = 0
 
 now = 0
 botRelaunching := false
@@ -103,6 +106,10 @@ idolBot:
 		; Campaign selection, the bot will either start a campaign or realize one is already started
 		if (botPhase = 0) {
 			__Log("Launching bot.")
+			now := __UnixTime(A_Now)
+			botRunLaunchTime := now
+			botLastRelaunch := now
+			botLaunchTime := now
 			Gosub, _BotCampaignStart
 			botPhase = 1
 		}
@@ -143,48 +150,13 @@ idolBot:
 							__Log("Moving the characters bar to the beginning.")
 							__BotMoveToFirstPage()
 						}
-						; Buffs stuff
-						bI = 1
-						now := __UnixTime(A_Now)
-						Loop, % botBuffs.length() {
-							moved := true
-							Loop, % botBuffsRarity.length() {
-								bB := botBuffs[bI]
-								bR := botBuffsRarity[A_Index]
-								if (optBuffs%bB%%bR% = 1) {
-									if ((now - botBuffs%bB%%bR%Timer) / 60 >= optBuffs%bB%%bR%Interval) {
-										if (botBuffs%bB%%bR%Timer > -1) {
-											__Log("Using a " . bB . " [" . bR . "] buff.")
-											bX := botBuffsCoords[1] + (40 * (bI - 1))
-											bY := botBuffsCoords[2]
-											if (moved = true) {
-												MouseMove, bX, bY
-												Sleep, 1000 * optBotClockSpeed
-												Click
-												moved := false
-											}
-											bX2 := bX + 95
-											bY2 := bY + 53 + (36 * (A_Index - 1))
-											MouseMove, bX2, bY2
-											Sleep, 500 * optBotClockSpeed
-											Click
-											if (optBuffs%bB%%bR%Interval = 0) {
-												botBuffs%bB%%bR%Timer = -1
-											} else {
-												botBuffs%bB%%bR%Timer := now
-											}
-										}
-									}
-								}
-							}
-							bI++
-						}
+						Gosub, _BotUseBuffs
 						; Open options window to see if auto progress is on
 						__Log("Initial auto progress check...")
 						if (optResetType = 2 or optAutoProgressCheck = 1 or optAutoProgress = 2) {
-							_BotSetAutoProgress(true)
+							__BotSetAutoProgress(true)
 						} else {
-							_BotSetAutoProgress(false)
+							__BotSetAutoProgress(false)
 						}
 						Loop {
 							; We look at Jim's buy button to know if we can select the formation
@@ -212,8 +184,8 @@ idolBot:
 						}
 						; Press space bar to close the events/sales tabs
 						Send, {Space}
-						__BotMaxLevels()
-						Send, {%optFormationKey%}
+						Gosub, _BotMaxLevels
+						__BotSetFormation(optFormation)
 						botMaxAllCount++
 						botFirstCycle := true
 						; Set Chat Room to optChatRoom
@@ -223,7 +195,7 @@ idolBot:
 							Gosub, _BotSetChatRoom
 						}
 						if (optCheatEngine = 1) {
-							Gosub, __BotCEOn
+							Gosub, _BotCEOn
 						}
 					} else {
 						Sleep, 1000 * optBotClockSpeed
@@ -235,16 +207,14 @@ idolBot:
 					__Log("Server failed error. Relaunching the game.")
 					Gosub, _BotRelaunch
 					if (optCheatEngine = 1) {
-						Gosub, __BotCEOn
+						Gosub, _BotCEOn
 					}
-				}
-				ImageSearch, OutputX, OutputY, 815, 370, 935, 410, *100 images/game/gimmerubies.png
-				if (ErrorLevel = 0) {
-					MouseMove, OutputX, OutputY
-					Click
 				}
 				; Upgrade all/max all/max main dps. Final phase until reset phase.
 				if (botPhase = 2 or botDelayReset = true) {
+					if (botCurrentCycleLoop = 0) {
+						botCurrentCycleTime := __UnixTime(A_Now)
+					}
 					if (botSession = 0) {
 						botSession = 1
 					}
@@ -255,323 +225,119 @@ idolBot:
 					MouseMove, 740, 480
 					Sleep, 100 * optBotClockSpeed
 					Click
-					if (botFirstCycle = true) {
-						; Yes, this part is disgusting
-						; Yes, I'll clean it soon
-						; The reason why I'm not doing it now is quite simple; I don't wish to break stuff by turning all of these in functions when I'm just about to release a new version!
-						__Log("First cycle sequence.")
-						__Log("Get the gold and quest items for " . optLootItemsDuration . " seconds.")
-						now = % __UnixTime(A_Now)
-						i = 1
-						Send, {Space}
-						max = 8
-						if (optClicking = 1) {
-							max = 4
+					if (botSkipToReset = false) {
+						if ((botCycles[botCurrentCycle].loop = "" or botCycles[botCurrentCycle].loop = 0) and (botCycles[botCurrentCycle].duration = "" or botCycles[botCurrentCycle].duration = 0)) {
+							botCurrentCycleLoop = 0
 						}
-						while (__UnixTime(A_Now) - now <= optLootItemsDuration) {
-							if (i > max) {
-								i = 1
-							}
-							MouseMove, 650 + i * 37, 320
-							if (optClicking = 1) {
-								Click
-							}
-							i++
-							Sleep, % optClickDelay
-						}
-						__BotMaxLevels()
-						Sleep, 100 * optBotClockSpeed
-						Send, {%optFormationKey%}
-						__Log("Get the gold and quest items for 1 second.")
-						now = % __UnixTime(A_Now)
-						i = 1
-						Send, {Space}
-						max = 8
-						if (optClicking = 1) {
-							max = 4
-						}
-						while (__UnixTime(A_Now) - now <= 1) {
-							if (i > max) {
-								i = 1
-							}
-							MouseMove, 650 + i * 37, 320
-							if (optClicking = 1) {
-								Click
-							}
-							i++
-							Sleep, % optClickDelay
-						}
-						__BotUpgAll()
-						Sleep, 100 * optBotClockSpeed
-						__Log("Get the gold and quest items for 1 second.")
-						now = % __UnixTime(A_Now)
-						i = 1
-						Send, {Space}
-						max = 8
-						if (optClicking = 1) {
-							max = 4
-						}
-						while (__UnixTime(A_Now) - now <= 1) {
-							if (i > max) {
-								i = 1
-							}
-							MouseMove, 650 + i * 37, 320
-							if (optClicking = 1) {
-								Click
-							}
-							i++
-							Sleep, % optClickDelay
-						}
-						__BotUpgAll()
-						Sleep, 100 * optBotClockSpeed
-						__Log("Get the gold and quest items for 1 second.")
-						now = % __UnixTime(A_Now)
-						i = 1
-						Send, {Space}
-						max = 8
-						if (optClicking = 1) {
-							max = 4
-						}
-						while (__UnixTime(A_Now) - now <= 1) {
-							if (i > max) {
-								i = 1
-							}
-							MouseMove, 650 + i * 37, 320
-							if (optClicking = 1) {
-								Click
-							}
-							i++
-							Sleep, % optClickDelay
-						}
-						__BotMaxLevels()
-						Sleep, 100 * optBotClockSpeed
-						Send, {%optFormationKey%}
-						__Log("Get the gold and quest items for 1 second.")
-						now = % __UnixTime(A_Now)
-						i = 1
-						Send, {Space}
-						max = 8
-						if (optClicking = 1) {
-							max = 4
-						}
-						while (__UnixTime(A_Now) - now <= 1) {
-							if (i > max) {
-								i = 1
-							}
-							MouseMove, 650 + i * 37, 320
-							if (optClicking = 1) {
-								Click
-							}
-							i++
-							Sleep, % optClickDelay
-						}
-						__BotUpgAll()
-						botFirstCycle := false
-						__Log("End of first cycle.")
-					} else {
-						; Buffs stuff
-						bI = 1
-						now := __UnixTime(A_Now)
-						Loop, % botBuffs.length() {
-							moved := true
-							Loop, % botBuffsRarity.length() {
-								bB := botBuffs[bI]
-								bR := botBuffsRarity[A_Index]
-								if (optBuffs%bB%%bR% = 1) {
-									if ((now - botBuffs%bB%%bR%Timer) / 60 >= optBuffs%bB%%bR%Interval) {
-										if (botBuffs%bB%%bR%Timer > -1) {
-											__Log("Using a " . bB . " [" . bR . "] buff.")
-											bX := botBuffsCoords[1] + (40 * (bI - 1))
-											bY := botBuffsCoords[2]
-											if (moved = true) {
-												MouseMove, bX, bY
-												Sleep, 1000 * optBotClockSpeed
-												Click
-												moved := false
+						if (botCurrentCycleLoop < botCycles[botCurrentCycle].loop or botCycles[botCurrentCycle].loop = "") {
+							if (botCycles[botCurrentCycle].duration = "" or (__UnixTime(A_Now) - botCurrentCycleTime < botCycles[botCurrentCycle].duration)) {
+								for cL in botCycles[botCurrentCycle].cyclesList {
+									if (StrLen(botCycles[botCurrentCycle].cyclesList[cL]) > 1) {
+										if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)PickGold\(([\d]+)\)", f)) {
+											__BotPickGold(f.1)
+										} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)PickGold", f)) {
+											__BotPickGold(optLootItemsDuration)
+										} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)MaxLevels", f)) {
+											Gosub, _BotMaxLevels
+										} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)UpgradeAll", f)) {
+											Gosub, _BotUpgAll
+										} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)MaxAll", f)) {
+											Gosub, _BotMaxAll
+										} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)LevelCrusader\(([\d|\w]+)\)", f)) {
+											__BotLevelCrusader(f.1)
+										} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)LevelMainDPS", f)) {
+											if ((optResetType = 1 or optResetType = 2 or optResetType = 5 or optResetType = 6) and botSkipToReset = false) {
+												if (__UnixTime(A_Now) - botRunLaunchTime > (optMainDPSDelay * 60) and optMainDPS != "None") {
+													__BotLevelCrusader(optMainDPS)
+												}
 											}
-											bX2 := bX + 95
-											bY2 := bY + 53 + (36 * (A_Index - 1))
-											MouseMove, bX2, bY2
-											Sleep, 500 * optBotClockSpeed
-											Click
-											if (optBuffs%bB%%bR%Interval = 0) {
-												botBuffs%bB%%bR%Timer = -1
-											} else {
-												botBuffs%bB%%bR%Timer := now
-											}
+										} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)SetFormation\(([\d]+)\)", f)) {
+											__BotSetFormation(f.1)
+										} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)SetFormation", f)) {
+											__BotSetFormation(optFormation)
+										} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)Wait\(([\d]+)\)", f)) {
+											Sleep, % f.1 * 1000 * optBotClockSpeed
+										} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)UseSkill\(([\d]+)\)", f)) {
+											__BotUseSkill(f.1)
+										} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)UseSkills", f)) {
+											Gosub, __BotUseSkills
+										} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)UseBuffs", f)) {
+											Gosub, _BotUseBuffs
+										} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)CheatEngineOn", f)) {
+											Gosub, _BotCEOn
+										} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)CheatEngineOff", f)) {
+											Gosub, _BotCEOff
 										}
+										
 									}
 								}
+							} else {
+								botCurrentCycle++
+								botCurrentCycleLoop = 0
 							}
-							bI++
+							botCurrentCycleLoop++
+						} else {
+							botCurrentCycle++
+							botCurrentCycleLoop = 0
 						}
+					}
+
 						
-						__Log("Get the gold and quest items for " . optLootItemsDuration . " seconds.")
-						now = % __UnixTime(A_Now)
-						i = 1
-						Send, {Space}
-						max = 8
-						if (optClicking = 1) {
-							max = 4
-						}
-						while (__UnixTime(A_Now) - now <= optLootItemsDuration) {
-							if (i > max) {
-								i = 1
+					; If the last time we did an auto progress check is >= than autoProgressCheckDelay, we initiate an auto progress check
+					if ((optResetType = 2 or optAutoProgressCheck = 1) and __UnixTime(A_Now) - lastProgressCheck >= optAutoProgressCheckDelay) {
+						; Every autoProgressCheckDelay seconds we take a look if Auto Progress is still activated, if it's not it means we died so achieved the highest zone we could, we have to reset
+						lastProgressCheck = % __UnixTime(A_Now)
+						Log("Auto progress check for max progress.")
+						if (__BotCheckAutoProgress() = false) {
+							if (__UnixTime(A_Now) - botRunLaunchTime < 60) {
+								; Stuck at beginning, might be the formation not active
+								Log("Might be stuck at the beginning.")
+								__BotSetFormation(optFormation)
+								Sleep, 100 * optBotClockSpeed
+								Send, {g}
+							} else {
+								botPhase = 3
 							}
-							MouseMove, 650 + i * 37, 320
-							if (optClicking = 1) {
-								Click
-							}
-							i++
-							Sleep, % optClickDelay
 						}
+					}
 						
-						if ((optResetType = 1 or optResetType = 2 or optResetType = 5 or optResetType = 6) and botSkipToReset = false) {
-							if (__UnixTime(A_Now) - botRunLaunchTime > (optMainDPSDelay * 60)) {
-								rightKeyInterrupt := true
-								__Log("Moving to mainDPS.")
-								if (botCrusaderPixels.length() = 0) {
-									__BotMoveToFirstPage()
-									__BotMoveToCrusader(optMainDPS)
-									Sleep, 1000 * optBotClockSpeed
-									__BotSetCrusadersPixels()
-								} else {
-									if (__BotCompareCrusadersPixels() = false) {
-										__Log("We might have moved from the mainDPS, let's go back.")
-										__BotMoveToFirstPage()
-										Sleep, 500 * optBotClockSpeed
-										__BotMoveToCrusader(optMainDPS)
-										Sleep, 500 * optBotClockSpeed
-										__BotSetCrusadersPixels()
-									}
-								}
-								Log("Maxing mainDPS.")
-								MouseMove, currentCCoords[1] + 252, currentCCoords[2] + 18
-								send, {ctrl down}
-								sleep, 100 * optBotClockSpeed
-								click
-								send, {ctrl up}
-								sleep, 100 * optBotClockSpeed
-								rightKeyInterrupt := false
-							}
-						}
-						
-						; If the last time we did an auto progress check is >= than autoProgressCheckDelay, we initiate an auto progress check
-						if ((optResetType = 2 or optAutoProgressCheck = 1) and __UnixTime(A_Now) - lastProgressCheck >= optAutoProgressCheckDelay) {
-							; Every autoProgressCheckDelay seconds we take a look if Auto Progress is still activated, if it's not it means we died so achieved the highest zone we could, we have to reset
-							lastProgressCheck = % __UnixTime(A_Now)
-							Log("Auto progress check for max progress.")
-							if (__BotCheckAutoProgress() = false) {
-								if (__UnixTime(A_Now) - botRunLaunchTime < 60) {
-									; Stuck at beginning, might be the formation not active
-									Log("Might be stuck at the beginning.")
-									Send, {%optFormationKey%}
-									Sleep, 100 * optBotClockSpeed
-									Send, {g}
-								} else {
-									botPhase = 3
-								}
-							}
-						}
-						
-						; Max all levels
-						__BotMaxLevels()
-						Send, {%optFormationKey%}
-						botMaxAllCount++
-						; If the bot did optUpgAllUntil max all levels, do one buy all upgrades
-						if (botMaxAllCount >= optUpgAllUntil) {
-							__Log("Get the gold and quest items for 1 second.")
-							now = % __UnixTime(A_Now)
-							delay := optClickDelay
-							i = 1
-							while (__UnixTime(A_Now) - now <= 1) {
-								if (i > 8) {
-									i = 1
-								}
-								MouseMove, 650 + i * 37, 320
-								i++
-								Sleep, % delay
-							}
-							__BotUpgAll()
-							botMaxAllCount = 0
-						}
-						
-						if (optResetType = 3) {
-							if (levelCapResetCheck = true) {
-								__BotMoveToLastPage()
-								Sleep, 500 * optBotClockSpeed
-								PixelGetColor, Output, 872, 594, RGB
-								if (Output = 0x7D2E0C) {
-									PixelGetColor, Output, 872, 508, RGB
-									if (Output = 0x979797) {
-										__Log("Level cap reached.")
-										botPhase = 3
-										botSkipToReset := true
-									}
-								} else if (Output = 0x979797) {
+					if (optResetType = 3) {
+						if (levelCapResetCheck = true) {
+							__BotMoveToLastPage()
+							Sleep, 500 * optBotClockSpeed
+							PixelGetColor, Output, 872, 594, RGB
+							if (Output = 0x7D2E0C) {
+								PixelGetColor, Output, 872, 508, RGB
+								if (Output = 0x979797) {
 									__Log("Level cap reached.")
 									botPhase = 3
 									botSkipToReset := true
 								}
-							} else {
-								__BotMoveToFirstPage()
-								PixelGetColor, Output, 242, 508, RGB
-								if (Output = 0x979797) {
-									__Log("Bush is maxed.")
-									levelCapResetCheck := true
-								}
+							} else if (Output = 0x979797) {
+								__Log("Level cap reached.")
+								botPhase = 3
+								botSkipToReset := true
+							}
+						} else {
+							__BotMoveToFirstPage()
+							PixelGetColor, Output, 242, 508, RGB
+							if (Output = 0x979797) {
+								__Log("Bush is maxed.")
+								levelCapResetCheck := true
 							}
 						}
+					}
 						
-						if (optResetType = 5 and __UnixTime(A_Now) - botRunLaunchTime >= (optRunTime * 60)) {
+					if (optResetType = 5 and __UnixTime(A_Now) - botRunLaunchTime >= (optRunTime * 60)) {
+						botSkipToReset := true
+						botPhase = 3
+					}
+					
+					if (optResetType = 6) {
+						if (botCurrentLevel >= optResetOnLevel) {
+							__Log("Level " . optResetOnLevel . " reached.")
 							botSkipToReset := true
 							botPhase = 3
-						}
-						
-						if (optResetType = 6) {
-							if (botCurrentLevel >= optResetOnLevel) {
-								__Log("Level " . optResetOnLevel . " reached.")
-								botSkipToReset := true
-								botPhase = 3
-							}
-						}
-						
-						if (botSkipToReset = false) {
-							if (optStormRiderMagnify = 0) {
-								__Log("Using all skills.")
-								__BotUseSkill(0)
-							} else {
-								PixelSearch, OutputX, OutputY, 382, 449, 421, 488, 0x0000FE,, Fast
-								if (ErrorLevel != 0) {
-									PixelSearch, OutputX, OutputY, 582, 449, 621, 488, 0x0000FE,, Fast
-									if (ErrorLevel != 0) {
-										Send, {%optStormRiderFormationKey%}
-										Sleep, 500 * optBotClockSpeed
-										__BotMaxLevels()
-										__BotUpgAll()
-										PixelGetColor, Output, 390, 466, RGB
-										if (Output != 0x3A3A3A) {
-											PixelGetColor, Output, 590, 466, RGB
-											if (Output != 0x3A3A3A) {
-												__Log("Using Storm Rider.")
-												Send, 2
-												Sleep, 25 * optBotClockSpeed
-												Send, 7
-												Sleep, 25 * optBotClockSpeed
-											}
-										}
-										Send, {%optFormationKey%}
-									}
-								}
-								__BotUseSkill(1)
-								__BotUseSkill(3)
-								__BotUseSkill(4)
-								__BotUseSkill(5)
-								if (optSkillsRoyalCommand = 1) {
-									__BotUseSkill(6)
-								}
-								__BotUseSkill(8)
-							}
 						}
 					}
 				}
@@ -579,7 +345,7 @@ idolBot:
 				; If optRunTime time elapsed or phase is set at 3, we reset
 				if (botPhase = 3 and optResetType > 1) {
 					if (optCheatEngine = 1) {
-						Gosub, __BotCEOff
+						Gosub, _BotCEOff
 					}
 					botDelayReset := false
 					resetPhase = 0
@@ -730,7 +496,6 @@ idolBot:
 																Click
 																Sleep, 500 * optBotClockSpeed
 																chestFound := true
-																__BotMaxLevels()
 																Break
 															} else {
 																__Log("Still in the chests window.")
@@ -770,16 +535,23 @@ idolBot:
 							}
 						}
 						Loop {
+							Gosub, _BotMaxLevels
+							Sleep, 1000 * optBotClockSpeed
 							MouseMove, resetOutputX + 3, resetOutputY + 3
 							Sleep, 25 * optBotClockSpeed
 							Click
 							Sleep, 1000 * optBotClockSpeed
-							__Log("Reset warning window.")
+							__Log("Waiting for the reset warning window.")
 							ImageSearch, OutputX, OutputY, 281, 116, 717, 235, *150 images/game/resetwarning.png
 							if (ErrorLevel = 0) {
 								__Log("Reset warning window found.")
 								resetPhase = 2
 								Break
+							} else {
+								if (A_Index > 9) {
+									resetPhase = 0
+									Break
+								}
 							}
 						}
 					}
@@ -838,6 +610,11 @@ idolBot:
 								botLevelCurrentCursor = 0
 								botLevelPreviousCursor = 0
 								botCurrentLevel = 0
+								botResets++
+								
+								botCurrentCycle = 1
+								botCurrentCycleLoop = 0
+								botCurrentCycleTime = 0
 								
 								bI = 1
 								Loop, % botBuffs.length() {
@@ -869,7 +646,7 @@ idolBot:
 						__Log((optRelaunchGameFrequency - 1) * 60 . " minutes elapsed. Time to reset.")
 						Gosub, _BotRelaunch
 						if (optCheatEngine = 1) {
-							Gosub, __BotCEOn
+							Gosub, _BotCEOn
 						}
 					}
 				}
@@ -907,26 +684,38 @@ _GUIPos:
 		if (X != oldX or Y != oldY) {
 			oldX := X
 			oldY := Y
-			nY := A_ScreenHeight - (A_ScreenHeight - Y) + H - 2
+			nY := A_ScreenHeight - (A_ScreenHeight - Y) + H - 8
 			nW := W
-			nX := X + W / 2 - 255 / 2 + 2
-			Gui, BotGUI: Show, x%nX% y%nY% w257 h35 NoActivate, idolBot
+			nX := X + W / 2 - 613 / 2 + 2
+			Gui, BotGUI: Show, x%nX% y%nY% w615 h35 NoActivate, idolBot
 		}
-		if (botPhase = 2) {
+		if (botPhase > -1) {
 			if (optResetType = 5) {
 				timeLeft := Round(((optRunTime * 60) - (__UnixTime(A_Now) - botRunLaunchTime)) / 60)
 				minutesSTR = minute
 				if (timeLeft > 1) {
 					minutesSTR := minutesSTR . "s"
 				}
-				GuiControl, BotGUI:, guiMainTimeLeft, Time left: %timeLeft% %minutesSTR%
-				GuiControl, BotGUI:Choose, guiMainTabs, 2
+				
 			}
 			if (optResetType = 6) {
 				levelsLeft := optResetOnLevel - botCurrentLevel
 				GuiControl, BotGUI:, guiMainTimeLeft, Levels left: %levelsLeft%
-				GuiControl, BotGUI:Choose, guiMainTabs, 2
 			}
+			
+			GuiControl, BotGUI:, guiMainStatsResets, % botResets
+			GuiControl, BotGUI:, guiMainStatsBottingTime, % __UnixToTime(__UnixTime(A_Now) - botLaunchTime)
+			GuiControl, BotGUI:, guiMainStatsIdolsLastReset, % idolsCount
+			GuiControl, BotGUI:, guiMainStatsIdolsTotal, % statsIdolsThisSession
+			GuiControl, BotGUI:, guiMainStatsIdolsPerHour, % __RoundNumber(statsIdolsThisSession / (__UnixTime(A_Now) - botLaunchTime) * 60 * 60, 2)
+			resetIn = --
+			if (optResetType = 5) {
+				resetIn := Round(((optRunTime * 60) - (__UnixTime(A_Now) - botRunLaunchTime)) / 60) . "m"
+			}
+			if (optResetType = 6) {
+				resetIn := optResetOnLevel - botCurrentLevel . " levels"
+			}
+			GuiControl, BotGUI:, guiMainStatsResetIn, % resetIn
 		}
 	}
 	Return
@@ -957,33 +746,44 @@ _BotPause:
 			__GUIShowPause(false)
 			if ((botPhase = 1 or botPhase = 2) and optResetType != 2 and optAutoProgressCheck = 0 and optAutoProgress = 1) {
 				Gosub, _BotCloseWindows
-				_BotSetAutoProgress(false)
+				__BotSetAutoProgress(false)
 			}
 			if ((botPhase = 1 or botPhase = 2) and optAutoProgress = 2) {
 				Gosub, _BotCloseWindows
-				_BotSetAutoProgress(true)
+				__BotSetAutoProgress(true)
 			}
 		}
 	}
 	WinActivate, Crusaders of The Lost Idols
 	Return
-
+	
 ; Force start key
 _BotForceStart:
 	__Log("Force starting the bot.")
+	now := __UnixTime(A_Now)
+	botRunLaunchTime := now
+	botLastRelaunch := now
+	botLaunchTime := now
 	Gosub, _BotPause
 	; Open options window to see if auto progress is on
 	__Log("Initial auto progress check...")
 	if (optResetType = 2 or optAutoProgressCheck = 1 or optAutoProgress = 2) {
-		_BotSetAutoProgress(true)
+		__BotSetAutoProgress(true)
 	} else {
-		_BotSetAutoProgress(false)
+		__BotSetAutoProgress(false)
 	}
-	optCheatEngine = 1
 	if (optCheatEngine = 1) {
-		Gosub, __BotCEOn
+		Gosub, _BotCEOn
 	}
 	botPhase = 2
+	Return
+	
+; Force reset key
+_BotForceReset:
+	__Log("Force resetting the bot.")
+	botPhase = 3
+	botSkipToReset := true
+	botFirstCycle := false
 	Return
 	
 ; Dev console key = ~
@@ -1004,29 +804,28 @@ SC029::
 
 _BotSetHotkeys:
 	if (optPauseHotkey2) {
-		optPauseHotkey = %optPauseHotkey1% & %optPauseHotkey2%
+		Hotkey, %optPauseHotkey1% & %optPauseHotkey2%, _BotPause
 	} else {
-		optPauseHotkey := optPauseHotkey1
+		Hotkey, $%optPauseHotkey1%, _BotPause
 	}
-	Hotkey, $%optPauseHotkey%, _BotPause
 	if (optReloadHotkey2) {
 		optReloadHotkey = %optReloadHotkey1% & %optReloadHotkey2%
 	} else {
 		optReloadHotkey := optReloadHotkey1
 	}
-	Hotkey, $%optReloadHotkey%, _BotReload
+	Hotkey, %optReloadHotkey%, _BotReload
 	if (optExitHotkey2) {
 		optExitHotkey = %optExitHotkey1% & %optExitHotkey2%
 	} else {
 		optExitHotkey := optExitHotkey1
 	}
-	Hotkey, $%optExitHotkey%, _BotExit
+	Hotkey, %optExitHotkey%, _BotExit
 	if (optForceStartHotkey2) {
 		optForceStartHotkey = %optForceStartHotkey1% & %optForceStartHotkey2%
 	} else {
 		optForceStartHotkey := optForceStartHotkey1
 	}
-	Hotkey, $%optForceStartHotkey%, _BotForceStart
+	Hotkey, %optForceStartHotkey%, _BotForceStart
 	Return
 
 ; Self-explanatory
@@ -1042,18 +841,32 @@ __GUIShowPause(status) {
 }
 
 _BotCloseWindows:
-	if (botAutoProgressCheck = false and botPhase = 2) {
-		PixelGetColor, Output, 15, 585, RGB
-		if (Output = 0x503803) {
-			__Log("Found an overlay.")
-			ImageSearch, OutputX, OutputY, 0, 0, 997, 671, *100 images/game/close.png
+	if (botAutoProgressCheck = false and (botPhase = 1 or botPhase = 2)) {
+		CoordMode, Pixel, Client
+		CoordMode, Mouse, Client
+		PixelGetColor, OutputCW, 15, 585, RGB
+		if (OutputCW = 0x503803  or OutputCW = 0x805901) {
+			__Log("Might have found an overlay.")
+			ImageSearch, OutputCWX, OutputCWY, 0, 0, 997, 671, *100 images/game/close.png
 			if (ErrorLevel = 0) {
 				__Log("Overlay closed.")
-				MouseMove, OutputX + 10, OutputY + 10
+				MouseMove, OutputCWX + 10, OutputCWY + 10
 				Sleep, 100 * optBotClockSpeed
 				Click
 			}
 		}
+		ImageSearch, OutputGRX, OutputGRY, 815, 370, 935, 410, *100 images/game/gimmerubies.png
+		if (ErrorLevel = 0) {
+			__Log("Obtaining rubies from a daily quest.")
+			MouseMove, OutputGRX, OutputGRY
+			Click
+		}
+		ImageSearch, OutputDQX, OutputDQY, 921, 237, 938, 318, *100 images/game/dailyquest_close.png
+		if (ErrorLevel = 0) {
+			__Log("Closing a daily quest popup.")
+			MouseMove, OutputDQX, OutputDQY
+			Click
+		} 
 	}
 	Return
 
@@ -1234,7 +1047,7 @@ _BotSetCampaign:
 	}
 	Return
 
-__BotCEOn:
+_BotCEOn:
 	IfWinExist, Cheat Engine
 	{
 		rightKeyInterrupt := true
@@ -1263,7 +1076,7 @@ __BotCEOn:
 	}
 	Return
 	
-__BotCEOff:
+_BotCEOff:
 	IfWinExist, Cheat Engine
 	{
 		__Log("Turning Cheat Engine off.")
@@ -1394,10 +1207,7 @@ __BotCompareCrusadersPixels() {
 }
 
 ; Max levels
-__BotMaxLevels() {
-	global optFormationKey
-	global optResetType
-	global botPhase
+_BotMaxLevels:
 	__Log("Max all levels.")
 	MouseMove, 985, 630
 	Click
@@ -1411,10 +1221,9 @@ __BotMaxLevels() {
 		Sleep, 10 * optBotClockSpeed
 	}
 	Return
-}
 
 ; Upgrade all
-__BotUpgAll() {
+_BotUpgAll:
 	__Log("Buy all upgrades.")
 	MouseMove, 985, 540
 	Click
@@ -1427,7 +1236,16 @@ __BotUpgAll() {
 		Sleep, 10 * optBotClockSpeed
 	}
 	Return
-}
+
+_BotMaxAll:
+	Gosub, _BotMaxLevels
+	botMaxAllCount++
+	if (botMaxAllCount >= optUpgAllUntil) {
+		__BotPickGold(1)
+		Gosub, _BotUpgAll
+		botMaxAllCount = 0
+	}
+	Return
 
 ; Use a skill, 0 to use all skills
 __BotUseSkill(s) {
@@ -1450,7 +1268,7 @@ __BotUseSkill(s) {
 }
 
 ; Sets the auto progress to false
-_BotSetAutoProgress(s) {
+__BotSetAutoProgress(s) {
 	__Log("Auto progress check at startup")
 	Global lastProgressCheck
 	lastProgressCheck = % __UnixTime(A_Now)
@@ -1509,6 +1327,7 @@ __BotCheckAutoProgress() {
 				Break
 			} else {
 				__Log("Auto progress check returned false.")
+				botAutoProgressCheck := false
 				Return, false
 			}
 		}
@@ -1560,7 +1379,7 @@ __BotGetIdolsCount() {
 }
 
 _BotGetCurrentLevel:
-	if (botPhase = 2 and botRelaunching = false) {
+	if (botPhase = 2 and botRelaunching = false and (__UnixTime(A_Now) - botGetCurrentLevelMute) > 4) {
 		botLookingForCursor := true
 		CoordMode, Pixel, Client
 		CoordMode, Mouse, Client
@@ -1588,6 +1407,16 @@ _BotGetCurrentLevel:
 				Break
 			}
 		}
+		/*
+		if (botLevelCurrentCursor = 5) {
+			ImageSearch, OutputX, OutputY, 654, 203, 999, 223, *25 images/game/sprint_green_arrow.png
+			if (ErrorLevel = 0) {
+				__Log("Sprint mode! +5 to current level.")
+				botCurrentLevel += 5
+				botGetCurrentLevelMute := __UnixTime(A_Now)
+			}
+		}
+		*/
 		if (botLevelCurrentCursor > botLevelPreviousCursor) {
 			if (botLevelCurrentCursor = 5 and botLevelPreviousCursor = 1) {
 				botCurrentLevel--
@@ -1661,6 +1490,163 @@ _BotForceFocus:
 		}
 	}
 	Return
+
+__BotPickGold(d) {
+	Global optClicking
+	Global optClickDelay
+	if (d > 1) {
+		__Log("Get the gold and quest items for " . d . " seconds.")
+	} else {
+		__Log("Get the gold and quest items for " . d . " second.")
+	}
+	now = % __UnixTime(A_Now)
+	i = 1
+	Send, {Space}
+	max = 8
+	if (optClicking = 1) {
+		max = 4
+	}
+	while (__UnixTime(A_Now) - now <= d) {
+		if (i > max) {
+			i = 1
+		}
+		MouseMove, 650 + i * 37, 320
+		if (optClicking = 1) {
+			Click
+		}
+		i++
+		Sleep, % optClickDelay
+	}
+	Return
+}
+
+__BotSetFormation(f:=0) {
+	Global optFormationKey
+	if (f > 0) {
+		if (f = 1) {
+			Send, {q}
+		}
+		if (f = 2) {
+			Send, {w}
+		}
+		if (f = 3) {
+			Send, {e}
+		}
+	}
+	Return
+}
+
+__BotLevelCrusader(f) {
+	Global rightKeyInterrupt
+	Global botCrusaderPixels
+	Global currentCCoords
+	Global optBotClockSpeed
+	rightKeyInterrupt := true
+	__Log("Moving to " . f . ".")
+	if (botCrusaderPixels.length() = 0) {
+		__BotMoveToFirstPage()
+		__BotMoveToCrusader(f)
+		Sleep, 1000 * optBotClockSpeed
+		__BotSetCrusadersPixels()
+	} else {
+		if (__BotCompareCrusadersPixels() = false) {
+			__Log("We might have moved from " . f . ", let's go back.")
+			__BotMoveToFirstPage()
+			Sleep, 500 * optBotClockSpeed
+			__BotMoveToCrusader(f)
+			Sleep, 500 * optBotClockSpeed
+			__BotSetCrusadersPixels()
+		}
+	}
+	Log("Maxing " . f . ".")
+	MouseMove, currentCCoords[1] + 252, currentCCoords[2] + 2
+	send, {ctrl down}
+	sleep, 100 * optBotClockSpeed
+	click
+	send, {ctrl up}
+	sleep, 100 * optBotClockSpeed
+	rightKeyInterrupt := false
+}
+
+_BotUseBuffs:
+	bI = 1
+	now := __UnixTime(A_Now)
+	Loop, % botBuffs.length() {
+		moved := true
+		Loop, % botBuffsRarity.length() {
+			bB := botBuffs[bI]
+			bR := botBuffsRarity[A_Index]
+			if (optBuffs%bB%%bR% = 1) {
+				if ((now - botBuffs%bB%%bR%Timer) / 60 >= optBuffs%bB%%bR%Interval) {
+					if (botBuffs%bB%%bR%Timer > -1) {
+						__Log("Using a " . bB . " [" . bR . "] buff.")
+						bX := botBuffsCoords[1] + (40 * (bI - 1))
+						bY := botBuffsCoords[2]
+						if (moved = true) {
+							MouseMove, bX, bY
+							Sleep, 1000 * optBotClockSpeed
+							Click
+							moved := false
+						}
+						bX2 := bX + 95
+						bY2 := bY + 53 + (36 * (A_Index - 1))
+						MouseMove, bX2, bY2
+						Sleep, 500 * optBotClockSpeed
+						Click
+						if (optBuffs%bB%%bR%Interval = 0) {
+							botBuffs%bB%%bR%Timer = -1
+						} else {
+							botBuffs%bB%%bR%Timer := now
+						}
+					}
+				}
+			}
+		}
+		bI++
+	}
+	Return
+
+__BotUseSkills:
+	if (optStormRiderMagnify = 0) {
+		__Log("Using all skills.")
+		__BotUseSkill(0)
+	} else {
+		Gosub, _BotUseMagnifiedStormRider
+		__BotUseSkill(1)
+		__BotUseSkill(3)
+		__BotUseSkill(4)
+		__BotUseSkill(5)
+		if (optSkillsRoyalCommand = 1) {
+			__BotUseSkill(6)
+		}
+		__BotUseSkill(8)
+	}
+	Return
+	
+_BotUseMagnifiedStormRider:
+	PixelSearch, OutputX, OutputY, 382, 449, 421, 488, 0x0000FE,, Fast
+	if (ErrorLevel != 0) {
+		PixelSearch, OutputX, OutputY, 582, 449, 621, 488, 0x0000FE,, Fast
+		if (ErrorLevel != 0) {
+			Send, {%optStormRiderFormationKey%}
+			Sleep, 500 * optBotClockSpeed
+			Gosub, _BotMaxLevels
+			Gosub, _BotUpgAll
+			PixelGetColor, Output, 390, 466, RGB
+			if (Output != 0x3A3A3A) {
+				PixelGetColor, Output, 590, 466, RGB
+				if (Output != 0x3A3A3A) {
+					__Log("Using Storm Rider.")
+					Send, 2
+					Sleep, 150 * optBotClockSpeed
+					Send, 7
+					Sleep, 150 * optBotClockSpeed
+				}
+			}
+			__BotSetFormation(optFormation)
+		}
+	}
+	Return
 	
 ; __Log function
 __Log(log) {
@@ -1685,10 +1671,17 @@ __Log(log) {
 }
 
 ; Transforms YYYYMMDDHH24MISS date format to Unix
-__UnixTime(Time) {
-	Result := Time
-	Result -= 19700101000000, Seconds
-	Return, Result
+__UnixTime(time) {
+	result := time
+	result -= 19700101000000, s
+	Return, result
+}
+
+__UnixToTime(time) {
+	hours := Floor(time / 3600)
+	minutes := Floor(Mod(time, 3600) / 60)
+	seconds := Mod(time, 60)
+	Return, hours . "h " . minutes . "m " . seconds . "s"
 }
 
 ; Rounds a number (n) to d decimals
@@ -1700,6 +1693,15 @@ __RoundNumber(n, d) {
 		n := e[1] . "." . e[2]
 	}
 	Return, n
+}
+
+RegExMatchGlobal(ByRef Haystack, NeedleRegEx) {
+   Static Options := "U)^[imsxACDJOPSUX`a`n`r]+\)"
+   NeedleRegEx := (RegExMatch(NeedleRegEx, Options, Opt) ? (InStr(Opt, "O", 1) ? "" : "O") : "O)") . NeedleRegEx
+   Match := {Len: {0: 0}}, Matches := [], FoundPos := 1
+   While (FoundPos := RegExMatch(Haystack, NeedleRegEx, Match, FoundPos + Match.Len[0]))
+      Matches[A_Index] := Match
+   Return Matches
 }
 
 ; Self-explanatory
@@ -1793,8 +1795,10 @@ _BotLoadSettings:
 	IniRead, optExitHotkey2, settings/settings.ini, Settings, exithotkey2, %A_Space%
 	IniRead, optForceStartHotkey1, settings/settings.ini, Settings, forcestarthotkey1, F7
 	IniRead, optForceStartHotkey2, settings/settings.ini, Settings, forcestarthotkey2, %A_Space%
-	IniRead, optCalcIdolsCount, settings/settings.ini, Settings, calcidolscount, 1
+	IniRead, optForceResetHotkey1, settings/settings.ini, Settings, forceresethotkey1, F11
+	IniRead, optForceResetHotkey2, settings/settings.ini, Settings, forceresethotkey2, %A_Space%
 	
+	IniRead, optCalcIdolsCount, settings/settings.ini, Settings, calcidolscount, 1
 	IniRead, optBotLighter, settings/settings.ini, Settings, botlighter, 0
 	IniRead, optBotClockSpeed, settings/settings.ini, Settings, botclockspeed, 1
 	IniRead, optCheatEngine, settings/settings.ini, Settings, cheatengine, 0
@@ -1916,6 +1920,8 @@ _BotLoadSettings:
 	optTempExitHotkey2 := optExitHotkey2
 	optTempForceStartHotkey1 := optForceStartHotkey1
 	optTempForceStartHotkey2 := optForceStartHotkey2
+	optTempForceResetHotkey1 := optForceResetHotkey1
+	optTempForceResetHotkey2 := optForceResetHotkey2
 	Return
 
 ; Self-explanatory
@@ -2014,9 +2020,54 @@ _BotRewriteSettings:
 	IniWrite, % optExitHotkey2, settings/settings.ini, Settings, exithotkey2
 	IniWrite, % optForceStartHotkey1, settings/settings.ini, Settings, forcestarthotkey1
 	IniWrite, % optForceStartHotkey2, settings/settings.ini, Settings, forcestarthotkey2
+	IniWrite, % optForceResetHotkey1, settings/settings.ini, Settings, forceresethotkey1
+	IniWrite, % optForceResetHotkey2, settings/settings.ini, Settings, forceresethotkey2
 	
 	Gosub, _BotTimers
 	
+	Return
+	
+_BotLoadCycles:
+	if (!FileExist("settings/cycles.txt")) {
+	FileAppend,
+	(
+	; Documentation: https://github.com/Hachifac/idolBot/blob/master/docs/CYCLES.md`n; Do not touch unless you know what you're doing!`n; If you make a mistake, you can delete this file and let the bot rebuild it.`n`n[1:`n%A_Tab%loop: 1`n%A_Tab%cycle: {`n%A_Tab%%A_Tab%PickGold(5)`n%A_Tab%%A_Tab%MaxLevels`n%A_Tab%%A_Tab%Wait(0.1)`n%A_Tab%%A_Tab%SetFormation`n%A_Tab%%A_Tab%PickGold(1)`n%A_Tab%%A_Tab%UpgradeAll`n%A_Tab%%A_Tab%Wait(0.1)`n%A_Tab%%A_Tab%PickGold(1)`n%A_Tab%%A_Tab%UpgradeAll`n%A_Tab%%A_Tab%PickGold(1)`n%A_Tab%%A_Tab%MaxLevels`n%A_Tab%%A_Tab%Wait(0.1)`n%A_Tab%%A_Tab%SetFormation`n%A_Tab%%A_Tab%PickGold(1)`n%A_Tab%%A_Tab%UpgradeAll`n%A_Tab%}`n]`n[2:`n%A_Tab%cycle: {`n%A_Tab%%A_Tab%PickGold`n%A_Tab%%A_Tab%MaxAll`n%A_Tab%%A_Tab%UseSkills`n%A_Tab%%A_Tab%SetFormation`n%A_Tab%%A_Tab%UseBuffs`n%A_Tab%}`n]
+	), settings/cycles.txt
+}
+	botCurrentCycle = 1
+	botCurrentCycleLoop = 0
+	botCurrentCycleTime = 0
+	FileRead, OutputVar, settings/cycles.txt
+
+	userCycles := RegExMatchGlobal(OutputVar, "iUO)(\[(.|`r`n)+\])")
+
+	botCycles := {}
+	for i, cycle in userCycles {
+		botCycles[i] := {}
+		botCycles[i].value := cycle.Value()
+		if (RegExMatch(botCycles[i].value, "iO)loop:\s?([\d]+)", loop)) {
+			botCycles[i].loop := loop.1
+		}
+		if (RegExMatch(botCycles[i].value, "iO)duration:\s?([\d]+)", duration)) {
+			botCycles[i].duration := duration.1
+		}
+		if (RegExMatch(botCycles[i].value, "iUO)cycle:\s?{((.|`r`n)+)}", c)) {
+			result := c.1
+			StringReplace, result, result, %A_TAB%,, All
+			botCycles[i].cycle := result
+		}
+	}
+	for c in botCycles {
+		cycles := botCycles[c].cycle
+		cycles := StrSplit(cycles, "`n")
+		cLI = 1
+		for cL in cycles {
+			if (StrLen(cycles[cL]) > 1) {
+				botCycles[c].cyclesList[cLI] := cycles[cL]
+				cLI++
+			}
+		}
+	}
 	Return
 	
 _BotLoadStats:

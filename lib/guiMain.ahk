@@ -11,8 +11,8 @@ SendMode Input
 #include lib/guiDev.ahk
 
 Gui, BotGUI: New, -Caption, idolBot
-Gui, Color, 5E1C0D
-Gui, Font, s14 norm cFEFEFE, System
+Gui, Color, 3D0F03
+Gui, Font, s8 norm cE5BF87, Arial
 
 Gui, Add, Tab2, vguiMainTabs Choose1 w0 h0, 1|2
 
@@ -24,12 +24,32 @@ Gui, Add, Picture, x+5 vbuttonStormRider g_GUIStormRider, images/gui/BStormRider
 Gui, Add, Picture, x+5 vbuttonBuffs g_GUIBuffs, images/gui/BBuffs.png
 Gui, Add, Picture, x+5 vbuttonStats g_GUIStats, images/gui/BStats.png
 Gui, Add, Picture, x+5 vbuttonAbout g_GUIAbout, images/gui/BAbout.png
-Gui, Add, Picture, x+5 vbuttonClose g_BotExit, images/gui/BClose.png
+Gui, Add, Picture, x585 y5 vbuttonClose g_BotExit, images/gui/BClose.png
 
-Gui, Tab, 2
-Gui, Add, Picture, x0 y0, images/gui/guiMainStats_bg.png
+Gui, Add, Text, w37 x228 y4, Resets:
+Gui, Font, cD59739
+Gui, Add, Text, w91 x+3 vguiMainStatsResets, --
+Gui, Font, cE5BF87
+Gui, Add, Text, w58 x228 yp+13, Botting time:
+Gui, Font, cD59739
+Gui, Add, Text, w70 x+3 vguiMainStatsBottingtime, --
 
-Gui, Add, Text, w170 x82 y9 vguiMainTimeLeft
+Gui, Font, cE5BF87
+Gui, Add, Text, w73 x360 y4, Idols last reset:
+Gui, Font, cD59739
+Gui, Add, Text, w38 x+3 vguiMainStatsIdolsLastReset, --
+Gui, Font, cE5BF87
+Gui, Add, Text, w48 x360 yp+13, Idols total:
+Gui, Font, cD59739
+Gui, Add, Text, w63 x+3 vguiMainStatsIdolsTotal, --
 
-Gui, Tab
+Gui, Font, cE5BF87
+Gui, Add, Text, w69 x475 y4, Idols per hour:
+Gui, Font, cD59739
+Gui, Add, Text, w34 x+3 vguiMainStatsIdolsPerHour, --
+Gui, Font, cE5BF87
+Gui, Add, Text, w42 x475 yp+13, Reset in:
+Gui, Font, cD59739
+Gui, Add, Text, w61 x+3 vguiMainStatsResetIn, --
+
 Gui, Add, Picture, x2 y2 vBotStatus, images/gui/paused.png

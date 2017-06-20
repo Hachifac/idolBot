@@ -10,6 +10,7 @@ _GUISetFormationQ:
 	GuiControl,, guiFormationQ, images/gui/bF1_on.png
 	GuiControl,, guiFormationW, images/gui/bF2_off.png
 	GuiControl,, guiFormationE, images/gui/bF3_off.png
+	GuiControl,, guiFormationOff, images/gui/bFOff_off.png
 	optTempFormation = 1
 	optTempFormationKey = q
 	Return
@@ -18,6 +19,7 @@ _GUISetFormationW:
 	GuiControl,, guiFormationQ, images/gui/bF1_off.png
 	GuiControl,, guiFormationW, images/gui/bF2_on.png
 	GuiControl,, guiFormationE, images/gui/bF3_off.png
+	GuiControl,, guiFormationOff, images/gui/bFOff_off.png
 	optTempFormation = 2
 	optTempFormationKey = w
 	Return
@@ -26,10 +28,20 @@ _GUISetFormationE:
 	GuiControl,, guiFormationQ, images/gui/bF1_off.png
 	GuiControl,, guiFormationW, images/gui/bF2_off.png
 	GuiControl,, guiFormationE, images/gui/bF3_on.png
+	GuiControl,, guiFormationOff, images/gui/bFOff_off.png
 	optTempFormation = 3
 	optTempFormationKey = e
 	Return
 
+_GUISetFormationOff:
+	GuiControl,, guiFormationQ, images/gui/bF1_off.png
+	GuiControl,, guiFormationW, images/gui/bF2_off.png
+	GuiControl,, guiFormationE, images/gui/bF3_off.png
+	GuiControl,, guiFormationOff, images/gui/bFOff_on.png
+	optTempFormation = 0
+	optTempFormationKey = 0
+	Return
+	
 _GUIChooseMainDPS:
 	Gui, Submit, NoHide
 	optTempMainDPS := guiMainDPSChoice
@@ -462,10 +474,16 @@ _GUICloseOptions:
 	f1 := "images/gui/bF1_off.png"
 	f2 := "images/gui/bF2_off.png"
 	f3 := "images/gui/bF3_off.png"
-	f%optFormation% := "images/gui/bF" . optFormation . "_on.png"
+	fOff := "images/gui/bFOff_off.png"
+	if (optFormation > 0) {
+		f%optFormation% := "images/gui/bF" . optFormation . "_on.png"
+	} else {
+		fOff := "images/gui/bFOff_on.png"
+	}
 	GuiControl, BotGUIOptions:, guiFormationQ, % f1
 	GuiControl, BotGUIOptions:, guiFormationW, % f2
 	GuiControl, BotGUIOptions:, guiFormationE, % f3
+	GuiControl, BotGUIOptions:, guiFormationOff, %fOff%
 	GuiControl, BotGUIOptions: ChooseString, guiMainDPSChoice, % optMainDPS
 	GuiControl, BotGUIOptions: Choose, guiResetChoice, % optResetType
 	if (optClicking = 1) {
@@ -531,10 +549,16 @@ _GUICloseAdvancedOptions:
 	GuiControl, BotGUIAdvancedOptions: ChooseString, guiPauseHotkey1Choice, % optPauseHotkey1
 	GuiControl, BotGUIAdvancedOptions: ChooseString, guiReloadHotkey1Choice, % optReloadHotkey1
 	GuiControl, BotGUIAdvancedOptions: ChooseString, guiExitHotkey1Choice, % optExitHotkey1
+	GuiControl, BotGUIAdvancedOptions: ChooseString, guiForceResetHotkey1Choice, % optForceResetHotkey1
 	if (optForceStartHotkey2) {
 		GuiControl, BotGUIAdvancedOptions: ChooseString, guiForceStartHotkey2Choice, % optForceStartHotkey2
 	} else {
 		GuiControl, BotGUIAdvancedOptions: Choose, guiForceStartHotkey2Choice, 1
+	}
+	if (optForceResetHotkey2) {
+		GuiControl, BotGUIAdvancedOptions: ChooseString, guiForceResetHotkey2Choice, % optForceResetHotkey2
+	} else {
+		GuiControl, BotGUIAdvancedOptions: Choose, guiForceResetHotkey2Choice, 1
 	}
 	if (optPauseHotkey2) {
 		GuiControl, BotGUIAdvancedOptions: ChooseString, guiPauseHotkey2Choice, % optPauseHotkey2
@@ -781,7 +805,8 @@ _GUIApplyAdvancedOptions:
 	hotkeys := {1: optTempForceStartHotkey1 . optTempForceStartHotkey2
 		, 2: optTempPauseHotkey1 . optTempPauseHotkey2
 		, 3: optTempReloadHotkey1 . optTempReloadHotkey2
-		, 4: optTempExitHotkey1 . optTempExitHotkey2}
+		, 4: optTempExitHotkey1 . optTempExitHotkey2
+		, 5: optTempForceResetHotkey1 . optTempForceResetHotkey2}
 	i = 1
 	Loop, % hotkeys.length() - 1 {
 		Loop, % hotkeys.length() - A_Index {
@@ -818,6 +843,8 @@ _GUIApplyAdvancedOptions:
 		optReloadHotkey2 := optTempReloadHotkey2
 		optExitHotkey1 := optTempExitHotkey1
 		optExitHotkey2 := optTempExitHotkey2
+		optForceResetHotkey1 := optTempForceResetHotkey1
+		optForceResetHotkey2 := optTempForceResetHotkey2
 		optBotLighter := optTempBotLighter
 		GuiControlGet, optBotClockSpeed,, guiBotClockSpeed
 		optCheatEngine := optTempCheatEngine
@@ -1196,6 +1223,39 @@ _GUIChooseExitHotkey2:
 	optTempExitHotkey2 = %guiExitHotkey2Choice%
 	Return	
 
+_GUIForceResetHotkey1Unmask:
+	GuiControl, Hide, guiForceResetHotkey1Mask
+	guiForceResetHotkey1Show := true
+	GuiControl, BotGUIAdvancedOptions:, guiForceResetHotkey1Choice, % listKeys
+	GuiControl, Show, guiForceResetHotkey1Choice
+	GuiControl, ChooseString, guiForceResetHotkey1Choice, % optForceResetHotkey1
+	Return
+
+_GUIForceResetHotkey2Unmask:
+	GuiControl, Hide, guiForceResetHotkey2Mask
+	GuiControlGet, guiForceResetHotkey1Choice
+	ForceResetHotkey2Choices := listKeys
+	GuiControl,, guiForceResetHotkey2Choice, ||%ForceResetHotkey2Choices%
+	GuiControl, Show, guiForceResetHotkey2Choice
+	GuiControl, ChooseString, guiForceResetHotkey2Choice, % optForceResetHotkey2
+	Return
+
+_GUIChooseForceResetHotkey1:
+	Gui, Submit, NoHide
+	ForceResetHotkey2Choices := __ListKeysRemove(listKeys, guiForceResetHotkey1Choice)
+	GuiControl,, guiForceResetHotkey2Choice, ||%ForceResetHotkey2Choices%
+	GuiControl, ChooseString, guiForceResetHotkey2Choice, % optTempForceResetHotkey2
+	optTempForceResetHotkey1 := guiForceResetHotkey1Choice
+	Return
+	
+_GUIChooseForceResetHotkey2:
+	Gui, Submit, NoHide
+	ForceResetHotkey1Choices := __ListKeysRemove(listKeys, guiForceResetHotkey2Choice)
+	GuiControl,, guiForceResetHotkey1Choice, ||%ForceResetHotkey1Choices%
+	GuiControl, ChooseString, guiForceResetHotkey1Choice, % optTempForceResetHotkey1
+	optTempForceResetHotkey2 = %guiForceResetHotkey2Choice%
+	Return
+	
 _GUISetRelaunchGameOn:
 	GuiControl,, guiRelaunchGameStatusOn, images/gui/bOn_on.png
 	GuiControl,, guiRelaunchGameStatusOff, images/gui/bOff_off.png
@@ -1347,7 +1407,7 @@ _GUIAbout:
 	Gosub, _GUICloseOtherWindows
 	GuiControl, BotGUI:, buttonAbout, images/gui/bAbout_active.png
 	winW = 252
-	winH = 370
+	winH = 397
 	ControlGetPos, OutputX, OutputY, OutputW, OutputH, images/gui/guiMain_bg.png
 	WinGetPos, Output2X, Output2Y
 	nX := Output2X - ((winW - OutputW) / 2)
