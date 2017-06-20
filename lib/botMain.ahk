@@ -249,7 +249,7 @@ idolBot:
 										} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)LevelCrusader\(([\d|\w]+)\)", f)) {
 											__BotLevelCrusader(f.1)
 										} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)LevelMainDPS", f)) {
-											if ((optResetType = 1 or optResetType = 2 or optResetType = 5 or optResetType = 6) and botSkipToReset = false) {
+											if (optResetType = 1 or optResetType = 2 or optResetType = 5 or optResetType = 6) {
 												if (__UnixTime(A_Now) - botRunLaunchTime > (optMainDPSDelay * 60) and optMainDPS != "None") {
 													__BotLevelCrusader(optMainDPS)
 												}

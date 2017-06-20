@@ -109,7 +109,8 @@ Example: *Upgrade all until* is set to 2, after two **MaxAll** the bot will upgr
 Move to and level up *CRUSADER*  
 
 **LevelMainDPS**  
-Move to and level up the *Main DPS* crusader in the bot options.  
+Move to and level up the *Main DPS* crusader accordingly to the bot options.  
+It won't level up the *Main DPS* until *Main DPS Delay* in the bot options has elapsed.
 
 **SetFormation(*FORMATION NUMBER*)**  
 Set the crusaders formation to *FORMATION NUMBER*  
