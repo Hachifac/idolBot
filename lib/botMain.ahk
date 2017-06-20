@@ -232,6 +232,9 @@ idolBot:
 						if (botCurrentCycleLoop < botCycles[botCurrentCycle].loop or botCycles[botCurrentCycle].loop = "") {
 							if (botCycles[botCurrentCycle].duration = "" or (__UnixTime(A_Now) - botCurrentCycleTime < botCycles[botCurrentCycle].duration)) {
 								for cL in botCycles[botCurrentCycle].cyclesList {
+									if (botSkipToReset = true) {
+										Break
+									}
 									if (StrLen(botCycles[botCurrentCycle].cyclesList[cL]) > 1) {
 										if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)PickGold\(([\d]+)\)", f)) {
 											__BotPickGold(f.1)
@@ -826,6 +829,12 @@ _BotSetHotkeys:
 		optForceStartHotkey := optForceStartHotkey1
 	}
 	Hotkey, %optForceStartHotkey%, _BotForceStart
+	if (optForceResetHotkey2) {
+		optForceResetHotkey = %optForceResetHotkey1% & %optForceResetHotkey2%
+	} else {
+		optForceResetHotkey := optForceResetHotkey1
+	}
+	Hotkey, %optForceResetHotkey%, _BotForceReset
 	Return
 
 ; Self-explanatory
