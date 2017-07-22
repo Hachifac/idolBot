@@ -112,6 +112,20 @@ if (optSkillsRoyalCommand = 1) {
 Gui, Add, Picture, x15 y+27 vguiUseSkillsRoyalCommandStatusOn g_GUISetUseSkillsRoyalCommandOn, %useSkillsRoyalCommandStatusOn%
 Gui, Add, Picture, x+2 vguiUseSkillsRoyalCommandStatusOff g_GUISetUseSkillsRoyalCommandOff, %useSkillsRoyalCommandStatusOff%
 
+if (optSameLevelTimeout = 1) {
+	sameLevelTimeoutStatusOn := "images/gui/bOn_on.png"
+	sameLevelTimeoutStatusOff := "images/gui/bOff_off.png"
+} else {
+	autoProgressCheckStatusOn := "images/gui/bOn_off.png"
+	autoProgressCheckStatusOff := "images/gui/bOff_on.png"
+}
+
+Gui, Add, Picture, x15 y+28 vguiSameLevelTimeoutStatusOn g_GUISetSameLevelTimeoutOn, %sameLevelTimeoutStatusOn%
+Gui, Add, Picture, x+2 vguiSameLevelTimeoutStatusOff g_GUISetSameLevelTimeoutOff, %sameLevelTimeoutStatusOff%
+Gui, Add, Edit, x+45 w73
+Gui, Add, UpDown, vguiSameLevelTimeoutDelay Range1-2147483647, %optSameLevelTimeoutDelay%
+Gui, Add, Picture, x+30 yp+4 g_GUIHelpAdvanced, images/gui/bHelp.png
+
 Gui, Tab, 4
 Gui, Add, Picture, x0 y0, images/gui/guiAdvancedOptionsHotkeys_bg.png
 

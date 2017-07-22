@@ -6,6 +6,14 @@ _GUIChooseCampaign:
 	optTempCampaign := guiCampaignChoice
 	Return
 
+_GUISetBackupCampaign:
+	Gui, Submit, NoHide
+	if (guiCampaignChoice > 1) {
+		optTempBackupCampaign := guiCampaignChoice
+		GuiControl,, guiBackupCampaign, % "images/gui/backupc" . optTempBackupCampaign . ".png"
+	}
+	Return
+	
 _GUISetFormationQ:
 	GuiControl,, guiFormationQ, images/gui/bF1_on.png
 	GuiControl,, guiFormationW, images/gui/bF2_off.png
@@ -404,11 +412,13 @@ _GUIHelpAdvanced:
 			help = When set to Always on, the bot will make sure auto progress is active at all time.`nKeep in mind that it can mess with the On level reset, which I would strongly suggest to turn on Prompt on current level after pause.`nThe Max progress reset is excluded from this setting, it will always make sure auto progress is active.
 		} else if (OutputVarControl = "Static20") {
 			help = Due to some limitations, if you proceed to pause the bot then manually play for a while, the bot could lose the current level.`nExample: You set reset to level 750 and you pause the bot on level 500 and unpause it on level 700, the bot still thinks it's on level 500 and won't reset until the game reaches the level 950.`nTurning this on will prompt you with a popup to set the current level every time you unpause.
-		} else if (OutputVarControl = "Static38") {
+		} else if (OutputVarControl = "Static28") {
+			help = When activated, the bot will reset the run if it gets stuck on the same level for the set delay.
+		} else if (OutputVarControl = "Static43") {
 			help = When turning this option on, the bot will take longer to refresh some GUI elements and will turn off chests stats.`nTurn on if you experience lag with the bot.
-		} else if (OutputVarControl = "Static39") {
+		} else if (OutputVarControl = "Static44") {
 			help = The higher the value, the slower the bot "thinks".`nChange it to a higher value if the game runs slower on your computer.
-		} else if (OutputVarControl = "Static42") {
+		} else if (OutputVarControl = "Static47") {
 			help = IMPORTANT: THE BOT MUST RUN AS ADMINISTRATOR FOR THIS FEATURE TO WORK.`n`nWhen turning this option on, the bot will make use of Cheat Engine.`nHave the desired speed already preset in Cheat Engine and have speedhack turned off.
 		} else {
 			ToolTip,
@@ -423,7 +433,9 @@ _GUIHelpOptions:
 	Loop {
 		MouseGetPos,,,, OutputVarControl
 		help := null
-		if (OutputVarControl = "Static6") {
+		if (OutputVarControl = "Static5") {
+			help = If the bot cannot launch an event free play due to a lack of currency, it will instead launch the backup campaign.
+		} else if (OutputVarControl = "Static10") {
 			help = Max progress: The bot will reset when the formation dies`nLevel cap: The bot will reset when all crusaders are maxed. (still in beta, might not work as intended)`nFast: The bot will reset at level 6 while maximizing idols gain. (Not yet implemented)`nTimed run: The bot will reset when the Advanced Option [Run Time] has elapsed.`nOn level: The bot will reset once it reaches the level set in Advanced Option [Reset on level]
 		} else {
 			ToolTip,
@@ -471,6 +483,7 @@ _GUICloseOptions:
 	Gui, BotGUIOptions: Hide
 	GuiControl, BotGUI:, buttonOptions, images/gui/bOptions.png
 	GuiControl, BotGUIOptions: Choose, guiCampaignChoice, % optCampaign
+	GuiControl, BotGUIOptions:, guiBackupCampaign, % "images/gui/backupc" . optBackupCampaign . ".png"
 	f1 := "images/gui/bF1_off.png"
 	f2 := "images/gui/bF2_off.png"
 	f3 := "images/gui/bF3_off.png"
@@ -545,6 +558,14 @@ _GUICloseAdvancedOptions:
 		GuiControl, BotGUIAdvancedOptions:, guiUseSkillsRoyalCommandStatusOn, images/gui/bOn_off.png
 		GuiControl, BotGUIAdvancedOptions:, guiUseSkillsRoyalCommandStatusOff, images/gui/bOff_on.png
 	}
+	if (optSameLevelTimeout = 1) {
+		GuiControl, BotGUIAdvancedOptions:, guiSameLevelTimeoutStatusOn, images/gui/bOn_on.png
+		GuiControl, BotGUIAdvancedOptions:, guiSameLevelTimeoutStatusOff, images/gui/bOff_off.png
+	} else {
+		GuiControl, BotGUIAdvancedOptions:, guiSameLevelTimeoutStatusOn, images/gui/bOn_off.png
+		GuiControl, BotGUIAdvancedOptions:, guiSameLevelTimeoutStatusOff, images/gui/bOff_on.png
+	}
+	GuiControl, BotGUIAdvancedOptions:, guiSameLevelTimeoutDelay, % optSameLevelTimeoutDelay
 	GuiControl, BotGUIAdvancedOptions: ChooseString, guiForceStartHotkey1Choice, % optForceStartHotkey1
 	GuiControl, BotGUIAdvancedOptions: ChooseString, guiPauseHotkey1Choice, % optPauseHotkey1
 	GuiControl, BotGUIAdvancedOptions: ChooseString, guiReloadHotkey1Choice, % optReloadHotkey1
@@ -835,6 +856,8 @@ _GUIApplyAdvancedOptions:
 		optUseChests := optTempUseChests
 		optUseChestsAmount := optTempUseChestsAmount
 		optSkillsRoyalCommand := optTempSkillsRoyalCommand
+		optSameLevelTimeout := optTempSameLevelTimeout
+		GuiControlGet, optSameLevelTimeoutDelay,, guiSameLevelTimeoutDelay
 		optForceStartHotkey1 := optTempForceStartHotkey1
 		optForceStartHotkey2 := optTempForceStartHotkey2
 		optPauseHotkey1 := optTempPauseHotkey1
@@ -859,6 +882,7 @@ _GUIApplyAdvancedOptions:
 _GUIApplyOptions:
 	Gui, Submit, NoHide
 	optCampaign := optTempCampaign
+	optBackupCampaign := optTempBackupCampaign
 	optFormation := optTempFormation
 	optFormationKey := optTempFormationKey
 	optMainDPS := optTempMainDPS
@@ -1331,6 +1355,18 @@ _GUISetUseSkillsRoyalCommandOff:
 	optTempSkillsRoyalCommand = 0
 	Return
 
+_GUISetSameLevelTimeoutOn:
+	GuiControl,, guiSameLevelTimeoutStatusOn, images/gui/bOn_on.png
+	GuiControl,, guiSameLevelTimeoutStatusOff, images/gui/bOff_off.png
+	optTempSameLevelTimeout = 1
+	Return
+
+_GUISetSameLevelTimeoutOff:
+	GuiControl,, guiSameLevelTimeoutStatusOn, images/gui/bOn_off.png
+	GuiControl,, guiSameLevelTimeoutStatusOff, images/gui/bOff_on.png
+	optTempSameLevelTimeout = 0
+	Return
+	
 _GUISetUseLightVersionOn:
 	GuiControl,, guiUseLightVersionStatusOn, images/gui/bOn_on.png
 	GuiControl,, guiUseLightVersionStatusOff, images/gui/bOff_off.png
@@ -1344,9 +1380,13 @@ _GUISetUseLightVersionOff:
 	Return
 
 _GUISetUseCheatEngineOn:
-	GuiControl,, guiUseCheatEngineStatusOn, images/gui/bOn_on.png
-	GuiControl,, guiUseCheatEngineStatusOff, images/gui/bOff_off.png
-	optTempCheatEngine = 1
+	MsgBox, 0x1, idolBot, % "The bot supports Cheat Engine but some features will break due to the Speed Hack.`nPretty much everything that is related to resets on level will not work as intended.`nI strongly suggest to use timed resets instead."
+	IfMsgBox Ok
+	{
+		GuiControl,, guiUseCheatEngineStatusOn, images/gui/bOn_on.png
+		GuiControl,, guiUseCheatEngineStatusOff, images/gui/bOff_off.png
+		optTempCheatEngine = 1
+	}
 	Return
 
 _GUISetUseCheatEngineOff:

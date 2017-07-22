@@ -32,23 +32,27 @@ maxProgressResetStatus := "images/gui/maxprogressreset_off.png"
 levelCapResetStatus := "images/gui/levelcapreset_off.png"
 fastResetStatus := "images/gui/fastreset_off.png"
 
-Gui, Add, DropDownList, x15 y71 w190 Choose%optCampaign% vguiCampaignChoice g_GUIChooseCampaign altSubmit, Event|World's Wake|Descent into Darkness|Ghostbeard's Greed|Grimm's Idle Tales|Mischief at Mugwarts|Ready Player Two|Idols Through Time|Amusement Park of Doom
+Gui, Add, DropDownList, x15 y65 w190 Choose%optCampaign% vguiCampaignChoice g_GUIChooseCampaign altSubmit, Event|World's Wake|Descent into Darkness|Ghostbeard's Greed|Grimm's Idle Tales|Mischief at Mugwarts|Ready Player Two|Idols Through Time|Amusement Park of Doom
 
-Gui, Add, Picture, y+30 vguiFormationQ g_GUISetFormationQ, %f1%
+Gui, Add, Picture, y+5 g_GUISetBackupCampaign, images/gui/bSetBackup.png
+Gui, Add, Picture, x+5 yp+2 w40 h22 vguiBackupCampaign, % "images/gui/backupc" . optBackupCampaign . ".png"
+Gui, Add, Picture, x+59 yp+2 g_GUIHelpOptions, images/gui/bHelp.png
+
+Gui, Add, Picture, x15 y+31 vguiFormationQ g_GUISetFormationQ, %f1%
 Gui, Add, Picture, x+5 vguiFormationW g_GUISetFormationW, %f2%
 Gui, Add, Picture, x+5 vguiFormationE g_GUISetFormationE, %f3%
 Gui, Add, Picture, x+5 vguiFormationOff g_GUISetFormationOff, %fOff%
 
-Gui, Add, DropDownList, x15 y+32 w100 vguiMainDPSChoice g_GUIChooseMainDPS, None|Alan|Arachnobuddy|Bat|Baenarall|Bernard|Billy|Boggins|Brogon|Broot|Bubba|Bush|Cindy|Dark Helper|Danni|Draco|Drizzle|Eiralon|Emo|Exterminator|Foresight|Fright-o-Tron|Frosty|Gloria|Graham|Grandmora|Greyskull|Groklok|Gryphon|Half-Blood Elf|Henry|Hermit|Ilsa|Jack|Jason|Jim|Kaine|Karen|Karl|Katie|Khouri|Kizlblyp|Kyle|Larry|Leerion|Lion|Littlefoot|Merci|Mindy|Momma|Monkey|Montana|Natalie|Nate|Pam|Panda|Paul|Pete|Petra|Phoenix|Polly|Princess|Rayna|Reginald|Robbie|Roborabbit|Roboturkey|Rocky|Rudolph|Sal|Sally|Santa|Sarah|Sasha|Shadow Queen|Siri|Sisaron|Sjin|Snickette|Soldierette|Spaceking|Squiggles|Thalia|Turps|Val|Veronica|Warwick|Wendy
+Gui, Add, DropDownList, x15 y+28 w100 vguiMainDPSChoice g_GUIChooseMainDPS, % crusadersSorted
 
-Gui, Add, DropDownList, y+31 w190 Choose%optResetType% vguiResetChoice g_GUIChooseReset altSubmit, No reset|Max progress|Level cap - NOT WORKING|Fast - NOT WORKING|Timed run|On level
+Gui, Add, DropDownList, y+28 w190 Choose%optResetType% vguiResetChoice g_GUIChooseReset altSubmit, No reset|Max progress|Level cap - NOT WORKING|Fast - NOT WORKING|Timed run|On level
 Gui, Add, Picture, x+20 yp+4 g_GUIHelpOptions, images/gui/bHelp.png
 
-Gui, Add, Picture, x15 y+35 vguiClickingStatusOn g_GUISetClickingOn, %clickingStatusOn%
+Gui, Add, Picture, x15 y+32 vguiClickingStatusOn g_GUISetClickingOn, %clickingStatusOn%
 Gui, Add, Picture, x+2 vguiClickingStatusOff g_GUISetClickingOff, %clickingStatusOff%
 
-Gui, Add, Picture, x+84 y+5 g_GUIAdvancedOptions, images/gui/bAdvanced.png
+Gui, Add, Picture, x+84 y+2 g_GUIAdvancedOptions, images/gui/bAdvanced.png
 
-Gui, Add, Picture, x95 y+10 g_GUIApplyOptions, images/gui/bApply.png
+Gui, Add, Picture, x95 y+2 g_GUIApplyOptions, images/gui/bApply.png
 
 GuiControl, ChooseString, MainDPSChoice, %optMainDPS%
