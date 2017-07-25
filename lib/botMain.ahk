@@ -70,6 +70,7 @@ idolsCount = 0
 
 now = 0
 botRelaunching := false
+botSkipJim := false
 
 botMaxAllCount = 0
 botBuffsSpeedTimer = 0
@@ -177,6 +178,9 @@ idolBot:
 							} else {
 								Break
 							}
+							if (botSkipJim) {
+								Break
+							}
 						}
 						; We look at Jim's buy button one last time, if it's green we're good to go to phase 2
 						PixelGetColor, Output, 244, 595, RGB
@@ -211,6 +215,9 @@ idolBot:
 				if (ErrorLevel = 0) {
 					__Log("Server failed error. Relaunching the game.")
 					Gosub, _BotRelaunch
+					if (optCheatEngine = 1) {
+						Gosub, _BotCEOn
+					}
 				}
 				; Upgrade all/max all/max main dps. Final phase until reset phase.
 				if (botPhase = 2 or botDelayReset = true) {
@@ -399,9 +406,14 @@ idolBot:
 									if (ErrorLevel = 0) {
 										resetPhase = 1
 									} else {
-										botDelayReset := true
-										botSkipToReset := false
-										Break
+										ImageSearch, resetOutputX, resetOutputY, 657, 631, 869, 665, *150 images/game/kizReset2.png
+										if (ErrorLevel = 0) {
+											resetPhase = 1
+										} else {
+											botDelayReset := true
+											botSkipToReset := false
+											Break
+										}
 									}
 								}
 							}
@@ -669,6 +681,7 @@ idolBot:
 					if (resetPhase = 3) {
 						__Log("Start a new campaign.")
 						__BotCampaignStart()
+						botSkipJim := false
 						botPhase = 1
 						Gosub, _BotTimers
 						Sleep, 100 * optBotClockSpeed
@@ -725,7 +738,7 @@ _GUIPos:
 			nY := A_ScreenHeight - (A_ScreenHeight - Y) + H - bW
 			nW := W
 			nX := X + W / 2 - 613 / 2 + 2
-			Gui, BotGUI: Show, x%nX% y%nY% w575 h35 NoActivate, idolBot
+			Gui, BotGUI: Show, x%nX% y%nY% w575 h35, idolBot
 		}
 		if (botPhase > -1) {
 			if (optResetType = 5) {
@@ -780,6 +793,11 @@ _BotPause:
 			__GUIShowPause(true)
 		} else {
 			__Log("Unpaused.")
+			SetTitleMatchMode, 3
+			WinActivate, idolBot ahk_class AutoHotkeyGUI
+			WinActivate, idolBot Dev ahk_class AutoHotkeyGUI
+			WinActivate, Crusaders of The Lost Idols
+			SetTitleMatchMode, 1
 			__GUIShowPause(false)
 			if ((botPhase = 1 or botPhase = 2) and optResetType != 2 and optAutoProgressCheck = 0 and optAutoProgress = 1) {
 				Gosub, _BotCloseWindows
@@ -797,23 +815,29 @@ _BotPause:
 ; Force start key
 _BotForceStart:
 	__Log("Force starting the bot.")
-	now := __UnixTime(A_Now)
-	botRunLaunchTime := now
-	botLastRelaunch := now
-	botLaunchTime := now
-	botCurrentLevelLastTimeout := __UnixTime(A_Now)
-	Gosub, _BotPause
-	; Open options window to see if auto progress is on
-	__Log("Initial auto progress check...")
-	if (optResetType = 2 or optAutoProgressCheck = 1 or optAutoProgress = 2) {
-		__BotSetAutoProgress(true)
+	if (botPhase < 0) {
+		now := __UnixTime(A_Now)
+		botRunLaunchTime := now
+		botLastRelaunch := now
+		botLaunchTime := now
+		botCurrentLevelLastTimeout := __UnixTime(A_Now)
+		Gosub, _BotPause
+		; Open options window to see if auto progress is on
+		__Log("Initial auto progress check...")
+		if (optResetType = 2 or optAutoProgressCheck = 1 or optAutoProgress = 2) {
+			__BotSetAutoProgress(true)
+		} else {
+			__BotSetAutoProgress(false)
+		}
+		if (botCheatEngine = true) {
+			Gosub, _BotCEOn
+		}
+		botPhase = 2
 	} else {
-		__BotSetAutoProgress(false)
+		if (botPhase = 1) {
+			botSkipJim := true
+		}
 	}
-	if (botCheatEngine = true) {
-		Gosub, _BotCEOn
-	}
-	botPhase = 2
 	Return
 	
 ; Force reset key
@@ -824,15 +848,27 @@ _BotForceReset:
 	botFirstCycle := false
 	Return
 	
+; Next cycle key
+_BotNextCycle:
+	if (botCurrentCycle < botCycles.MaxIndex()) {
+		__Log("Advancing to the next cycle.")
+		botCurrentCycle++
+		botCurrentCycleLoop = 0+
+	}
+	Return
+	
 ; Dev console key = ~
 #IfWinActive Crusaders of The Lost Idols
+SC029::
+#IfWinActive idolBot ahk_class AutoHotkeyGUI
 SC029::
 	if (optDevConsole = 0) {
 		optDevConsole = 1
 		WinGetPos, X, Y, W, H, Crusaders of The Lost Idols
 		nX := X + W
 		nY := Y + H - 677
-		Gui, BotGUIDev: Show, x%nX% y%nY% w300 h675 NoActivate, idolBot Dev
+		Gui, BotGUIDev: Show, x%nX% y%nY% w300 h675, idolBot Dev
+		Gosub, _GUIDevLogging
 	} else {
 		optDevConsole = 0
 		Gui, BotGUIDev: Hide
@@ -870,6 +906,12 @@ _BotSetHotkeys:
 		optForceResetHotkey := optForceResetHotkey1
 	}
 	Hotkey, %optForceResetHotkey%, _BotForceReset
+	if (optNextCycleHotkey2) {
+		optNextCycleHotkey = %optNextCycleHotkey1% & %optNextCycleHotkey2%
+	} else {
+		optNextCycleHotkey := optNextCycleHotkey1
+	}
+	Hotkey, %optNextCycleHotkey%, _BotNextCycle
 	Return
 
 ; Self-explanatory
@@ -1310,7 +1352,7 @@ _BotMaxLevels:
 	__Log("Max all levels.")
 	MouseMove, 985, 630
 	Click
-	Sleep, 100 * optBotClockSpeed
+	Sleep, 500 * optBotClockSpeed
 	i = 0
 	Loop {
 		PixelGetColor, Output, 985, 610, RGB
@@ -1326,7 +1368,7 @@ _BotUpgAll:
 	__Log("Buy all upgrades.")
 	MouseMove, 985, 540
 	Click
-	Sleep, 100 * optBotClockSpeed
+	Sleep, 500 * optBotClockSpeed
 	Loop {
 		PixelGetColor, Output, 985, 515, RGB
 		if (Output != 0x194D80) {
@@ -1416,7 +1458,7 @@ __BotCheckAutoProgress() {
 					Loop {
 						MouseMove, OutputX + 10, OutputY + 10
 						Click
-						Sleep, 50 * optBotClockSpeed
+						Sleep, 350 * optBotClockSpeed
 						PixelGetColor, Output, 15, 585, RGB
 						if (Output = 0xA07107 or Output = 0xFFB103) {
 							Break
@@ -1483,7 +1525,7 @@ __BotGetIdolsCount() {
 }
 
 _BotGetCurrentLevel:
-	if ((botPhase = 1 or botPhase = 2) and botRelaunching = false) {
+	if (botPhase = 2 and botRelaunching = false) {
 		CoordMode, Pixel, Client
 		CoordMode, Mouse, Client
 		rightKeyInterrupt := true
@@ -1774,22 +1816,35 @@ _BotUseMagnifiedStormRider:
 	if (ErrorLevel != 0) {
 		PixelSearch, OutputX, OutputY, 582, 449, 621, 488, 0x0000FE,, Fast
 		if (ErrorLevel != 0) {
-			Send, {%optStormRiderFormationKey%}
-			Sleep, 500 * optBotClockSpeed
-			Gosub, _BotMaxLevels
-			Gosub, _BotUpgAll
 			PixelGetColor, Output, 390, 466, RGB
 			if (Output != 0x3A3A3A) {
+				__Log("Disabling progress.")
+				rightKeyInterrupt = true
+				Send, {g}
+				__Log("Changing to storm rider formation.")
+				Loop, 5 {
+					Send, {%optStormRiderFormationKey%}
+					Sleep, 1000 * optBotClockSpeed
+				}
+				Loop, 2 {
+					Gosub, _BotMaxLevels
+					Gosub, _BotUpgAll
+				}
 				PixelGetColor, Output, 590, 466, RGB
 				if (Output != 0x3A3A3A) {
 					__Log("Using Storm Rider.")
-					Send, 2
-					Sleep, 150 * optBotClockSpeed
-					Send, 7
-					Sleep, 150 * optBotClockSpeed
+					Loop, 5 {
+						Send, 2
+						Sleep, 600 * optBotClockSpeed
+						Send, 7
+						Sleep, 600 * optBotClockSpeed
+					}
 				}
 			}
+			__Log("Changing back to regular formation and enabling progress.")
 			__BotSetFormation(optFormation)
+			Send, {g}
+			rightKeyInterrupt = false
 		}
 	}
 	Return
@@ -1953,6 +2008,8 @@ _BotLoadSettings:
 	IniRead, optForceStartHotkey2, settings/settings.ini, Settings, forcestarthotkey2, %A_Space%
 	IniRead, optForceResetHotkey1, settings/settings.ini, Settings, forceresethotkey1, F11
 	IniRead, optForceResetHotkey2, settings/settings.ini, Settings, forceresethotkey2, %A_Space%
+	IniRead, optNextCycleHotkey1, settings/settings.ini, Settings, nextcyclehotkey1, F12
+	IniRead, optNextCycleHotkey2, settings/settings.ini, Settings, nextcyclehotkey2, %A_Space%
 	
 	IniRead, optCalcIdolsCount, settings/settings.ini, Settings, calcidolscount, 1
 	IniRead, optBotLighter, settings/settings.ini, Settings, botlighter, 0
@@ -2082,6 +2139,8 @@ _BotLoadSettings:
 	optTempForceStartHotkey2 := optForceStartHotkey2
 	optTempForceResetHotkey1 := optForceResetHotkey1
 	optTempForceResetHotkey2 := optForceResetHotkey2
+	optTempNextCycleHotkey1 := optNextCycleHotkey1
+	optTempNextCycleHotkey2 := optNextCycleHotkey2
 	Return
 
 ; Self-explanatory
@@ -2186,6 +2245,8 @@ _BotRewriteSettings:
 	IniWrite, % optForceStartHotkey2, settings/settings.ini, Settings, forcestarthotkey2
 	IniWrite, % optForceResetHotkey1, settings/settings.ini, Settings, forceresethotkey1
 	IniWrite, % optForceResetHotkey2, settings/settings.ini, Settings, forceresethotkey2
+	IniWrite, % optNextCycleHotkey1, settings/settings.ini, Settings, nextcyclehotkey1
+	IniWrite, % optNextCycleHotkey2, settings/settings.ini, Settings, nextcyclehotkey2
 	
 	Gosub, _BotTimers
 	

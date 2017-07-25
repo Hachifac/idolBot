@@ -1,6 +1,34 @@
 ---
 # http://www.reddit.com/r/cotlibot
 ---
+# 1.4.2
+---
+- Fixed a Kiz reset issue  
+- Added a Next Cycle hotkey (defaulted to F12, not available in the GUI for now)  
+- Fixed a backup campaign issue  
+- Fixed a Cheat Engine issue  
+- Fixed a GUI visibility issue  
+- You can now use the Pause key with hotkeys  
+- Fixed a Force reset/Pause issue  
+- Added some changes /u/driderr made to storm rider  
+- The console dev now automatically logs  
+---
+# 1.4.1
+---
+- Added a popup message when launching the bot if the resolution of the game isn't the proper one
+- Added ClickingOn and ClickingOff to cycles
+- Added level parameter to cycles (to change cycle when the run gets to X level)
+- Idols Per Hour now displays after the second reset and is now rounded to the integer
+- Added a "Same level timeout" feature, the bot will attempt reset if it gets stuck on the same level
+- The bot should relaunch the game if it gets stuck on "Loading..." in the loading screen
+- Changed the paused/running icon
+- Added Slisiblyp, Red, Agent 79, RoboQueen and Zombie Winter to the crusaders list
+- The bot should now be better at tracking the current level (still not good)
+- The bot will now stop pressing the right key when the formation dies (doesn't work with Cheat Engine)
+- Reworked the reset phase
+- Fixed campaign selection issue
+- The bot will now close the error messages
+---
 # 1.4.0
 ---
 - The crafting window issue should be resolved
@@ -13,47 +41,3 @@
 - The bot will now close Daily Quest popups (It should, I couldn't properly test it since I haven't seen the popup in a little while...)
 - Resets should be more consistent
 - Added Turps & Sjin to the crusaders list
----
-# 1.3.9
----
-- Added support for Cheat Engine
-- Extended the loot items phase mouse range (doubled it)
-- Added time left & levels left in main GUI window when using Timed or On level runs
-- Added Bot tab in Advanced Settings
-- Added Lighter bot option
-- Added customizable bot clock speed, use it to slow down (or even speed up) the bot
-- The bot will now start a RP2 FP if it can't do an event FP
-- Made the auto progress check a bit better
-- Changed the help button
-- Added a "first cycle" cycle, the bot will focus on getting gold ASAP to help with launching Sprint Mode
-- Added a few fail-safes to the use chests cycle, here's to hoping it works without issues (I know it won't, /u/TexSC will post in less than 48 hours to tell me it got stuck again... hahahaha)
----
-# 1.3.8
----
-- [BETA] Added support for all buffs
-- Fixed a potential issue with focusing the game
-- Added a 1 second gold pick up before buying all upgrades
-- Reworked the whole chests before reset phase
-- Added a disable Royal Command option (in advanced options, Even more tab)
----
-# 1.3.7
----
-- Better handling of chests
-- Added the use of speed buffs (for sprint mode)
----
-# 1.3.6
----
-- Fixed an issue at the start of a run
-- Fixed a prompt current level issue
-- Fixed an issue when hotkeys are set to numbers
-- Added an alert window when multiple bot versions are opened
-- Added new crusaders to the list
-- [Beta] Added the use of chests before reset
----
-# 1.3.5
----
-- Changed auto clicker coordinates
-- Fixed a max levels/upgrade all delay
-- Added a force start hotkey (defaulted at F7)
-- Fixed a stats display issue
-- Added an option to always have auto progress on
