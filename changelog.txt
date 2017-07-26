@@ -1,6 +1,12 @@
 ---
 # http://www.reddit.com/r/cotlibot
 ---
+# 1.4.3  
+---
+- Fixed a GUI display issue  
+- Fixed an early reset issue  
+- Temporarily deactivated the Same level timeout feature until I can properly track the current level  
+---
 # 1.4.2
 ---
 - Fixed a Kiz reset issue  

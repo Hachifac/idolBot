@@ -56,7 +56,10 @@ Commands must be entered in the cycle parameter.
 - UseSkills
 - UseBuffs
 - CheatEngineOn
-- CheatEngineOff
+- CheatEngineOff  
+- ClickingOn  
+- ClickingOff
+
 
 Example
 ```
@@ -137,7 +140,13 @@ Independant of the Cheat Engine options.
 
 **CheatEngineOff**  
 Deactivate Cheat Engine.  
-Independant of the Cheat Engine options.
+Independant of the Cheat Engine options.  
+
+**ClickingOn**  
+Activate the auto-clicker.  
+
+**ClickingOff**  
+Deactivate the auto-clicker.  
 
 ## Notes  
 

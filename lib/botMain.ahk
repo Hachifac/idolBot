@@ -738,7 +738,7 @@ _GUIPos:
 			nY := A_ScreenHeight - (A_ScreenHeight - Y) + H - bW
 			nW := W
 			nX := X + W / 2 - 613 / 2 + 2
-			Gui, BotGUI: Show, x%nX% y%nY% w575 h35, idolBot
+			Gui, BotGUI: Show, x%nX% y%nY% w575 h35 NoActivate, idolBot
 		}
 		if (botPhase > -1) {
 			if (optResetType = 5) {
@@ -793,11 +793,13 @@ _BotPause:
 			__GUIShowPause(true)
 		} else {
 			__Log("Unpaused.")
+			/*
 			SetTitleMatchMode, 3
 			WinActivate, idolBot ahk_class AutoHotkeyGUI
 			WinActivate, idolBot Dev ahk_class AutoHotkeyGUI
 			WinActivate, Crusaders of The Lost Idols
 			SetTitleMatchMode, 1
+			*/
 			__GUIShowPause(false)
 			if ((botPhase = 1 or botPhase = 2) and optResetType != 2 and optAutoProgressCheck = 0 and optAutoProgress = 1) {
 				Gosub, _BotCloseWindows
@@ -867,7 +869,7 @@ SC029::
 		WinGetPos, X, Y, W, H, Crusaders of The Lost Idols
 		nX := X + W
 		nY := Y + H - 677
-		Gui, BotGUIDev: Show, x%nX% y%nY% w300 h675, idolBot Dev
+		Gui, BotGUIDev: Show, x%nX% y%nY% w300 h675 NoActivate, idolBot Dev
 		Gosub, _GUIDevLogging
 	} else {
 		optDevConsole = 0
@@ -1176,6 +1178,11 @@ __BotSetCampaign(campaign := 0) {
 				Return
 			}
 			Sleep, 2000
+		}
+		ImageSearch, OutputX2, OutputY2, 395, 180, 543, 242, *100 images/game/options.png
+		if (ErrorLevel = 0) {
+			__Log("Campaign already started.")
+			Return
 		}
 	}
 }
@@ -1569,8 +1576,8 @@ _BotGetCurrentLevel:
 			botCurrentLevelLastTimeout := __UnixTime(A_Now)
 			if (botLevelCurrentCursor = 5 and botLevelPreviousCursor = 1) {
 				if (botCheatEngine = false) {
-					__Log("Interrupting the right key.")
-					rightKeyStop := true
+					;__Log("Interrupting the right key.")
+					;rightKeyStop := true
 				}
 				botCurrentLevel--
 				botLevelPreviousCursor = 5 
@@ -1597,8 +1604,8 @@ _BotGetCurrentLevel:
 					botLevelPreviousCursor := botLevelCurrentCursor 
 				} else {
 					if (botCheatEngine = false) {
-						__Log("Interrupting the right key.")
-						rightKeyStop := true
+						;__Log("Interrupting the right key.")
+						;rightKeyStop := true
 					}
 					botCurrentLevel--
 					botLevelPreviousCursor := botLevelCurrentCursor
@@ -1820,7 +1827,7 @@ _BotUseMagnifiedStormRider:
 			if (Output != 0x3A3A3A) {
 				__Log("Disabling progress.")
 				rightKeyInterrupt = true
-				Send, {g}
+				Sleep, 500 * optBotClockSpeed
 				__Log("Changing to storm rider formation.")
 				Loop, 5 {
 					Send, {%optStormRiderFormationKey%}
