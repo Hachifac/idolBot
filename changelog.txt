@@ -1,6 +1,14 @@
 ---
 # http://www.reddit.com/r/cotlibot
 ---
+# 1.4.4
+---
+- Fixed Kiz resets  
+- Removed Level cap & fast resets  
+- Level tracking is now optional (turned on when On level reset is selected). This will speed up idols gain.  
+- Added Next cycle hotkey to the GUI  
+- The bot should be less annoying with Storm Rider
+---
 # 1.4.3  
 ---
 - Fixed a GUI display issue  

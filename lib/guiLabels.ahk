@@ -57,7 +57,20 @@ _GUIChooseMainDPS:
 
 _GUIChooseReset:
 	Gui, Submit, NoHide
+	if (guiResetChoice = 4) {
+		MsgBox, 0x4, idolBot, "By selecting On level resets, the bot will need to track the current level.`nThis feature can slow down the bot thus slowing down your idols gain.`nDo you wish to proceed?"
+		IfMsgBox Yes
+		{
+			botTempTrackCurrentLevel := true
+		} else {
+			Return
+		}
+	} else {
+		botTempTrackCurrentLevel := false
+	}
+	botTempTrackCurrentLevel := false
 	optTempResetType := guiResetChoice
+	
 	Return
 	
 _GUISetClickingOn:
@@ -407,13 +420,13 @@ _GUIHelpAdvanced:
 		} else if (OutputVarControl = "Static13") {
 			help = Move the game to the desired position when launching the bot
 		} else if (OutputVarControl = "Static16") {
-			help = When activated, the bot will check if max progress has been achieved regardless of the reset type (Fast mode excluded).`nExample: You set reset to On level 400 but your formation dies on 300, the bot will reset`nDelay: Delay, in seconds, between each Auto progress check.
+			help = When activated, the bot will check if max progress has been achieved regardless of the reset type.`nExample: You set reset to On level 400 but your formation dies on 300, the bot will reset`nDelay: Delay, in seconds, between each Auto progress check.
 		} else if (OutputVarControl = "Static17") {
 			help = When set to Always on, the bot will make sure auto progress is active at all time.`nKeep in mind that it can mess with the On level reset, which I would strongly suggest to turn on Prompt on current level after pause.`nThe Max progress reset is excluded from this setting, it will always make sure auto progress is active.
 		} else if (OutputVarControl = "Static20") {
 			help = Due to some limitations, if you proceed to pause the bot then manually play for a while, the bot could lose the current level.`nExample: You set reset to level 750 and you pause the bot on level 500 and unpause it on level 700, the bot still thinks it's on level 500 and won't reset until the game reaches the level 950.`nTurning this on will prompt you with a popup to set the current level every time you unpause.
 		} else if (OutputVarControl = "Static28") {
-			help = When activated, the bot will reset the run if it gets stuck on the same level for the set delay.
+			help = When activated, the bot will reset the run if it gets stuck on the same level for the set delay.`nOnly works when On level reset is selected.
 		} else if (OutputVarControl = "Static43") {
 			help = When turning this option on, the bot will take longer to refresh some GUI elements and will turn off chests stats.`nTurn on if you experience lag with the bot.
 		} else if (OutputVarControl = "Static44") {
@@ -436,7 +449,7 @@ _GUIHelpOptions:
 		if (OutputVarControl = "Static5") {
 			help = If the bot cannot launch an event free play due to a lack of currency, it will instead launch the backup campaign.
 		} else if (OutputVarControl = "Static10") {
-			help = Max progress: The bot will reset when the formation dies`nLevel cap: The bot will reset when all crusaders are maxed. (still in beta, might not work as intended)`nFast: The bot will reset at level 6 while maximizing idols gain. (Not yet implemented)`nTimed run: The bot will reset when the Advanced Option [Run Time] has elapsed.`nOn level: The bot will reset once it reaches the level set in Advanced Option [Reset on level]
+			help = Max progress: The bot will reset when the formation dies`nTimed run: The bot will reset when the Advanced Option [Run Time] has elapsed.`nOn level: The bot will reset once it reaches the level set in Advanced Option [Reset on level]
 		} else {
 			ToolTip,
 			Break
@@ -571,6 +584,7 @@ _GUICloseAdvancedOptions:
 	GuiControl, BotGUIAdvancedOptions: ChooseString, guiReloadHotkey1Choice, % optReloadHotkey1
 	GuiControl, BotGUIAdvancedOptions: ChooseString, guiExitHotkey1Choice, % optExitHotkey1
 	GuiControl, BotGUIAdvancedOptions: ChooseString, guiForceResetHotkey1Choice, % optForceResetHotkey1
+	GuiControl, BotGUIAdvancedOptions: ChooseString, guiNextCycleHotkey1Choice, % optNextCycleHotkey1
 	if (optForceStartHotkey2) {
 		GuiControl, BotGUIAdvancedOptions: ChooseString, guiForceStartHotkey2Choice, % optForceStartHotkey2
 	} else {
@@ -595,6 +609,11 @@ _GUICloseAdvancedOptions:
 		GuiControl, BotGUIAdvancedOptions: ChooseString, guiExitHotkey2Choice, % optExitHotkey2
 	} else {
 		GuiControl, BotGUIAdvancedOptions: Choose, guiExitHotkey2Choice, 1
+	}
+	if (optNextCycleHotkey2) {
+		GuiControl, BotGUIAdvancedOptions: ChooseString, guiNextCycleHotkey2Choice, % optNextCycleHotkey2
+	} else {
+		GuiControl, BotGUIAdvancedOptions: Choose, guiNextCycleHotkey2Choice, 1
 	}
 	if (optBotLighter = 1) {
 		GuiControl, BotGUIAdvancedOptions:, guiUseLightVersionStatusOn, images/gui/bOn_on.png
@@ -827,7 +846,8 @@ _GUIApplyAdvancedOptions:
 		, 2: optTempPauseHotkey1 . optTempPauseHotkey2
 		, 3: optTempReloadHotkey1 . optTempReloadHotkey2
 		, 4: optTempExitHotkey1 . optTempExitHotkey2
-		, 5: optTempForceResetHotkey1 . optTempForceResetHotkey2}
+		, 5: optTempForceResetHotkey1 . optTempForceResetHotkey2
+		, 6: optTempNextCycleHotkey1 . optTempNextCycleHotkey2}
 	i = 1
 	Loop, % hotkeys.length() - 1 {
 		Loop, % hotkeys.length() - A_Index {
@@ -868,6 +888,8 @@ _GUIApplyAdvancedOptions:
 		optExitHotkey2 := optTempExitHotkey2
 		optForceResetHotkey1 := optTempForceResetHotkey1
 		optForceResetHotkey2 := optTempForceResetHotkey2
+		optNextCycleHotkey1 := optTempNextCycleHotkey1
+		optNextCycleHotkey2 := optTempNextCycleHotkey2
 		optBotLighter := optTempBotLighter
 		GuiControlGet, optBotClockSpeed,, guiBotClockSpeed
 		optCheatEngine := optTempCheatEngine
@@ -888,6 +910,7 @@ _GUIApplyOptions:
 	optMainDPS := optTempMainDPS
 	optResetType := optTempResetType
 	optClicking := optTempClicking
+	botTrackCurrentLevel := botTempTrackCurrentLevel
 	Gosub, _BotRewriteSettings
 	GuiControl, BotGUI:, buttonOptions, images/gui/bOptions.png
 	Gui, BotGUIOptions: Hide
@@ -1278,6 +1301,39 @@ _GUIChooseForceResetHotkey2:
 	GuiControl,, guiForceResetHotkey1Choice, ||%ForceResetHotkey1Choices%
 	GuiControl, ChooseString, guiForceResetHotkey1Choice, % optTempForceResetHotkey1
 	optTempForceResetHotkey2 = %guiForceResetHotkey2Choice%
+	Return
+	
+_GUINextCycleHotkey1Unmask:
+	GuiControl, Hide, guiNextCycleHotkey1Mask
+	guiNextCycleHotkey1Show := true
+	GuiControl, BotGUIAdvancedOptions:, guiNextCycleHotkey1Choice, % listKeys
+	GuiControl, Show, guiNextCycleHotkey1Choice
+	GuiControl, ChooseString, guiNextCycleHotkey1Choice, % optNextCycleHotkey1
+	Return
+
+_GUINextCycleHotkey2Unmask:
+	GuiControl, Hide, guiNextCycleHotkey2Mask
+	GuiControlGet, guiNextCycleHotkey1Choice
+	NextCycleHotkey2Choices := listKeys
+	GuiControl,, guiNextCycleHotkey2Choice, ||%NextCycleHotkey2Choices%
+	GuiControl, Show, guiNextCycleHotkey2Choice
+	GuiControl, ChooseString, guiNextCycleHotkey2Choice, % optNextCycleHotkey2
+	Return
+
+_GUIChooseNextCycleHotkey1:
+	Gui, Submit, NoHide
+	NextCycleHotkey2Choices := __ListKeysRemove(listKeys, guiNextCycleHotkey1Choice)
+	GuiControl,, guiNextCycleHotkey2Choice, ||%NextCycleHotkey2Choices%
+	GuiControl, ChooseString, guiNextCycleHotkey2Choice, % optTempNextCycleHotkey2
+	optTempNextCycleHotkey1 := guiNextCycleHotkey1Choice
+	Return
+	
+_GUIChooseNextCycleHotkey2:
+	Gui, Submit, NoHide
+	NextCycleHotkey1Choices := __ListKeysRemove(listKeys, guiNextCycleHotkey2Choice)
+	GuiControl,, guiNextCycleHotkey1Choice, ||%NextCycleHotkey1Choices%
+	GuiControl, ChooseString, guiNextCycleHotkey1Choice, % optTempNextCycleHotkey1
+	optTempNextCycleHotkey2 = %guiNextCycleHotkey2Choice%
 	Return
 	
 _GUISetRelaunchGameOn:

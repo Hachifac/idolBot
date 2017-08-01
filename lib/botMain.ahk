@@ -41,6 +41,8 @@ botLevelCursorCoords[5] := [904, 11, 943, 130]
 botLevelCurrentCursor = 0
 botLevelPreviousCursor = 0
 botCurrentLevel = 0
+botTrackCurrentLevel := false
+botTempTrackCurrentLevel := false
 botSprintModeCheck := false
 botCurrentLevelTimeout = 0 
 botBuffsRarity := ["C", "U", "R", "E"]
@@ -76,7 +78,7 @@ botMaxAllCount = 0
 botBuffsSpeedTimer = 0
 
 botSkipToReset := false
-optLastoptChatRoom := optChatRoom
+optLastChatRoom := optChatRoom
 
 global currentCIndex := [1, 1]
 global currentCCoords := [36, 506]
@@ -227,7 +229,7 @@ idolBot:
 					if (botSession = 0) {
 						botSession = 1
 					}
-					if (optChatRoom > 0 and (optLastoptChatRoom != optChatRoom or botRelaunched = true)) {
+					if (optChatRoom > 0 and (optLastChatRoom != optChatRoom or botRelaunched = true)) {
 						botRelaunched := false
 						Gosub, _BotSetChatRoom
 					} 
@@ -235,7 +237,7 @@ idolBot:
 					Sleep, 100 * optBotClockSpeed
 					Click
 					
-					if (optSameLevelTimeout = 1 and botCurrentLevelTimeout > optSameLevelTimeoutDelay) {
+					if (optSameLevelTimeout = 1 and botCurrentLevelTimeout > optSameLevelTimeoutDelay and botTrackCurrentLevel = true) {
 						__Log("Same level timeout.")
 						botPhase = 3
 						botSkipToReset := true
@@ -266,10 +268,8 @@ idolBot:
 											} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)LevelCrusader\(([\d|\w]+)\)", f)) {
 												__BotLevelCrusader(f.1)
 											} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)LevelMainDPS", f)) {
-												if (optResetType = 1 or optResetType = 2 or optResetType = 5 or optResetType = 6) {
-													if (__UnixTime(A_Now) - botRunLaunchTime > (optMainDPSDelay * 60) and optMainDPS != "None") {
-														__BotLevelCrusader(optMainDPS)
-													}
+												if (__UnixTime(A_Now) - botRunLaunchTime > (optMainDPSDelay * 60) and optMainDPS != "None") {
+													__BotLevelCrusader(optMainDPS)
 												}
 											} else if (RegExMatch(botCycles[botCurrentCycle].cyclesList[cL], "iO)SetFormation\(([\d]+)\)", f)) {
 												__BotSetFormation(f.1)
@@ -331,39 +331,12 @@ idolBot:
 						}
 					}
 						
-					if (optResetType = 3) {
-						if (levelCapResetCheck = true) {
-							__BotMoveToLastPage()
-							Sleep, 500 * optBotClockSpeed
-							PixelGetColor, Output, 872, 594, RGB
-							if (Output = 0x7D2E0C) {
-								PixelGetColor, Output, 872, 508, RGB
-								if (Output = 0x979797) {
-									__Log("Level cap reached.")
-									botPhase = 3
-									botSkipToReset := true
-								}
-							} else if (Output = 0x979797) {
-								__Log("Level cap reached.")
-								botPhase = 3
-								botSkipToReset := true
-							}
-						} else {
-							__BotMoveToFirstPage()
-							PixelGetColor, Output, 242, 508, RGB
-							if (Output = 0x979797) {
-								__Log("Bush is maxed.")
-								levelCapResetCheck := true
-							}
-						}
-					}
-						
-					if (optResetType = 5 and __UnixTime(A_Now) - botRunLaunchTime >= (optRunTime * 60)) {
+					if (optResetType = 3 and __UnixTime(A_Now) - botRunLaunchTime >= (optRunTime * 60)) {
 						botSkipToReset := true
 						botPhase = 3
 					}
 					
-					if (optResetType = 6) {
+					if (optResetType = 4) {
 						if (botCurrentLevel >= optResetOnLevel) {
 							__Log("Level " . optResetOnLevel . " reached.")
 							botSkipToReset := true
@@ -402,18 +375,13 @@ idolBot:
 								if (ErrorLevel = 0) {
 									resetPhase = 1
 								} else {
-									ImageSearch, resetOutputX, resetOutputY, 657, 631, 869, 665, *150 images/game/kizReset.png
+									ImageSearch, resetOutputX, resetOutputY, 657, 631, 869, 665, *100 images/game/kizReset.png
 									if (ErrorLevel = 0) {
 										resetPhase = 1
 									} else {
-										ImageSearch, resetOutputX, resetOutputY, 657, 631, 869, 665, *150 images/game/kizReset2.png
-										if (ErrorLevel = 0) {
-											resetPhase = 1
-										} else {
-											botDelayReset := true
-											botSkipToReset := false
-											Break
-										}
+										botDelayReset := true
+										botSkipToReset := false
+										Break
 									}
 								}
 							}
@@ -741,7 +709,7 @@ _GUIPos:
 			Gui, BotGUI: Show, x%nX% y%nY% w575 h35 NoActivate, idolBot
 		}
 		if (botPhase > -1) {
-			if (optResetType = 5) {
+			if (optResetType = 3) {
 				timeLeft := Round(((optRunTime * 60) - (__UnixTime(A_Now) - botRunLaunchTime)) / 60)
 				minutesSTR = minute
 				if (timeLeft > 1) {
@@ -749,7 +717,7 @@ _GUIPos:
 				}
 				
 			}
-			if (optResetType = 6) {
+			if (optResetType = 4) {
 				levelsLeft := optResetOnLevel - botCurrentLevel
 				GuiControl, BotGUI:, guiMainTimeLeft, Levels left: %levelsLeft%
 			}
@@ -759,10 +727,10 @@ _GUIPos:
 			GuiControl, BotGUI:, guiMainStatsIdolsLastReset, % idolsCount
 			GuiControl, BotGUI:, guiMainStatsIdolsTotal, % statsIdolsThisSession
 			resetIn = --
-			if (optResetType = 5) {
+			if (optResetType = 3) {
 				resetIn := Round(((optRunTime * 60) - (__UnixTime(A_Now) - botRunLaunchTime)) / 60) . "m"
 			}
-			if (optResetType = 6) {
+			if (optResetType = 4) {
 				resetIn := optResetOnLevel - botCurrentLevel . " levels"
 			}
 			GuiControl, BotGUI:, guiMainStatsResetIn, % resetIn
@@ -781,7 +749,7 @@ _BotPause:
 		Pause,, 1
 		if (botPhase = 2 and !A_IsPaused) {
 			rightKeyInterrupt := true
-			if (optPromptCurrentLevel = 1 and optResetType = 6) {
+			if (optPromptCurrentLevel = 1 and optResetType = 4) {
 				Gosub, _GUICurrentLevel
 			}
 			rightKeyInterrupt := false
@@ -870,7 +838,9 @@ SC029::
 		nX := X + W
 		nY := Y + H - 677
 		Gui, BotGUIDev: Show, x%nX% y%nY% w300 h675 NoActivate, idolBot Dev
-		Gosub, _GUIDevLogging
+		if (optDevLogging != 1) {
+			Gosub, _GUIDevLogging
+		}
 	} else {
 		optDevConsole = 0
 		Gui, BotGUIDev: Hide
@@ -1179,7 +1149,7 @@ __BotSetCampaign(campaign := 0) {
 			}
 			Sleep, 2000
 		}
-		ImageSearch, OutputX2, OutputY2, 395, 180, 543, 242, *100 images/game/options.png
+		ImageSearch, OutputX2, OutputY2, 298, 90, 340, 130, *150 images/game/cog.png
 		if (ErrorLevel = 0) {
 			__Log("Campaign already started.")
 			Return
@@ -1500,7 +1470,7 @@ _BotSetChatRoom:
 	MouseMove, 1135, 18 + (21 * optChatRoom)
 	Sleep, 100 * optBotClockSpeed
 	Click
-	optLastoptChatRoom := optChatRoom
+	optLastChatRoom := optChatRoom
 	Return
 
 __BotGetIdolsCount() {
@@ -1532,7 +1502,7 @@ __BotGetIdolsCount() {
 }
 
 _BotGetCurrentLevel:
-	if (botPhase = 2 and botRelaunching = false) {
+	if (botPhase = 2 and botRelaunching = false and botTrackCurrentLevel = true) {
 		CoordMode, Pixel, Client
 		CoordMode, Mouse, Client
 		rightKeyInterrupt := true
@@ -1617,7 +1587,7 @@ _BotGetCurrentLevel:
 	Return
 
 _BotBlackWipe:
-	if ((botPhase = 2) and botRelaunching = false) {
+	if ((botPhase = 2) and botRelaunching = false and botTrackCurrentLevel = true) {
 		CoordMode, Pixel, Client
 		CoordMode, Mouse, Client
 		if (botLevelCurrentCursor = botLevelPreviousCursor) {
@@ -1821,12 +1791,36 @@ __BotUseSkills:
 _BotUseMagnifiedStormRider:
 	PixelSearch, OutputX, OutputY, 382, 449, 421, 488, 0x0000FE,, Fast
 	if (ErrorLevel != 0) {
+		proceed = 0
 		PixelSearch, OutputX, OutputY, 582, 449, 621, 488, 0x0000FE,, Fast
-		if (ErrorLevel != 0) {
+		if (ErrorLevel > 0) {
+			proceed++
+		} else {
+			Return
+		}
+		PixelSearch, OutputX, OutputY, 582, 449, 621, 488, 0x7F0000,, Fast
+		if (ErrorLevel > 0) {
+			proceed++
+		} else {
+			Return
+		}
+		PixelSearch, OutputX, OutputY, 582, 449, 621, 488, 0x000000,, Fast
+		if (ErrorLevel > 0) {
+			proceed++
+		} else {
+			Return
+		}
+		PixelSearch, OutputX, OutputY, 582, 449, 621, 488, 0xFC9C10,, Fast
+		if (ErrorLevel > 0) {
+			proceed++
+		} else {
+			Return
+		}
+		if (proceed = 3) {
 			PixelGetColor, Output, 390, 466, RGB
 			if (Output != 0x3A3A3A) {
 				__Log("Disabling progress.")
-				rightKeyInterrupt = true
+				rightKeyInterrupt := true
 				Sleep, 500 * optBotClockSpeed
 				__Log("Changing to storm rider formation.")
 				Loop, 5 {
@@ -1850,8 +1844,7 @@ _BotUseMagnifiedStormRider:
 			}
 			__Log("Changing back to regular formation and enabling progress.")
 			__BotSetFormation(optFormation)
-			Send, {g}
-			rightKeyInterrupt = false
+			rightKeyInterrupt := false
 		}
 	}
 	Return
@@ -2047,6 +2040,18 @@ _BotLoadSettings:
 	if (optStormRiderFormation = 0) {
 		optStormRiderFormationKey = optFormationKey
 	}
+	
+	if (optResetType = 5) {
+		optResetType = 3
+	} else if (optResetType = 6) {
+		optResetType = 4
+	}
+	
+	if (optResetType = 4) {
+		botTrackCurrentLevel := true
+		botTempTrackCurrentLevel := true
+	}
+	
 	StringLower, optMainDPS, optMainDPS
 	StringLower, optResetCrusader, optResetCrusader
 	optTempCampaign := optCampaign

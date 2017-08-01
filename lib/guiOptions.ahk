@@ -45,7 +45,7 @@ Gui, Add, Picture, x+5 vguiFormationOff g_GUISetFormationOff, %fOff%
 
 Gui, Add, DropDownList, x15 y+28 w100 vguiMainDPSChoice g_GUIChooseMainDPS, % crusadersSorted
 
-Gui, Add, DropDownList, y+28 w190 Choose%optResetType% vguiResetChoice g_GUIChooseReset altSubmit, No reset|Max progress|Level cap - NOT WORKING|Fast - NOT WORKING|Timed run|On level
+Gui, Add, DropDownList, y+28 w190 Choose%optResetType% vguiResetChoice g_GUIChooseReset hwndddl altSubmit, No reset|Max progress|Timed run|On level
 Gui, Add, Picture, x+20 yp+4 g_GUIHelpOptions, images/gui/bHelp.png
 
 Gui, Add, Picture, x15 y+32 vguiClickingStatusOn g_GUISetClickingOn, %clickingStatusOn%
