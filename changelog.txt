@@ -1,6 +1,11 @@
 ---
 # http://www.reddit.com/r/cotlibot
 ---
+# 1.4.5
+---
+- Fixed Storm Rider (my bad, forgot to adjust one value before compiling)  
+- Adjusted a reset safety feature  
+---
 # 1.4.4
 ---
 - Fixed Kiz resets  

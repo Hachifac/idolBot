@@ -319,7 +319,7 @@ idolBot:
 						lastProgressCheck = % __UnixTime(A_Now)
 						__Log("Auto progress check for max progress.")
 						if (__BotCheckAutoProgress() = false) {
-							if (__UnixTime(A_Now) - botRunLaunchTime < 60) {
+							if (__UnixTime(A_Now) - botRunLaunchTime < 300) {
 								; Stuck at beginning, might be the formation not active
 								__Log("Might be stuck at the beginning.")
 								__BotSetFormation(optFormation)
@@ -1816,7 +1816,7 @@ _BotUseMagnifiedStormRider:
 		} else {
 			Return
 		}
-		if (proceed = 3) {
+		if (proceed = 4) {
 			PixelGetColor, Output, 390, 466, RGB
 			if (Output != 0x3A3A3A) {
 				__Log("Disabling progress.")
