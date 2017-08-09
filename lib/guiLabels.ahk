@@ -427,12 +427,14 @@ _GUIHelpAdvanced:
 			help = Due to some limitations, if you proceed to pause the bot then manually play for a while, the bot could lose the current level.`nExample: You set reset to level 750 and you pause the bot on level 500 and unpause it on level 700, the bot still thinks it's on level 500 and won't reset until the game reaches the level 950.`nTurning this on will prompt you with a popup to set the current level every time you unpause.
 		} else if (OutputVarControl = "Static28") {
 			help = When activated, the bot will reset the run if it gets stuck on the same level for the set delay.`nOnly works when On level reset is selected.
-		} else if (OutputVarControl = "Static43") {
+		} else if (OutputVarControl = "Static45") {
 			help = When turning this option on, the bot will take longer to refresh some GUI elements and will turn off chests stats.`nTurn on if you experience lag with the bot.
-		} else if (OutputVarControl = "Static44") {
+		} else if (OutputVarControl = "Static46") {
 			help = The higher the value, the slower the bot "thinks".`nChange it to a higher value if the game runs slower on your computer.
-		} else if (OutputVarControl = "Static47") {
+		} else if (OutputVarControl = "Static49") {
 			help = IMPORTANT: THE BOT MUST RUN AS ADMINISTRATOR FOR THIS FEATURE TO WORK.`n`nWhen turning this option on, the bot will make use of Cheat Engine.`nHave the desired speed already preset in Cheat Engine and have speedhack turned off.
+		} else if (OutputVarControl = "Static50") {
+			help = When the bot starts a run, there is a delay in which that if the auto progress stops, the bot won't reset until it the delay elapses.`nIt is useful if your runs take too long to start.`nIf the monsters walk through the screen BEFORE you can actually get a run going, it will set auto progress to off and the bot will detect that as "it's time to reset" or`nif your settings are not set to auto progress and max progress, it might just stay on level one forever.
 		} else {
 			ToolTip,
 			Break
@@ -630,6 +632,7 @@ _GUICloseAdvancedOptions:
 		GuiControl, BotGUIAdvancedOptions:, guiUseCheatEngineStatusOn, images/gui/bOn_off.png
 		GuiControl, BotGUIAdvancedOptions:, guiUseCheatEngineStatusOff, images/gui/bOff_on.png
 	}
+	GuiControl, BotGUIAdvancedOptions:, guiResetGracePeriod, % optResetGracePeriod
 	Return	
 
 _GUICloseStats:
@@ -893,6 +896,7 @@ _GUIApplyAdvancedOptions:
 		optBotLighter := optTempBotLighter
 		GuiControlGet, optBotClockSpeed,, guiBotClockSpeed
 		optCheatEngine := optTempCheatEngine
+		GuiControlGet, optResetGracePeriod,, guiResetGracePeriod
 		Gosub, _BotRewriteSettings
 		Gosub, _BotSetHotkeys
 		Gui, BotGUIAdvancedOptions: Hide

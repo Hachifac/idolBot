@@ -2,7 +2,7 @@
 SendMode Input
 
 optDevConsole = 0
-__Log("- idolBot by Hachifac -")
+__Log("- idolBot v" . version . " by Hachifac (bobby@avoine.ca) -")
 __Log("- Crusaders of The Lost Idols bot -")
 
 FileCreateDir, logs
@@ -162,15 +162,21 @@ idolBot:
 						} else {
 							__BotSetAutoProgress(false)
 						}
+						skipJim := __UnixTime(A_Now)
+						__Log("Looking for Jim's status.")
 						Loop {
 							; We look at Jim's buy button to know if we can select the formation
 							PixelGetColor, Output, 244, 595, RGB
 							; If it's not green, we first look if the right arrow is gold, if it is it means the game already started long ago and Jim is probably maxed, meaning we need to put the formation in right now
 							; then we click the monsters until we get some cash to initiate the formation
 							; If it's green, in a few seconds the bot will max all levels and some crusaders will get in formation, eventually the formation set will kick in
-							__Log("Looking for Jim's status.")
 							if (Output != 0x45D402) {
 								; Auto click until Jim lvl up button turns green
+								if (__UnixTime(A_Now) - skipJim > 60) {
+									__Log("Skipping Jim.")
+									botSkipJim := true
+									Break
+								}
 								MouseMove, 695, 325
 								Click
 								Sleep, 40
@@ -186,7 +192,7 @@ idolBot:
 						}
 						; We look at Jim's buy button one last time, if it's green we're good to go to phase 2
 						PixelGetColor, Output, 244, 595, RGB
-						if (Output = 0x45D402 or Output = 0x226A01) {
+						if (Output = 0x45D402 or Output = 0x226A01 or botSkipJim = true) {
 							botPhase = 2
 						}
 						; Press space bar to close the events/sales tabs
@@ -319,7 +325,7 @@ idolBot:
 						lastProgressCheck = % __UnixTime(A_Now)
 						__Log("Auto progress check for max progress.")
 						if (__BotCheckAutoProgress() = false) {
-							if (__UnixTime(A_Now) - botRunLaunchTime < 300) {
+							if (__UnixTime(A_Now) - botRunLaunchTime < optResetGracePeriod) {
 								; Stuck at beginning, might be the formation not active
 								__Log("Might be stuck at the beginning.")
 								__BotSetFormation(optFormation)
@@ -354,44 +360,6 @@ idolBot:
 					__Log("Cannot progress further, time to reset.")
 					; Move to reset crusader
 					if (resetPhase = 0) {
-						resetAttempt = 0
-						Loop {
-							Click
-							__Log("Moving to reset crusader.")
-							if (optAutoProgress = 1) {
-								__BotSetAutoProgress(false)
-								Sleep, 2000
-							}
-							__BotMoveToFirstPage()
-							Sleep, 500 * optBotClockSpeed
-							__BotMoveToCrusader("nate")
-							Sleep, 2000 * optBotClockSpeed
-							__Log("Searching for that reset skill.")
-							ImageSearch, resetOutputX, resetOutputY, 657, 631, 869, 665, *100 images/game/nateReset.png
-							if (ErrorLevel = 0) {
-								resetPhase = 1
-							} else {
-								ImageSearch, resetOutputX, resetOutputY, 657, 631, 869, 665, *100 images/game/rudolphReset.png
-								if (ErrorLevel = 0) {
-									resetPhase = 1
-								} else {
-									ImageSearch, resetOutputX, resetOutputY, 657, 631, 869, 665, *100 images/game/kizReset.png
-									if (ErrorLevel = 0) {
-										resetPhase = 1
-									} else {
-										botDelayReset := true
-										botSkipToReset := false
-										Break
-									}
-								}
-							}
-							if (resetPhase = 1) {
-								__Log("Found. Reset inbound.")
-								Break
-							}
-						}
-					}
-					if (resetPhase = 1) {
 						if (optUseChests = 1) {
 							__Log("Using chests before reset.")
 							MouseMove, 795, 480
@@ -536,6 +504,24 @@ idolBot:
 								Sleep, 500 * optBotClockSpeed
 							}
 						}
+						resetPhase = 1
+						Gosub, _BotMaxLevels
+					}
+					if (resetPhase = 1) {
+						resetAttempt = 0
+						Loop {
+							Click
+							__Log("Moving to reset crusader.")
+							if (optAutoProgress = 1) {
+								__BotSetAutoProgress(false)
+								Sleep, 2000
+							}
+							__BotMoveToFirstPage()
+							Sleep, 500 * optBotClockSpeed
+							__BotMoveToCrusader("nate")
+							Sleep, 2000 * optBotClockSpeed
+							Break
+						}
 						Loop {
 							__Log("Waiting for the reset warning window.")
 							ImageSearch, OutputRWX, OutputRWY, 281, 116, 717, 235, *100 images/game/resetwarning.png
@@ -544,15 +530,28 @@ idolBot:
 								resetPhase = 2
 								Break
 							} else {
-								MouseMove, resetOutputX + 3, resetOutputY + 3
-								Sleep, 25 * optBotClockSpeed
+								MouseMove, 675, 650
+								Sleep, 100 * optBotClockSpeed
 								Click
-								Sleep, 1000 * optBotClockSpeed
+								Sleep, 100 * optBotClockSpeed
+								MouseMove, 760, 650
+								Sleep, 100 * optBotClockSpeed
+								Click
+								MouseMove, 815, 650
+								Sleep, 100 * optBotClockSpeed
+								Click
+								Sleep, 1000
+								resetAttempt++
+							}
+							if (resetAttempt > 10) {
+								__Log("Failed attempt.")
+								Break
 							}
 						}
 					}
 					if (resetPhase = 2) {
 						resetPhase = 3
+						failedReset := false
 						Loop {
 							__Log("Waiting for the big red button.")
 							ImageSearch, OutputRB, OutputRB, 439, 479, 671, 601, *100 images/game/redbutton.png
@@ -568,81 +567,90 @@ idolBot:
 									Click
 									Sleep, 500 * optBotClockSpeed
 								}
+								ImageSearch,,, 287, 242, 472, 289, *100 images/game/failedreset.png
+								if (ErrorLevel = 0) {
+									__Log("Failed reset. Relaunching.")
+									failedReset := true
+									Gosub, _BotRelaunch
+									Break
+								}
 							}
 							Sleep, 1000
 						}
-						Loop {
-							ImageSearch, OutputIS, OutputIS, 439, 479, 671, 601, *100 images/game/idolscontinue.png
-							if (ErrorLevel = 0) {
-								__Log("Calculating the idols.")
-								idolsCount := __BotGetIdolsCount()
-								FileAppend, % __UnixTime(A_Now) . ":" . idolsCount, stats/idols.txt
-								statsIdolsPastDay := 0
-								Loop, read, stats/idols.txt
-								{
-									break := StrSplit(A_LoopReadLine, ":")
-									if (__UnixTime(A_Now) - break[1] <= 86400) {
-										FileAppend, % break[1] . ":" . break[2] . "`n", stats/idols_temp.txt
-										statsIdolsPastDay := statsIdolsPastDay + break[2]
+						if (failedReset = false) {
+							Loop {
+								ImageSearch, OutputIS, OutputIS, 439, 479, 671, 601, *100 images/game/idolscontinue.png
+								if (ErrorLevel = 0) {
+									__Log("Calculating the idols.")
+									idolsCount := __BotGetIdolsCount()
+									FileAppend, % __UnixTime(A_Now) . ":" . idolsCount, stats/idols.txt
+									statsIdolsPastDay := 0
+									Loop, read, stats/idols.txt
+									{
+										break := StrSplit(A_LoopReadLine, ":")
+										if (__UnixTime(A_Now) - break[1] <= 86400) {
+											FileAppend, % break[1] . ":" . break[2] . "`n", stats/idols_temp.txt
+											statsIdolsPastDay := statsIdolsPastDay + break[2]
+										}
 									}
-								}
-								FileDelete, stats/idols.txt
-								FileMove, stats/idols_temp.txt, stats/idols.txt
-								
-								IniRead, statsIdolsAllTime, stats/stats.txt, Idols, alltime, 0
-								statsIdolsAllTime += idolsCount
-								statsIdolsThisSession += idolsCount
-								
-								statsRunTime := __UnixTime(A_Now) - botRunLaunchTime
-								
-								IniWrite, % statsIdolsAllTime, stats/stats.txt, Idols, alltime
-								IniWrite, % statsIdolsPastDay, stats/stats.txt, Idols, pastday
-								IniWrite, % idolsCount, stats/stats.txt, Idols, lastrun
-								IniWrite, % statsRunTime, stats/stats.txt, Idols, lastruntime
-								
-								IniWrite, % statsChestsThisRun, stats/stats.txt, Chests, lastrun
-								IniWrite, % statsRunTime, stats/stats.txt, Chests, lastruntime
-								statsChestsThisRun = 0
-								
-								botLevelCurrentCursor = 0
-								botLevelPreviousCursor = 0
-								botCurrentLevel = 0
-								botResets++
-								
-								botCurrentCycle = 1
-								botCurrentCycleLoop = 0
-								botCurrentCycleTime = 0
-								botCurrentLevelTimeout = 0
-								
-								if (botResets = 1) {
-									statsIdolsFirstReset := idolsCount
-									botRunTimeFirstReset := statsRunTime
-								}
-								
-								if (botResets > 1) {
-									GuiControl, BotGUI:, guiMainStatsIdolsPerHour, % Round((statsIdolsThisSession - statsIdolsFirstReset) / (__UnixTime(A_Now) - botLaunchTime - botRunTimeFirstReset) * 60 * 60)
-								}
-								
-								bI = 1
-								Loop, % botBuffs.length() {
-									Loop, % botBuffsRarity.length() {
-										bB := botBuffs[bI]
-										bR := botBuffsRarity[A_Index]
-										botBuffs%bB%%bR%Timer := 0
+									FileDelete, stats/idols.txt
+									FileMove, stats/idols_temp.txt, stats/idols.txt
+									
+									IniRead, statsIdolsAllTime, stats/stats.txt, Idols, alltime, 0
+									statsIdolsAllTime += idolsCount
+									statsIdolsThisSession += idolsCount
+									
+									statsRunTime := __UnixTime(A_Now) - botRunLaunchTime
+									
+									IniWrite, % statsIdolsAllTime, stats/stats.txt, Idols, alltime
+									IniWrite, % statsIdolsPastDay, stats/stats.txt, Idols, pastday
+									IniWrite, % idolsCount, stats/stats.txt, Idols, lastrun
+									IniWrite, % statsRunTime, stats/stats.txt, Idols, lastruntime
+									
+									IniWrite, % statsChestsThisRun, stats/stats.txt, Chests, lastrun
+									IniWrite, % statsRunTime, stats/stats.txt, Chests, lastruntime
+									statsChestsThisRun = 0
+									
+									botLevelCurrentCursor = 0
+									botLevelPreviousCursor = 0
+									botCurrentLevel = 0
+									botResets++
+									
+									botCurrentCycle = 1
+									botCurrentCycleLoop = 0
+									botCurrentCycleTime = 0
+									botCurrentLevelTimeout = 0
+									
+									if (botResets = 1) {
+										statsIdolsFirstReset := idolsCount
+										botRunTimeFirstReset := statsRunTime
 									}
-									bI++
+									
+									if (botResets > 1) {
+										GuiControl, BotGUI:, guiMainStatsIdolsPerHour, % Round((statsIdolsThisSession - statsIdolsFirstReset) / (__UnixTime(A_Now) - botLaunchTime - botRunTimeFirstReset) * 60 * 60)
+									}
+									
+									bI = 1
+									Loop, % botBuffs.length() {
+										Loop, % botBuffsRarity.length() {
+											bB := botBuffs[bI]
+											bR := botBuffsRarity[A_Index]
+											botBuffs%bB%%bR%Timer := 0
+										}
+										bI++
+									}
+									
+									MouseMove, 507, 550
+									Sleep, 500 * optBotClockSpeed
+									Click
+									Sleep, 500 * optBotClockSpeed
+									Break
+								} else {
+									MouseMove, 210, 95
+									Sleep, 500 * optBotClockSpeed
+									Click
+									Sleep, 500 * optBotClockSpeed
 								}
-								
-								MouseMove, 507, 550
-								Sleep, 500 * optBotClockSpeed
-								Click
-								Sleep, 500 * optBotClockSpeed
-								Break
-							} else {
-								MouseMove, 210, 95
-								Sleep, 500 * optBotClockSpeed
-								Click
-								Sleep, 500 * optBotClockSpeed
 							}
 						}
 					}
@@ -1391,7 +1399,7 @@ __BotSetAutoProgress(s) {
 	if (s = 0) {
 		t = false
 	}
-	__Log("Setting auto progress check to " . t . ".")
+	__Log("Setting auto progress to " . t . ".")
 	Global lastProgressCheck
 	lastProgressCheck = % __UnixTime(A_Now)
 	if (__BotCheckAutoProgress() != s) {
@@ -2015,6 +2023,7 @@ _BotLoadSettings:
 	IniRead, optBotLighter, settings/settings.ini, Settings, botlighter, 0
 	IniRead, optBotClockSpeed, settings/settings.ini, Settings, botclockspeed, 1
 	IniRead, optCheatEngine, settings/settings.ini, Settings, cheatengine, 0
+	IniRead, optResetGracePeriod, settings/settings.ini, Settings, resetgraceperiod, 120
 	
 	if (optPromptCurrentLevel = 120) {
 		optPromptCurrentLevel = 0
@@ -2083,6 +2092,7 @@ _BotLoadSettings:
 	optTempBotLighter := optBotLighter
 	optTempBotClockSpeed := optBotClockSpeed
 	optTempCheatEngine := optCheatEngine
+	optTempResetGracePeriod := optResetGracePeriod
 	botCheatEngine := optCheatEngine
 	
 	optTempBuffsGoldC := optBuffsGoldC
@@ -2191,6 +2201,7 @@ _BotRewriteSettings:
 	IniWrite, % optBotLighter, settings/settings.ini, Settings, botlighter
 	IniWrite, % optBotClockSpeed, settings/settings.ini, Settings, botclockspeed
 	IniWrite, % optCheatEngine, settings/settings.ini, Settings, cheatengine
+	IniWrite, % optResetGracePeriod, settings/settings.ini, Settings, resetgraceperiod
 	
 	
 	IniWrite, % optBuffsGoldC, settings/settings.ini, Settings, buffsgoldc
@@ -2312,7 +2323,7 @@ _BotLoadCycles:
 	
 _BotLoadCrusaders:
 	FileRead, OutputVar, lib/crusaders.txt
-	crusadersList := RegExMatchGlobal(OutputVar, "iO)((\d+),(\d+)):(.+)")
+	crusadersList := RegExMatchGlobal(OutputVar, "iO)((\d+),(\d+)):(.+?)(`r`n|$)")
 	crusaders := {}
 	crusadersSorted :=  null
 	for i, coords in crusadersList {

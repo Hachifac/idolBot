@@ -120,8 +120,8 @@ if (optSameLevelTimeout = 1) {
 	autoProgressCheckStatusOff := "images/gui/bOff_on.png"
 }
 
-Gui, Add, Picture, x15 y+28 vguiSameLevelTimeoutStatusOn g_GUISetSameLevelTimeoutOn, %sameLevelTimeoutStatusOn%
-Gui, Add, Picture, x+2 vguiSameLevelTimeoutStatusOff g_GUISetSameLevelTimeoutOff, %sameLevelTimeoutStatusOff%
+Gui, Add, Picture, x15 y+28 w30 vguiSameLevelTimeoutStatusOn g_GUISetSameLevelTimeoutOn, %sameLevelTimeoutStatusOn%
+Gui, Add, Picture, x+2 w30 vguiSameLevelTimeoutStatusOff g_GUISetSameLevelTimeoutOff, %sameLevelTimeoutStatusOff%
 Gui, Add, Edit, x+45 w73
 Gui, Add, UpDown, vguiSameLevelTimeoutDelay Range1-2147483647, %optSameLevelTimeoutDelay%
 Gui, Add, Picture, x+30 yp+4 g_GUIHelpAdvanced, images/gui/bHelp.png
@@ -189,6 +189,10 @@ if (optCheatEngine = 1) {
 Gui, Add, Picture, x15 y+32 vguiUseCheatEngineStatusOn g_GUISetUseCheatEngineOn, %useCheatEngineStatusOn%
 Gui, Add, Picture, x+2 vguiUseCheatEngineStatusOff g_GUISetUseCheatEngineOff, %useCheatEngineStatusOff%
 Gui, Add, Picture, x+148 yp+3 g_GUIHelpAdvanced, images/gui/bHelp.png
+
+Gui, Add, Edit, x15 y+30 w180
+Gui, Add, UpDown, vguiResetGracePeriod Range0-2147483647, %optResetGracePeriod%
+Gui, Add, Picture, x+30 yp+4 g_GUIHelpAdvanced, images/gui/bHelp.png
 
 Gui, Tab
 Gui, Add, Picture, x7 y44 vguiAdvancedOptionsAdvancedTab g_GUIAdvancedOptionsAdvancedTab, images/gui/guiAdvancedOptionsAdvanced_tab_active.png

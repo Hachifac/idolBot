@@ -1,6 +1,15 @@
 ---
 # http://www.reddit.com/r/cotlibot
 ---
+# 1.4.6
+---
+- Fixed the "browsing through the crusaders"  
+- Fixed the finding the reset skills issue  
+- The bot will now skip "Looking for Jim's status" after 60 seconds  
+- Fixed a "Reset Failed" issue that can happen  
+- The bot will now max the levels after opening chests  
+- Added a "Reset grace period" in the advanced options
+---
 # 1.4.5
 ---
 - Fixed Storm Rider (my bad, forgot to adjust one value before compiling)  
