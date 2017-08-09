@@ -8,7 +8,8 @@
 - The bot will now skip "Looking for Jim's status" after 60 seconds  
 - Fixed a "Reset Failed" issue that can happen  
 - The bot will now max the levels after opening chests  
-- Added a "Reset grace period" in the advanced options
+- Added a "Reset grace period" in the advanced options  
+- Added Beary & Penny to the crusaders list
 ---
 # 1.4.5
 ---
