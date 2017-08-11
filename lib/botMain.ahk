@@ -2322,14 +2322,18 @@ _BotLoadCycles:
 	Return
 	
 _BotLoadCrusaders:
-	FileRead, OutputVar, lib/crusaders.txt
-	crusadersList := RegExMatchGlobal(OutputVar, "iO)((\d+),(\d+)):(.+?)(`r`n|$)")
 	crusaders := {}
 	crusadersSorted :=  null
-	for i, coords in crusadersList {
-		cL := StrSplit(coords.4, ",")
-		for c, crusader in cL {
-			crusaders[crusader] := [coords.2, coords.3]
+	Loop {
+		FileReadLine, line, lib/crusaders.txt, %A_Index%
+		if (ErrorLevel) {
+			Break
+		}
+		cC := StrSplit(line, ":")
+		cL := StrSplit(cC[2], ",")
+		cC := StrSplit(cC[1], ",")
+		for i, crusader in cL {
+			crusaders[crusader] := [cC[1], cC[2]]
 			crusadersSorted := crusadersSorted . __UpperCaseFL(crusader) . "`n"
 		}
 	}

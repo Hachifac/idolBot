@@ -5,8 +5,8 @@
 5,1:jason,pete,broot,paul
 6,1:khouri,momma,brogon,halfbloodelf,foresight
 7,1:sarah,soldierette,snickette,sjin
-8,1:sal,wendy,robbie,val
-9,1:reginald,siri,boggins,squiggles
+8,1:sal,wendy,robbie,val,penny
+9,1:reginald,siri,boggins,squiggles,beary
 10,1:merci,petra,bat,polly
 11,1:exterminator,gloria
 12,1:greyskull,eiralon
