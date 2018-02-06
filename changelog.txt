@@ -1,6 +1,10 @@
 ---
 # http://www.reddit.com/r/cotlibot
 ---
+# 1.4.8
+---
+- Updated crusaders list
+---
 # 1.4.7
 ---
 - Redid the "browsing through the crusaders"
