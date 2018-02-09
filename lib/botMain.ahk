@@ -3,6 +3,7 @@ SendMode Input
 
 optDevConsole = 0
 __Log("- idolBot v" . version . " by Hachifac (bobby@avoine.ca) -")
+__Log("- minor updates @thejonpearson")
 __Log("- Crusaders of The Lost Idols bot -")
 
 FileCreateDir, logs
