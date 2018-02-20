@@ -25,7 +25,7 @@ Gosub, _BotTimers
 
 /*
 BOT PHASES
--1 = bot not launched
+-1 = bot not launched (is paused)
 0 = bot in campaign selection screen
 1 = initial stuff like looking for overlays, waiting for the game to fully load
 2 = maxing the levels/ main dps and upgrades

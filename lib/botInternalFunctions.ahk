@@ -183,6 +183,7 @@ _GUIPos:
 _BotPause:
 	CoordMode, Pixel, Client
 	CoordMode, Mouse, Client
+	; if bot is paused and phase is not started, unpausing starts the bot
 	if (botPhase = -1) {
 		botPhase = 0
 		__GUIShowPause(false)
@@ -339,6 +340,7 @@ __GUIShowPause(status) {
 	Return
 }
 
+;TODO - can fix a possible desync here, maybe send escape or single click in main area. 
 _BotCloseWindows:
 	if (botAutoProgressCheck = false and (botPhase = 1 or botPhase = 2)) {
 		CoordMode, Pixel, Client
@@ -478,6 +480,7 @@ __BotCampaignStart(campaign := 0) {
 	Global optRelaunchGameFrequency
 	Global optBotClockSpeed
 	Global optCampaign
+	; if campaign isn't passed to function, use one loaded from options
 	if (campaign = 0) {
 		campaign := optCampaign
 	}

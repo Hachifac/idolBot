@@ -56,6 +56,5 @@ botBuffsSpeedCTimer := botBuffsSpeedUTimer := botBuffsSpeedRTimer := botBuffsSpe
 botBuffsCritCTimer := botBuffsCritUTimer := botBuffsCritRTimer := botBuffsCritETimer := 0
 botBuffsClickCTimer := botBuffsClickUTimer := botBuffsClickRTimer := botBuffsClickETimer := 0
 botBuffsSplashCTimer := botBuffsSplashUTimer := botBuffsSplashRTimer := botBuffsSplashETimer := 0
-
 rightKeyInterrupt := false
 rightKeyStop := false

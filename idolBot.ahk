@@ -26,3 +26,4 @@ __Log("ran Bot update check")
 
 ; Include internal bot functions
 #include lib/botInternalFunctions.ahk
+#include lib/guiLabels.ahk
