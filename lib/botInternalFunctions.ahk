@@ -1745,10 +1745,8 @@ _BotLoadCrusaders:
 	Loop {
 		FileReadLine, line, lib/crusaders.txt, %A_Index%
 		if (ErrorLevel) {
-			__Log("hit an error loading crusaders")
 			Break
 		}
-		__Log("loaded crusader list successfully: " line)
 		cC := StrSplit(line, ":")
 		cL := StrSplit(cC[2], ",")
 		cC := StrSplit(cC[1], ",")
