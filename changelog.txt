@@ -1,6 +1,13 @@
 ---
 # http://www.reddit.com/r/cotlibot
 ---
+# 1.4.9 - Beta
+---
+- Updated crusaders list, added: Griz, Frankie 
+- Lots of internal changes in preperation for some additional refactoring
+- ** Please keep your copy of 1.4.8, in case I've caused some issues I haven't
+hit in testing yet. 
+---
 # 1.4.8
 ---
 - Updated crusaders list, added: 
