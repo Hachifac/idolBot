@@ -19,7 +19,7 @@ __Log("- idolBot v" . version . " by Hachifac (bobby@avoine.ca) -")
 __Log("- paint refreshed by thejonpearson - ")
 __Log("- Crusaders of The Lost Idols bot -")
 
-#Include botInit.ahk
+#include lib/botInit.ahk
 
 Gosub, _BotTimers
 
@@ -58,5 +58,5 @@ global botCrusaderPixels := Object()
 global botCrusaderPixelsTemp := Object()
 global levelCapPixels := Object()
 
-#Include botMainLoop.ahk
+#Include lib/botMainLoop.ahk
 

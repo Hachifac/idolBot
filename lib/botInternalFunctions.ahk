@@ -105,14 +105,13 @@ __Log(log) {
 	Return
 }
 
-_rotateLogs{
+_rotateLogs:
 	FileGetSize, Output, logs/logs.txt, M
 	if (Output >= 10) {
 		FileMove, logs/logs.txt, logs/logs_old.txt
 		FileDelete, logs/logs.txt
 	}
 	Return
-}
 
 _BotTimers:
 	if (optBotLighter = 1) {
@@ -1746,8 +1745,10 @@ _BotLoadCrusaders:
 	Loop {
 		FileReadLine, line, lib/crusaders.txt, %A_Index%
 		if (ErrorLevel) {
+			__Log("hit an error loading crusaders")
 			Break
 		}
+		__Log("loaded crusader list successfully: " line)
 		cC := StrSplit(line, ":")
 		cL := StrSplit(cC[2], ",")
 		cC := StrSplit(cC[1], ",")
