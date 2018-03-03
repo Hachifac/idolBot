@@ -1,5 +1,3 @@
-#NoEnv
-
 ;################################################################################################
 ;        Takes a screenshot, names it and puts it in folder called "ScreenShots"
 ;This entire script is just an edit of Gdip standard library v1.45 by tic (Tariq Porter) 07/09/11
@@ -9,15 +7,19 @@
 ;
 ; Updated by Cruncher1 on AHK forums
 ; https://autohotkey.com/board/topic/91585-screen-capture-using-only-ahk-no-3rd-party-software-required/
-; 
-; Very very very very very very very slightly modified by thejonpearson to integrate with idolbot
+;
+; idolbot inclusion note: this script must be compiled 32bit ANSI. It has some issues running unicode.
+; Rather than spend a bunch of time working out why, I compiled this script and call the compiled code
+; directly. This allows for 32 and 64 bit unicode compilation in idolBot, and as a side-effect slightly
+; improves loading times for idolbot vs. when I was trying to include the library as part of the bot! - jp 
 ;################################################################################################
 ;################################################################################################
 
 
 pToken := Gdip_Startup()
+OnExit, shutdown
 
-folderPath := A_ScriptDir "/screenshots/"
+folderPath := A_ScriptDir "\ScreenShots\"
 fileName :=  A_YYYY "-" A_MM "-" A_DD "-" A_Hour "-" A_Min "-" A_Sec ".jpg"
 ;;NOTE: other formats are supported, just replace "jpg" with "png" or another format in the fileName.
 
@@ -26,6 +28,11 @@ CaptureScreen:
 	saveFileTo := folderPath fileName                   
 	Gdip_SaveBitmapToFile(pBitmap, saveFileTo)
 	Gdip_DisposeImage(pBitmap)
+	return
+
+shutdown:
+	Gdip_Shutdown(pToken)
+	Exitapp
 	return
 
 

@@ -1341,6 +1341,10 @@ RegExMatchGlobal(ByRef Haystack, NeedleRegEx) {
 ; Self-explanatory
 _BotLoadSettings:
 	__Log("Reading settings.")
+	; advanced dev/beta features
+	IniRead, optTakeScreenshot, settings/devFeatures.ini, developer_settings, optTakeScreenshot, 0
+	optTakeScreenshot := optTakeScreenshot
+	; regular settings
 	IniRead, optCampaign, settings/settings.ini, Settings, campaign, 2
 	IniRead, optBackupCampaign, settings/settings.ini, Settings, backupcampaign, 2
 	IniRead, optFormation, settings/settings.ini, Settings, formation, 1

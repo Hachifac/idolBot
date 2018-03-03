@@ -26,6 +26,6 @@ __Log("ran Bot update check")
 
 ; Include internal bot functions
 ; Include libraries we only want called at specific times after we load the main bot, because AHK is very procedural
+;   and likes to run functions even if we don't actually "call" them.....
 #include lib/botInternalFunctions.ahk
 #include lib/guiLabels.ahk
-#include lib/botScreenshot.ahk
