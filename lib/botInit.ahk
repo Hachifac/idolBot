@@ -15,6 +15,7 @@ Gosub, _BotLoadSettings
 ; TODO - eventually when the GUI is done, we can drop this loop and create screenshots automatically. 
 ; for now, we'll check the option first, to avoid unnecessary confusion. 
 if (optTakeScreenshot = 1){
+	__Log("Creating screenshots folder")
 	FileCreateDir, screenshots					
 }
 

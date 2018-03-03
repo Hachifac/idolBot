@@ -11,3 +11,5 @@ Press F8 to launch/pause/unpause
 ## License
 
 Released under the [MIT License](LICENSE)
+Screenshot function *(beta)* uses the Gdip standard library v1.45 by tic (Tariq Porter), [further modified by Cruncher1](https://goo.gl/wiouSi)
+GUI Font is [Grobold, by Guy Buhry](https://www.dafont.com/guy-buhry.d1243)
