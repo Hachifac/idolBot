@@ -3,7 +3,7 @@
 ---
 # 1.4.9 - Beta
 ---
-- Updated crusaders list, added: Griz, Frankie 
+- Updated crusaders list, added: Griz, Frankie, Graham, James, Saint Patrokia
 - Lots of internal changes in preperation for some additional refactoring
 - ** Please keep your copy of 1.4.8, in case I've caused some issues I haven't
 hit in testing yet. 
