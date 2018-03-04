@@ -1,12 +1,17 @@
 ---
 # http://www.reddit.com/r/cotlibot
 ---
-# 1.4.9 - Beta
+# 1.4.9 - beta
 ---
-- Updated crusaders list, added: Griz, Frankie 
-- Lots of internal changes in preperation for some additional refactoring
-- ** Please keep your copy of 1.4.8, in case I've caused some issues I haven't
-hit in testing yet. 
+- Updated crusaders list, added: Griz, Frankie, Graham, James, Saint Patrokia
+- Fixed issues with how I added crusaders in 1.4.8 ((oops))
+- Lots of internal changes in preperation for some refactoring and new features!
+- Added developer (beta) options: 
+-- screenshot tool. When option is set to 1 in lib/devFeatures.ini, the bot will attempt to take a screenshot just before resetting.
+-- This captures the level / final dps / final gold bonus earned each run, to potentially help with formation planning.  
+- ** Please report any issues you enounter. I've done heavy testing, but I'm sure I haven't touched everything. There is very
+- ** little functional change in this release, mostly just moving code around, so it "should" be fine, but please report it 
+- ** right away if it's not! 
 ---
 # 1.4.8
 ---

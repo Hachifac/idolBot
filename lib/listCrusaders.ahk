@@ -32,4 +32,4 @@ crusaders["nate"] := crusaders["kizlblyp"] := crusaders["rudolph"] := crusaders[
 crusaders["shadowqueen"] :=  crusaders["ilsa"] := [11, 2]
 crusaders["priestess"] := crusaders["agent79"] := [12, 2]
 crusaders["viktor"] := crusaders["shenna"] := [13,2]
-crusaders["xander"] := [14,2]
+crusaders["xander"] := crusaders["saint"] := [14,2]

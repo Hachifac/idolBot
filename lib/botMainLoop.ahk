@@ -281,6 +281,11 @@ idolBot:
 					__Log("Cannot progress further, time to reset.")
 					; Move to reset crusader
 					if (resetPhase = 0) {
+						if (optTakeScreenshot = 1){
+							_BotTakeScreenshot("details")
+						} else {
+							__Log("Not taking screenshot")
+						}
 						; check if we're using chests, then set phase to 1, then max levels
 						if (optUseChests = 1) {
 							__Log("Using chests before reset.")
