@@ -3,6 +3,53 @@ SendMode Input
 
 __Log("loaded botInternalFunctions")
 
+_BotTakeScreenshot(quick_shot:="basic"){
+	if (quick_shot = "details"){
+		__Log("Starting screenshot process.")
+		__BotMoveToFirstPage()
+		Sleep, 500 * optBotClockSpeed
+		__BotMoveToCrusader("nate")
+		Sleep, 2000 * optBotClockSpeed
+		MouseMove, 760, 650
+		Sleep, 100 * optBotClockSpeed
+		Runwait, screenshot_tool.exe
+		__Log("Screenshot done, checking if we need to clean the directory")
+		Gosub, _Cleanup_Screenshots
+	}
+	Else{
+		__Log("Starting quick screenshot process")
+		Runwait, screenshot_tool.exe
+		__Log("Screenshot done, checking if we need to clean the directory")
+		Gosub, _Cleanup_Screenshots
+		__Log("Screenshot done")
+	}
+	Return
+}
+
+; checks screenshot folder filesize. If more than 5Mb, remove backups folder and move all screenshots there.
+; we should never be using more than 10Mb of space for screenshots. 5Mb should be about 20 images. 
+_Cleanup_Screenshots: 
+	ScreenShot_Folder_Size = 0
+	__Log("Starting screenshot housekeeping")
+	Loop, Files, ScreenShots\*.jpg, F
+		ScreenShot_Folder_Size += %A_LoopFileSizeKB% 
+	if (ScreenShot_Folder_Size > 5120) {
+		__Log("Screenshot folder too large! ( " ScreenShot_Folder_Size "kb) starting cleanup")
+		FileRemoveDir, ScreenShots\backups, 1
+		FileCreateDir, ScreenShots\backups
+		__Log("Backups folder cleaned out, starting file move")
+		Loop, Files, ScreenShots\*.jpg, F
+		{
+			FileMove, ScreenShots\%A_LoopFileName%, ScreenShots\backups\%A_LoopFileName%
+			__Log("Moved " A_LoopFileName " to backups folder")
+		}
+		__Log("Done moving files")
+	} Else{
+		__Log("Screenshot folder only " ScreenShot_Folder_Size "KB, not moving anything")
+	}
+	__Log("Screenshot folder housekeeping completed")
+	Return
+
 _botInternal_botRunningCheck:
 	__Log("loaded botRunningCheck code")
 	if WinExist("idolBot ahk_class AutoHotkeyGUI") {

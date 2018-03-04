@@ -12,11 +12,14 @@ FileCreateDir, stats
 
 Gosub, _BotLoadSettings
 
-; TODO - eventually when the GUI is done, we can drop this loop and create screenshots automatically. 
+; TODO - eventually when the GUI is done, we can drop this loop and create screenshots folder automatically. 
 ; for now, we'll check the option first, to avoid unnecessary confusion. 
 if (optTakeScreenshot = 1){
-	__Log("Creating screenshots folder")
-	FileCreateDir, screenshots					
+	FileCreateDir, ScreenShots
+	__Log("Checking screenshot folder size")
+	Gosub, _Cleanup_Screenshots					
+} else{
+	__Log("Screenshots disabled, not creating screenshots folder")
 }
 
 Gosub, _BotLoadCycles

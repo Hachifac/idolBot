@@ -282,9 +282,9 @@ idolBot:
 					; Move to reset crusader
 					if (resetPhase = 0) {
 						if (optTakeScreenshot = 1){
-							__Log("Starting screenshot process.")
-							Runwait, screenshot.exe
-							__Log("Screenshot process done")
+							_BotTakeScreenshot("details")
+						} else {
+							__Log("Not taking screenshot")
 						}
 						; check if we're using chests, then set phase to 1, then max levels
 						if (optUseChests = 1) {

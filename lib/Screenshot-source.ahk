@@ -5,13 +5,15 @@
 ;          Gdip code available from: http://www.autohotkey.net/~tic/Gdip.ahk
 ;   Gdip tutorial: http://www.autohotkey.com/board/topic/29449-gdi-standard-library-145-by-tic/
 ;
-; Updated by Cruncher1 on AHK forums
+;                             Updated by Cruncher1 on AHK forums
 ; https://autohotkey.com/board/topic/91585-screen-capture-using-only-ahk-no-3rd-party-software-required/
 ;
-; idolbot inclusion note: this script must be compiled 32bit ANSI. It has some issues running unicode.
-; Rather than spend a bunch of time working out why, I compiled this script and call the compiled code
-; directly. This allows for 32 and 64 bit unicode compilation in idolBot, and as a side-effect slightly
-; improves loading times for idolbot vs. when I was trying to include the library as part of the bot! - jp 
+;              idolbot inclusion note: this script must be compiled 32bit ANSI
+; 		it must be named "screenshot_tool.exe", and live in the root directory of the script.  
+; It has some issues running unicode. Rather than spend a bunch of time working out why, I compiled this 
+; script and call the compiled code directly. This allows for 32 and 64 bit unicode compilation in idolBot, 
+;  and as a side-effect slightly improves loading times for idolbot vs. when I was trying to include the 
+;                             entire library as part of the bot - jp, 2018/03/03 
 ;################################################################################################
 ;################################################################################################
 
