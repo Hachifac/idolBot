@@ -10,7 +10,9 @@
 10,1:merci,petra,bat,polly
 11,1:exterminator,gloria
 12,1:greyskull,eiralon
-1,2:jim,pam,veronica,arachnobuddy
+13,1:chiyome,griz
+14,1:casey,frankie
+1,2:jim,pam,veronica,arachnobuddy,james
 2,2:sasha,groklok,mindy,danni
 3,2:kaine,monkey,larry,bernard,zombiewinter
 4,2:natalie,jack,billy,karl
@@ -19,6 +21,8 @@
 7,2:panda,santa,leerion,katie
 8,2:phoenix,alan,frighotron,spaceking
 9,2:thalia,frosty,littlefoot,cindy
-10,2:nate,kizlblyp,rudoplh
+10,2:nate,kizlblyp,rudoplh,milgred
 11,2:shadowqueen,ilsa
 12,2:priestess,agent79
+13,2:viktor,shenna
+14,2:xander, saint
