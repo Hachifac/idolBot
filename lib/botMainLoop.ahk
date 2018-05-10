@@ -501,7 +501,7 @@ idolBot:
 								; Reset button
 								ImageSearch, OutputRWX, OutputRWY, 281, 116, 717, 235, *100 images/game/resetwarning.png
 								if (ErrorLevel = 0) {
-									MouseMove, 375, 525 ; changed from 426, 528 to avoid opening crafing menu if window isn't actually open
+									MouseMove, 375, 540 ;changed from 426, 528 to avoid opening crafing menu if window isn't actually open
 									Sleep, 500 * optBotClockSpeed
 									Click
 									Sleep, 500 * optBotClockSpeed
