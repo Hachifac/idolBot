@@ -1,16 +1,6 @@
 ---
 # http://www.reddit.com/r/cotlibot
 ---
-# 1.5.1
----
-- Updated crusader list, added: Biff, Thoonoose, Guardian
-- Moved reset cursor click to fix bug that effects some users where the reset button was 
--- just barely missed
----
-# 1.5.0
----
-Updated version again to allow auto-download to work
----
 # 1.4.9 - beta
 ---
 - Updated crusaders list, added: Griz, Frankie, Graham, James, Saint Patrokia

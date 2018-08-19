@@ -544,7 +544,7 @@ __BotCampaignStart(campaign := 0) {
 			Break
 		} else {
 			__Log("Searching for the cog.")
-			ImageSearch, OutputX, OutputY, 298, 90, 340, 130, *150 images/game/cog.png
+			ImageSearch, OutputX, OutputY, 15, 95, 40, 125, *150 images/game/cog.png
 			if (ErrorLevel = 0) {
 				__Log("Found the cog.")
 				Break
@@ -639,7 +639,7 @@ __BotSetCampaign(campaign := 0) {
 			}
 			Sleep, 2000
 		}
-		ImageSearch, OutputX2, OutputY2, 298, 90, 340, 130, *150 images/game/cog.png
+		ImageSearch, OutputX2, OutputY2, 15, 95, 40, 125, *150 images/game/cog.png
 		if (ErrorLevel = 0) {
 			__Log("Campaign already started.")
 			Return
@@ -896,54 +896,27 @@ __BotCheckAutoProgress() {
 	Global botAutoProgressCheck
 	botAutoProgressCheck := true
 	Loop {
-		MouseMove, 317, 111
-		Sleep, 100 * optBotClockSpeed
-		Click
-		Sleep, 500 * optBotClockSpeed
-		ImageSearch, OutputX2, OutputY2, 395, 180, 543, 242, *100 images/game/options.png
-		Sleep, 500 * optBotClockSpeed
-		; If the big options header is found, it means the options window is open
-		if (ErrorLevel = 0) {
-			__Log("Options header found.")
+		PixelGetColor, Output, 155, 115, RGB
+		__Log("WOO" + Output)
+		if (Output = 0xE8CDC5) {
 			c = 0
-			; Here I use a loop because I've had lots of trouble with AHK giving me the wrong color, so now the bot loops until it finds the proper color
-			; (will get stuck here infinitely until the color is found, this seriously can take a few seconds)
-			Loop {
-				PixelGetColor, Output, 212, 337, RGB
-				if (Output = 0xE8CDC5) {
-					Break
-				} else {
-					if (Output = 0x742814 or Output = 0xF7EDEA) {
-						c++
-						Break
-					}
-				}
-			}
-			Loop {
-				ImageSearch, OutputX, OutputY, 712, 150, 758, 219, *100 images/game/close.png
-				if (ErrorLevel = 0) {
-					Loop {
-						MouseMove, OutputX + 10, OutputY + 10
-						Click
-						Sleep, 350 * optBotClockSpeed
-						PixelGetColor, Output, 15, 585, RGB
-						if (Output = 0xA07107 or Output = 0xFFB103) {
-							Break
-						} else {
-							__Log("Waiting for the options window to close...")
-						}
-					}
-					Break
-				}
-			}
-			if (c = 0) {
-				Break
+		} else {
+			if (Output = 0x742814 or Output = 0xF7EDEA) {
+				c = 1
 			} else {
-				__Log("Auto progress check returned false.")
-				botAutoProgressCheck := false
-				Return, false
+				c = 2
 			}
 		}
+		if (c = 0) {
+			Break
+		} else if (c = 1) {
+			__Log("Auto progress check returned false.")
+			botAutoProgressCheck := false
+			Return, false
+		} else {
+			__Log("Can't find the auto progress button.")
+		}
+		Sleep, 1000 * optBotClockSpeed
 	}
 	botAutoProgressCheck := false
 	__Log("Auto progress check returned true.")
