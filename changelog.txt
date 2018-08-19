@@ -1,6 +1,10 @@
 ---
 # http://www.reddit.com/r/cotlibot
 ---
+# 1.5.2
+---
+- Fixed the auto progress check issue due to the UI update
+---
 # 1.4.9 - beta
 ---
 - Updated crusaders list, added: Griz, Frankie, Graham, James, Saint Patrokia
