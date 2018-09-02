@@ -499,9 +499,11 @@ idolBot:
 								Break
 							} else {			
 								; Reset button
-								ImageSearch, OutputRWX, OutputRWY, 281, 116, 717, 235, *100 images/game/resetwarning.png
+                						; ImageSearch, OutputRWX, OutputRWY, 281, 116, 717, 235, *100 images/game/resetwarning.png
+                						ImageSearch, OutputVarX, OutputVarY, 300, 500, 550, 600, *100 images/game/resetButton.png ; [02.09.18][IvayloStanev] - changed from resetwarning.png 
 								if (ErrorLevel = 0) {
-									MouseMove, 375, 540 ;changed from 426, 528 to avoid opening crafing menu if window isn't actually open
+									MouseMove, OutputVarX, OutputVarY ; changed from 426, 528 to avoid opening crafing menu if window isn't actually open 
+									; [02.09.18][IvayloStanev] - changed to upper top X/Y of the reset button to avoid being stuck due to 'Idol Reward' row cout difference (4 vs 5 rows)
 									Sleep, 500 * optBotClockSpeed
 									Click
 									Sleep, 500 * optBotClockSpeed
